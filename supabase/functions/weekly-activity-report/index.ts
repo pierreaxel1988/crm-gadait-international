@@ -5,16 +5,18 @@ import { Resend } from "npm:resend@2.0.0";
 // --- ENV VARS ---
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const resendApiKey = Deno.env.get("RESEND_API_KEY")!; // re_GW2FFSS5_...
+const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
-const RESEND_TO = Deno.env.get("RESEND_TO")!;     // "pierre@gadait-international.com" (ou liste séparée par des virgules)
+const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.com"
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
 // On supporte plusieurs destinataires séparés par des virgules si tu veux élargir plus tard
-const RECIPIENTS = RESEND_TO.split(",").map((email) => email.trim()).filter(Boolean);
+const RECIPIENTS = RESEND_TO.split(",")
+  .map((email) => email.trim())
+  .filter(Boolean);
 
 interface WeeklyStats {
   newLeadsCount: number;
@@ -49,6 +51,25 @@ interface ActionTypeBreakdown {
 interface AgentActionBreakdown {
   agent_name: string;
   actions_by_type: ActionTypeBreakdown[];
+}
+
+interface AgentPipelineActionStats {
+  agent_id: string;
+  agent_name: string;
+  pipeline_type: string;
+  total_actions: number;
+  call_count: number;
+  follow_up_count: number;
+  visit_done_count: number;
+  visit_planned_future_count: number;
+  estimation_count: number;
+  propositions_count: number;
+  prospection_count: number;
+  compromis_count: number;
+  acte_vente_count: number;
+  contrat_location_count: number;
+  admin_count: number;
+  overdue_actions_count: number;
 }
 
 const corsHeaders = {
@@ -94,8 +115,20 @@ function getPreviousWeekRange() {
   };
 }
 
+// On choisit une date de référence pour une action : createdAt > completedDate > scheduledDate
+function getActionStatDate(action: any): Date | null {
+  const candidates = [action.createdAt, action.completedDate, action.scheduledDate].filter(Boolean) as string[];
+
+  for (const c of candidates) {
+    const d = new Date(c);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
 async function getWeeklyStats(): Promise<WeeklyStats> {
   const { startDate, endDate } = getWeekRange();
+
   const { startDate: prevStartDate, endDate: prevEndDate } = getPreviousWeekRange();
 
   // Current week stats
@@ -130,7 +163,7 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
     .lt("created_at", prevEndDate)
     .is("deleted_at", null);
 
-  // Count actions from action_history JSON field (pour la semaine en cours)
+  // Count actions from action_history JSON field (semaine en cours)
   const { data: leadsWithActions } = await supabase
     .from("leads")
     .select("action_history")
@@ -158,10 +191,10 @@ async function getWeeklyStats(): Promise<WeeklyStats> {
 
 async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
   const { startDate, endDate } = getWeekRange();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  const { data: teamMembers } = await supabase
-    .from("team_members")
-    .select("id, name, email");
+  const { data: teamMembers } = await supabase.from("team_members").select("id, name, email");
 
   if (!teamMembers) return [];
 
@@ -187,7 +220,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .lt("created_at", endDate)
       .is("deleted_at", null);
 
-    // Actions by this agent (tous les leads de l'agent, puis filtrage par date en JS)
+    // Actions by this agent (tous les leads de l'agent, filtrage par date)
     const { data: leadsWithActions } = await supabase
       .from("leads")
       .select("action_history")
@@ -199,8 +232,8 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       for (const lead of leadsWithActions) {
         if (lead.action_history && Array.isArray(lead.action_history)) {
           const weekActions = lead.action_history.filter((action: any) => {
-            const actionDate = new Date(action.date);
-            return actionDate >= new Date(startDate) && actionDate < new Date(endDate);
+            const actionDate = getActionStatDate(action);
+            return actionDate !== null && actionDate >= start && actionDate < end;
           });
           actionsCount += weekActions.length;
         }
@@ -215,8 +248,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
       .gte("login_time", startDate)
       .lt("login_time", endDate);
 
-    const connectionMinutes =
-      sessions?.reduce((sum, s) => sum + (s.session_duration || 0), 0) || 0;
+    const connectionMinutes = sessions?.reduce((sum, s) => sum + (s.session_duration || 0), 0) || 0;
 
     agentActivities.push({
       agent_id: member.id,
@@ -233,7 +265,7 @@ async function getAgentWeeklyActivity(): Promise<AgentWeeklyActivity[]> {
 }
 
 async function getDailyBreakdown(): Promise<DailyBreakdown[]> {
-  const { startDate, endDate } = getWeekRange();
+  const { startDate } = getWeekRange();
   const dailyData: DailyBreakdown[] = [];
 
   const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -251,18 +283,15 @@ async function getDailyBreakdown(): Promise<DailyBreakdown[]> {
       .lt("created_at", dayEnd.toISOString())
       .is("deleted_at", null);
 
-    const { data: leadsWithActions } = await supabase
-      .from("leads")
-      .select("action_history")
-      .is("deleted_at", null);
+    const { data: leadsWithActions } = await supabase.from("leads").select("action_history").is("deleted_at", null);
 
     let actionsCount = 0;
     if (leadsWithActions) {
       for (const lead of leadsWithActions) {
         if (lead.action_history && Array.isArray(lead.action_history)) {
           const dayActions = lead.action_history.filter((action: any) => {
-            const actionDate = new Date(action.date);
-            return actionDate >= dayStart && actionDate < dayEnd;
+            const actionDate = getActionStatDate(action);
+            return actionDate !== null && actionDate >= dayStart && actionDate < dayEnd;
           });
           actionsCount += dayActions.length;
         }
@@ -282,10 +311,10 @@ async function getDailyBreakdown(): Promise<DailyBreakdown[]> {
 
 async function getActionTypeBreakdown(): Promise<AgentActionBreakdown[]> {
   const { startDate, endDate } = getWeekRange();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  const { data: teamMembers } = await supabase
-    .from("team_members")
-    .select("id, name");
+  const { data: teamMembers } = await supabase.from("team_members").select("id, name");
 
   if (!teamMembers) return [];
 
@@ -304,12 +333,12 @@ async function getActionTypeBreakdown(): Promise<AgentActionBreakdown[]> {
       for (const lead of leadsWithActions) {
         if (lead.action_history && Array.isArray(lead.action_history)) {
           const weekActions = lead.action_history.filter((action: any) => {
-            const actionDate = new Date(action.date);
-            return actionDate >= new Date(startDate) && actionDate < new Date(endDate);
+            const actionDate = getActionStatDate(action);
+            return actionDate !== null && actionDate >= start && actionDate < end;
           });
 
           for (const action of weekActions) {
-            const type = action.type || "Autre";
+            const type = action.actionType || "Autre";
             actionTypeCounts[type] = (actionTypeCounts[type] || 0) + 1;
           }
         }
@@ -329,6 +358,128 @@ async function getActionTypeBreakdown(): Promise<AgentActionBreakdown[]> {
   }
 
   return agentBreakdowns;
+}
+
+// NEW: stats par agent & par pipeline, avec chaque type d'action
+async function getAgentPipelineActionStats(): Promise<AgentPipelineActionStats[]> {
+  const { startDate, endDate } = getWeekRange();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const now = new Date();
+
+  const { data: teamMembers } = await supabase.from("team_members").select("id, name");
+
+  if (!teamMembers) return [];
+
+  const allStats: AgentPipelineActionStats[] = [];
+
+  for (const member of teamMembers) {
+    const { data: leads } = await supabase
+      .from("leads")
+      .select("pipeline_type, action_history")
+      .eq("assigned_to", member.id)
+      .is("deleted_at", null);
+
+    if (!leads) continue;
+
+    const statsByPipeline = new Map<string, AgentPipelineActionStats>();
+
+    for (const lead of leads) {
+      const pipelineType: string = lead.pipeline_type || "Autre";
+
+      if (!statsByPipeline.has(pipelineType)) {
+        statsByPipeline.set(pipelineType, {
+          agent_id: member.id,
+          agent_name: member.name,
+          pipeline_type: pipelineType,
+          total_actions: 0,
+          call_count: 0,
+          follow_up_count: 0,
+          visit_done_count: 0,
+          visit_planned_future_count: 0,
+          estimation_count: 0,
+          propositions_count: 0,
+          prospection_count: 0,
+          compromis_count: 0,
+          acte_vente_count: 0,
+          contrat_location_count: 0,
+          admin_count: 0,
+          overdue_actions_count: 0,
+        });
+      }
+
+      const stats = statsByPipeline.get(pipelineType)!;
+
+      if (lead.action_history && Array.isArray(lead.action_history)) {
+        for (const action of lead.action_history) {
+          const actionDate = getActionStatDate(action);
+          if (actionDate === null || actionDate < start || actionDate >= end) {
+            continue;
+          }
+
+          stats.total_actions++;
+
+          const type: string = action.actionType || "Autre";
+          const scheduledDate = action.scheduledDate ? new Date(action.scheduledDate) : null;
+          const completedDate = action.completedDate ? new Date(action.completedDate) : null;
+
+          switch (type) {
+            case "Call":
+              stats.call_count++;
+              break;
+            case "Follow up":
+              stats.follow_up_count++;
+              break;
+            case "Estimation":
+              stats.estimation_count++;
+              break;
+            case "Propositions":
+              stats.propositions_count++;
+              break;
+            case "Prospection":
+              stats.prospection_count++;
+              break;
+            case "Compromis":
+              stats.compromis_count++;
+              break;
+            case "Acte de vente":
+              stats.acte_vente_count++;
+              break;
+            case "Contrat de Location":
+              stats.contrat_location_count++;
+              break;
+            case "Admin":
+              stats.admin_count++;
+              break;
+            case "Visites":
+              // On gère les visites plus bas (done / planned)
+              break;
+            default:
+              break;
+          }
+
+          // Visites : réalisées vs futures
+          if (type === "Visites") {
+            if (completedDate) {
+              stats.visit_done_count++;
+            } else if (scheduledDate && scheduledDate > now) {
+              stats.visit_planned_future_count++;
+            }
+          }
+
+          // Actions en retard : scheduled < now et pas complétées
+          if (scheduledDate && !completedDate && scheduledDate < now) {
+            stats.overdue_actions_count++;
+          }
+        }
+      }
+    }
+
+    allStats.push(...statsByPipeline.values());
+  }
+
+  // Tri par total d'actions desc
+  return allStats.sort((a, b) => b.total_actions - a.total_actions);
 }
 
 function formatMinutesToHours(minutes: number): string {
@@ -354,15 +505,14 @@ async function generateWeeklyReportHtml(): Promise<string> {
   const agentActivities = await getAgentWeeklyActivity();
   const dailyBreakdown = await getDailyBreakdown();
   const actionBreakdown = await getActionTypeBreakdown();
+  const agentPipelineStats = await getAgentPipelineActionStats();
 
   const { startDate } = getWeekRange();
   const weekStart = new Date(startDate);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
 
-  const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString(
-    "fr-FR",
-  )}`;
+  const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString("fr-FR")}`;
 
   return `
 <!DOCTYPE html>
@@ -383,16 +533,16 @@ async function generateWeeklyReportHtml(): Promise<string> {
     .evolution.negative { color: #ef4444; }
     .section { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 25px; margin-bottom: 20px; }
     .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #1f2937; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
-    td { padding: 12px; border-bottom: 1px solid #f3f4f6; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #f9fafb; padding: 8px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 8px; border-bottom: 1px solid #f3f4f6; }
     tr:last-child td { border-bottom: none; }
     .rank { display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; font-weight: bold; }
     .rank-1 { background: #ffd700; color: #000; }
     .rank-2 { background: #c0c0c0; color: #000; }
     .rank-3 { background: #cd7f32; color: #fff; }
     .rank-other { background: #e5e7eb; color: #6b7280; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
     .badge-success { background: #d1fae5; color: #065f46; }
     .badge-info { background: #dbeafe; color: #1e40af; }
     .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; margin-top: 30px; }
@@ -500,8 +650,8 @@ async function generateWeeklyReportHtml(): Promise<string> {
     ${actionBreakdown
       .map(
         (agent) => `
-      <div style="margin-bottom: 20px;">
-        <h3 style="color: #374151; font-size: 16px; margin-bottom: 10px;">${agent.agent_name}</h3>
+      <div style="margin-bottom: 16px;">
+        <h3 style="color: #374151; font-size: 14px; margin-bottom: 6px;">${agent.agent_name}</h3>
         <table>
           <thead>
             <tr>
@@ -526,6 +676,54 @@ async function generateWeeklyReportHtml(): Promise<string> {
     `,
       )
       .join("")}
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 Actions par Agent & Pipeline</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Pipeline</th>
+          <th>Total</th>
+          <th>Call</th>
+          <th>Follow up</th>
+          <th>Visites faites</th>
+          <th>Visites futures</th>
+          <th>Estim.</th>
+          <th>Prop.</th>
+          <th>Prospect.</th>
+          <th>Compromis</th>
+          <th>Acte vente</th>
+          <th>Contrat loc.</th>
+          <th>Retards</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${agentPipelineStats
+          .map(
+            (s) => `
+          <tr>
+            <td><strong>${s.agent_name}</strong></td>
+            <td>${s.pipeline_type}</td>
+            <td><span class="badge badge-info">${s.total_actions}</span></td>
+            <td>${s.call_count}</td>
+            <td>${s.follow_up_count}</td>
+            <td>${s.visit_done_count}</td>
+            <td>${s.visit_planned_future_count}</td>
+            <td>${s.estimation_count}</td>
+            <td>${s.propositions_count}</td>
+            <td>${s.prospection_count}</td>
+            <td>${s.compromis_count}</td>
+            <td>${s.acte_vente_count}</td>
+            <td>${s.contrat_location_count}</td>
+            <td><span class="badge badge-success">${s.overdue_actions_count}</span></td>
+          </tr>
+        `,
+          )
+          .join("")}
+      </tbody>
+    </table>
   </div>
 
   <div class="footer">
@@ -556,19 +754,20 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (error) {
       console.error("❌ Error sending email:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to send email", details: error }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response(JSON.stringify({ error: "Failed to send email", details: error }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     console.log("✅ Weekly report sent successfully:", data);
 
     return new Response(
-      JSON.stringify({ success: true, message: "Weekly report sent", data }),
+      JSON.stringify({
+        success: true,
+        message: "Weekly report sent",
+        data,
+      }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -578,7 +777,10 @@ const handler = async (req: Request): Promise<Response> => {
     console.error("❌ Error in weekly-activity-report:", err);
     const message = err instanceof Error ? err.message : String(err);
     return new Response(
-      JSON.stringify({ error: "Internal server error", details: message }),
+      JSON.stringify({
+        error: "Internal server error",
+        details: message,
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
