@@ -31,7 +31,7 @@ const MANAGER_RECIPIENTS = [
 
 // Toggle : si false => uniquement managers reçoivent le mail
 // si true => l'agent reçoit le mail, managers en copie.
-const SEND_TO_AGENTS = false;
+const SEND_TO_AGENTS = true;
 
 // Agents ciblés pour le planning (par EMAIL)
 const FOCUS_AGENT_EMAILS = [
