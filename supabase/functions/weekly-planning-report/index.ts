@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
 
-// --- ENV VARS (mêmes que pour tes autres rapports) ---
+// --- ENV VARS ---
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
@@ -10,15 +10,27 @@ const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
 const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.com"
 
+// URL de base pour ouvrir un lead dans Success (à ADAPTER si besoin)
+const SUCCESS_LEAD_BASE_URL = Deno.env.get("SUCCESS_LEAD_BASE_URL") ?? "https://crm.gadait-international.com/leads";
+
+// --- CLIENTS ---
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-// Les destinataires managers (toi + éventuellement d'autres via RESEND_TO)
-const MANAGER_RECIPIENTS = RESEND_TO.split(",")
-  .map((email) => email.trim())
-  .filter(Boolean);
+// --- MANAGERS EN COPIE : RESEND_TO + Christelle ---
+const EXTRA_MANAGER_EMAILS = ["christelle@gadait-international.com"];
 
-// Agents ciblés pour le planning (par EMAIL)
+const MANAGER_RECIPIENTS = [
+  ...RESEND_TO.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean),
+  ...EXTRA_MANAGER_EMAILS,
+];
+
+// Pour l'instant : on n’envoie PAS aux agents directement
+const SEND_TO_AGENTS = false;
+
+// On commence avec ces 4 agents (filtre par EMAIL)
 const FOCUS_AGENT_EMAILS = [
   "jade@gadait-international.com",
   "franck.fontaine@gadait-international.com",
@@ -26,33 +38,20 @@ const FOCUS_AGENT_EMAILS = [
   "matthieu@gadait-international.com",
 ];
 
+// --- TYPES ---
 interface TeamMember {
   id: string;
   name: string;
   email: string | null;
 }
 
-interface PlanningAction {
-  lead_id: string;
-  lead_name: string;
-  pipeline: string | null;
+interface ActionRow {
+  scheduledDate: Date;
   type: string;
-  scheduled_at: Date | null;
-  notes?: string | null;
-  is_overdue: boolean;
-}
-
-interface AgentPlanningSummary {
-  upcoming: PlanningAction[];
-  overdue: PlanningAction[];
-  counts: {
-    totalUpcoming: number;
-    totalOverdue: number;
-    visites: number;
-    compromis: number;
-    acteVente: number;
-    contratLocation: number;
-  };
+  pipeline: string;
+  leadId: string;
+  leadName: string;
+  notes: string;
 }
 
 const corsHeaders = {
@@ -60,40 +59,70 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// ---- HELPERS ----
+// --- HELPERS GÉNÉRAUX ---
 
-function getParisDate(daysAgo: number = 0): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
-  const parisDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  parisDate.setHours(0, 0, 0, 0);
-  return parisDate;
-}
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-function getParisNow(): Date {
+function getParisToday(): Date {
   const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  const paris = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  paris.setHours(0, 0, 0, 0);
+  return paris;
 }
 
-// Prochaine "fenêtre" de 7 jours à partir d'aujourd'hui (0h Paris)
-function getComingWeekRange() {
-  const start = getParisDate(0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-  return {
-    startDate: start,
-    endDate: end,
-  };
+function escapeHtml(value: string | null | undefined): string {
+  if (!value) return "";
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-// Date de référence pour l'action (pour le planning on utilise surtout scheduledDate)
-function getActionStatDate(action: any): Date | null {
-  const dateStr = action.scheduledDate || action.completedDate || action.createdAt || action.date;
+function truncate(value: string, max: number): string {
+  if (value.length <= max) return value;
+  return value.slice(0, max - 1) + "…";
+}
 
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return null;
-  return d;
+function formatDateFr(d: Date): string {
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
+function getLeadDisplayName(lead: any): string {
+  return lead.full_name || lead.name || `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim() || `Lead #${lead.id}`;
+}
+
+function makeLeadUrl(leadId: string): string {
+  // Ajuste ce pattern si ton URL de Success est différente
+  return `${SUCCESS_LEAD_BASE_URL}/${leadId}`;
+}
+
+// Noms lisibles & cliquables même sur mobile
+function formatLeadNameHtml(name: string, url?: string | null): string {
+  const safe = escapeHtml(name || "Lead");
+  const withNbsp = safe.replace(/ /g, "&nbsp;");
+
+  const inner = `<span style="white-space:nowrap;">${withNbsp}</span>`;
+
+  if (!url) return inner;
+
+  return `
+    <a 
+      href="${url}" 
+      style="
+        color:#2563eb;
+        text-decoration:underline;
+        font-weight:500;
+        display:inline-block;
+        max-width:160px;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+      "
+    >
+      ${withNbsp}
+    </a>
+  `;
 }
 
 function isAutoEmail(actionTypeRaw: any): boolean {
@@ -102,28 +131,8 @@ function isAutoEmail(actionTypeRaw: any): boolean {
   return t.startsWith("email auto");
 }
 
-function formatDateFR(d: Date | null): string {
-  if (!d || isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  });
-}
+// --- DATA FETCHERS ---
 
-function formatHoursToHuman(hours: number): string {
-  const h = Math.floor(hours);
-  let m = Math.round((hours - h) * 60);
-  if (m === 60) {
-    m = 0;
-    return `${h + 1}h00`;
-  }
-  return `${h}h${m.toString().padStart(2, "0")}`;
-}
-
-// ---- DATA FETCHERS ----
-
-// Agents ciblés par EMAIL
 async function getFocusedAgents(): Promise<TeamMember[]> {
   const { data, error } = await supabase.from("team_members").select("id, name, email").in("email", FOCUS_AGENT_EMAILS);
 
@@ -135,194 +144,122 @@ async function getFocusedAgents(): Promise<TeamMember[]> {
   return data as TeamMember[];
 }
 
-// Récupère les actions en retard + à venir pour un agent donné
-async function getAgentPlanning(agentId: string): Promise<AgentPlanningSummary> {
-  const { startDate, endDate } = getComingWeekRange();
-  const parisNow = getParisNow();
+async function getAgentActions(agentId: string): Promise<{
+  overdue: ActionRow[];
+  upcoming: ActionRow[];
+}> {
+  const today = getParisToday();
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
 
   const { data: leads, error } = await supabase
     .from("leads")
-    .select("id, name, pipeline_type, action_history")
+    .select("id, full_name, name, first_name, last_name, pipeline_type, action_history")
     .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
   if (error || !leads) {
-    console.error("Error fetching leads for planning:", error);
-    return {
-      upcoming: [],
-      overdue: [],
-      counts: {
-        totalUpcoming: 0,
-        totalOverdue: 0,
-        visites: 0,
-        compromis: 0,
-        acteVente: 0,
-        contratLocation: 0,
-      },
-    };
+    console.error("Error fetching leads for agent", agentId, error);
+    return { overdue: [], upcoming: [] };
   }
 
-  const upcoming: PlanningAction[] = [];
-  const overdue: PlanningAction[] = [];
+  const overdue: ActionRow[] = [];
+  const upcoming: ActionRow[] = [];
 
-  let visitesCount = 0;
-  let compromisCount = 0;
-  let acteVenteCount = 0;
-  let contratLocationCount = 0;
-
-  for (const lead of leads as any[]) {
+  for (const lead of leads) {
+    const pipeline = lead.pipeline_type || "—";
+    const leadName = getLeadDisplayName(lead);
     const leadId = lead.id as string;
-    const leadName = (lead.name as string) || "Lead sans nom";
-    const pipeline = (lead.pipeline_type as string) || null;
 
-    if (!lead.action_history || !Array.isArray(lead.action_history)) continue;
+    if (!Array.isArray(lead.action_history)) continue;
 
     for (const action of lead.action_history) {
       const typeRaw = (action.actionType || action.type || "").toString();
       if (isAutoEmail(typeRaw)) continue;
 
-      const scheduled = action.scheduledDate ? new Date(action.scheduledDate) : null;
+      if (!action.scheduledDate) continue;
+
+      const sched = new Date(action.scheduledDate);
+      if (isNaN(sched.getTime())) continue;
+
       const completed = action.completedDate ? new Date(action.completedDate) : null;
+      const isCompleted = completed && !isNaN(completed.getTime());
 
-      // Si pas de scheduledDate, ça n'entre pas dans le planning
-      if (!scheduled || isNaN(scheduled.getTime())) continue;
+      // On ne s'intéresse qu'aux actions non complétées
+      if (isCompleted) continue;
 
-      const isOverdue = scheduled < parisNow && !completed;
-      const inComingWeek = scheduled >= startDate && scheduled < endDate;
-
-      if (!isOverdue && !inComingWeek) continue;
-
-      const typeLower = typeRaw.toLowerCase();
-
-      if (typeLower === "visites") visitesCount++;
-      if (typeLower === "compromis") compromisCount++;
-      if (typeLower === "acte de vente") acteVenteCount++;
-      if (typeLower === "contrat de location") contratLocationCount++;
-
-      const pa: PlanningAction = {
-        lead_id: leadId,
-        lead_name: leadName,
+      const row: ActionRow = {
+        scheduledDate: sched,
+        type: typeRaw || "Action",
         pipeline,
-        type: typeRaw,
-        scheduled_at: scheduled,
-        notes: action.notes || null,
-        is_overdue: isOverdue,
+        leadId,
+        leadName,
+        notes: action.notes || action.comment || action.description || "",
       };
 
-      if (isOverdue) {
-        overdue.push(pa);
-      } else if (inComingWeek) {
-        upcoming.push(pa);
+      if (sched < today) {
+        overdue.push(row);
+      } else if (sched >= today && sched < nextWeek) {
+        upcoming.push(row);
       }
     }
   }
 
-  // Tri : en retard -> date croissante, à venir -> date croissante
-  overdue.sort((a, b) => {
-    if (!a.scheduled_at || !b.scheduled_at) return 0;
-    return a.scheduled_at.getTime() - b.scheduled_at.getTime();
-  });
+  // Tri par date
+  overdue.sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
+  upcoming.sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
 
-  upcoming.sort((a, b) => {
-    if (!a.scheduled_at || !b.scheduled_at) return 0;
-    return a.scheduled_at.getTime() - b.scheduled_at.getTime();
-  });
-
-  return {
-    upcoming,
-    overdue,
-    counts: {
-      totalUpcoming: upcoming.length,
-      totalOverdue: overdue.length,
-      visites: visitesCount,
-      compromis: compromisCount,
-      acteVente: acteVenteCount,
-      contratLocation: contratLocationCount,
-    },
-  };
+  return { overdue, upcoming };
 }
 
-// ---- HTML BUILDER ----
+// --- HTML ---
 
-function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanningSummary): string {
-  const { startDate, endDate } = getComingWeekRange();
+function buildAgentActionPlanHtml(agent: TeamMember, overdue: ActionRow[], upcoming: ActionRow[]): string {
+  const today = getParisToday();
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
 
-  const dateRange = `${startDate.toLocaleDateString(
-    "fr-FR",
-  )} - ${new Date(endDate.getTime() - 1).toLocaleDateString("fr-FR")}`;
+  const rangeLabel = `${today.toLocaleDateString("fr-FR")} - ${nextWeek.toLocaleDateString("fr-FR")}`;
 
-  const firstName = agent.name.split(" ")[0];
-
-  // Bandeau alerte si beaucoup de retard
-  const overdueAlert =
-    planning.counts.totalOverdue >= 10
-      ? `
-  <div style="background:#fee2e2;color:#b91c1c;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;">
-    ⚠️ Tu as <strong>${planning.counts.totalOverdue}</strong> actions en retard.
-    L'objectif de la semaine est de revenir à un niveau maîtrisé avant d'ajouter trop de nouveaux dossiers.
-  </div>
-  `
-      : "";
-
-  // Coaching simple
-  let coaching = "";
-  if (planning.counts.totalOverdue > 0 && planning.counts.totalUpcoming > 0) {
-    coaching =
-      "Commence par les actions en retard les plus anciennes, puis concentre-toi sur les visites et dossiers les plus proches du compromis / acte.";
-  } else if (planning.counts.totalOverdue > 0) {
-    coaching =
-      "Ta priorité cette semaine est de régulariser les actions en retard pour sécuriser la relation avec les leads.";
-  } else if (planning.counts.totalUpcoming > 0) {
-    coaching =
-      "Tu es à jour sur tes actions : profite-en pour transformer tes visites et suivis en offres, compromis et actes.";
-  } else {
-    coaching =
-      "Tu n'as pas encore d'actions planifiées sur la semaine : pense à programmer tes prochains suivis dans Success.";
-  }
-
-  const upcomingRows =
-    planning.upcoming.length === 0
-      ? `<tr><td colspan="5" style="color:#9ca3af;font-size:13px;">Aucune action planifiée dans les 7 prochains jours.</td></tr>`
-      : planning.upcoming
+  const overdueRows =
+    overdue.length === 0
+      ? `<tr><td colspan="5" style="color:#9ca3af; padding:12px;">Aucune action en retard 🎯</td></tr>`
+      : overdue
           .map((a) => {
-            const leadUrl = `https://success.gadait-international.com/leads/${a.lead_id}`;
-            const notes = a.notes && a.notes.length > 80 ? a.notes.slice(0, 77) + "..." : a.notes || "";
+            const date = formatDateFr(a.scheduledDate);
+            const notes = truncate(escapeHtml(a.notes || ""), 120);
+            const leadLink = formatLeadNameHtml(a.leadName, makeLeadUrl(a.leadId));
+
             return `
-        <tr>
-          <td>${formatDateFR(a.scheduled_at)}</td>
-          <td>${a.type}</td>
-          <td>${a.pipeline || "-"}</td>
-          <td>
-            <a href="${leadUrl}" style="color:#2563eb;text-decoration:none;">
-              ${a.lead_name}
-            </a>
-          </td>
-          <td>${notes}</td>
-        </tr>
-      `;
+              <tr>
+                <td>${date}</td>
+                <td>${escapeHtml(a.type)}</td>
+                <td>${escapeHtml(a.pipeline)}</td>
+                <td>${leadLink}</td>
+                <td>${notes}</td>
+              </tr>
+            `;
           })
           .join("");
 
-  const overdueRows =
-    planning.overdue.length === 0
-      ? `<tr><td colspan="5" style="color:#9ca3af;font-size:13px;">Aucune action en retard 🎯</td></tr>`
-      : planning.overdue
+  const upcomingRows =
+    upcoming.length === 0
+      ? `<tr><td colspan="5" style="color:#9ca3af; padding:12px;">Aucune action planifiée sur les 7 prochains jours.</td></tr>`
+      : upcoming
           .map((a) => {
-            const leadUrl = `https://success.gadait-international.com/leads/${a.lead_id}`;
-            const notes = a.notes && a.notes.length > 80 ? a.notes.slice(0, 77) + "..." : a.notes || "";
+            const date = formatDateFr(a.scheduledDate);
+            const notes = truncate(escapeHtml(a.notes || ""), 120);
+            const leadLink = formatLeadNameHtml(a.leadName, makeLeadUrl(a.leadId));
+
             return `
-        <tr>
-          <td>${formatDateFR(a.scheduled_at)}</td>
-          <td>${a.type}</td>
-          <td>${a.pipeline || "-"}</td>
-          <td>
-            <a href="${leadUrl}" style="color:#b91c1c;text-decoration:none;">
-              ${a.lead_name}
-            </a>
-          </td>
-          <td>${notes}</td>
-        </tr>
-      `;
+              <tr>
+                <td>${date}</td>
+                <td>${escapeHtml(a.type)}</td>
+                <td>${escapeHtml(a.pipeline)}</td>
+                <td>${leadLink}</td>
+                <td>${notes}</td>
+              </tr>
+            `;
           })
           .join("");
 
@@ -332,59 +269,106 @@ function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanningSummar
 <head>
   <meta charset="UTF-8" />
   <style>
-    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#111827;max-width:900px;margin:0 auto;padding:20px;background:#f9fafb; }
-    .header { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:white;padding:24px 26px;border-radius:12px;margin-bottom:24px; }
-    .header h1 { margin:0;font-size:22px; }
-    .header p { margin:4px 0 0 0;opacity:0.9;font-size:13px; }
-    .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0 8px 0; }
-    .stat-card { background:white;border-radius:10px;padding:14px;border:1px solid #e5e7eb;text-align:center; }
-    .stat-label { font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em; }
-    .stat-value { font-size:22px;font-weight:700;color:#4f46e5;margin-top:4px; }
-    .section { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:18px;margin-bottom:18px; }
-    .section-title { font-size:16px;font-weight:600;margin-bottom:10px;color:#111827;border-bottom:2px solid #e5e7eb;padding-bottom:6px; }
-    table { width:100%;border-collapse:collapse;margin-top:4px; }
-    th { background:#f9fafb;padding:8px 8px;text-align:left;font-size:12px;color:#374151;border-bottom:1px solid #e5e7eb; }
-    td { padding:7px 8px;font-size:12px;border-bottom:1px solid #f3f4f6;vertical-align:top; }
-    tr:last-child td { border-bottom:none; }
-    .badge { display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600; }
-    .badge-info { background:#dbeafe;color:#1d4ed8; }
-    .badge-success { background:#dcfce7;color:#166534; }
-    .badge-warning { background:#fef3c7;color:#92400e; }
-    .small-text { font-size:12px;color:#6b7280; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      color: #111827;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f9fafb;
+    }
+    .header {
+      background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+      color: #fff;
+      padding: 22px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .header p {
+      margin: 4px 0 0;
+      opacity: 0.9;
+      font-size: 13px;
+    }
+    .section {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title span.icon {
+      font-size: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      text-align: left;
+      padding: 8px 10px;
+      background: #f3f4f6;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .note {
+      color: #4b5563;
+    }
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+      table {
+        font-size: 12px;
+      }
+      th, td {
+        padding: 6px 6px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🗓️ Plan d'Actions - ${agent.name}</h1>
-    <p>Semaine du ${dateRange}</p>
+    <h1>🔥 Plan d'actions - ${escapeHtml(agent.name)}</h1>
+    <p>Gadait International · Période ${rangeLabel}</p>
   </div>
 
-  <p>Bonjour ${firstName},</p>
-  <p>Voici ton plan d'action pour les prochains jours : actions en retard à rattraper et rendez-vous déjà planifiés.</p>
-
-  ${overdueAlert}
-
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Actions à venir</div>
-      <div class="stat-value">${planning.counts.totalUpcoming}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Actions en retard</div>
-      <div class="stat-value">${planning.counts.totalOverdue}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Visites à réaliser</div>
-      <div class="stat-value">${planning.counts.visites}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Dossiers à closer</div>
-      <div class="stat-value">${planning.counts.compromis + planning.counts.acteVente + planning.counts.contratLocation}</div>
-    </div>
-  </div>
+  <p>Bonjour ${escapeHtml(agent.name.split(" ")[0] || agent.name)},</p>
+  <p>Voici ton récapitulatif des actions à rattraper et de celles prévues sur la semaine à venir.</p>
 
   <div class="section">
-    <div class="section-title">🔥 Actions en retard à rattraper</div>
+    <h2 class="section-title">
+      <span class="icon">🚨</span>
+      <span>Actions en retard à rattraper</span>
+    </h2>
     <table>
       <thead>
         <tr>
@@ -402,7 +386,10 @@ function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanningSummar
   </div>
 
   <div class="section">
-    <div class="section-title">📅 Actions planifiées sur les 7 prochains jours</div>
+    <h2 class="section-title">
+      <span class="icon">📅</span>
+      <span>Actions planifiées sur les 7 prochains jours</span>
+    </h2>
     <table>
       <thead>
         <tr>
@@ -417,24 +404,27 @@ function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanningSummar
         ${upcomingRows}
       </tbody>
     </table>
-    <p class="small-text">Les leads sont cliquables pour ouvrir directement la fiche dans Success.</p>
+    <p class="hint">
+      Les noms des leads sont cliquables pour ouvrir directement leur fiche dans Success.
+    </p>
   </div>
 
-  <div class="section">
-    <div class="section-title">🎯 Focus de la semaine</div>
-    <p class="small-text">${coaching}</p>
-  </div>
+  <p class="note">
+    Objectif : terminer les actions en retard dès que possible, et sécuriser les visites, compromis,
+    actes de vente et contrats de location prévus cette semaine.
+  </p>
 
-  <p class="small-text">Ce planning est généré automatiquement à partir des actions Success (hors emails automatiques J+). Si tu vois une incohérence, signale-le à la direction.</p>
+  <p>Bonne semaine 🙌</p>
 
-  <p class="small-text">Bonne semaine 🙌</p>
-
+  <p style="font-size:12px; color:#9ca3af; margin-top:24px;">
+    Rapport généré automatiquement par Gadait CRM.
+  </p>
 </body>
 </html>
   `;
 }
 
-// ---- HANDLER ----
+// --- HANDLER ---
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -442,7 +432,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log("🚀 Generating weekly planning reports for agents...");
+    console.log("🚀 Generating weekly agent action plans...");
 
     const agents = await getFocusedAgents();
     if (agents.length === 0) {
@@ -454,37 +444,41 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const results: any[] = [];
+    let index = 0;
 
     for (const agent of agents) {
-      const planning = await getAgentPlanning(agent.id);
+      if (index > 0) {
+        // On espace les appels pour respecter le rate limit Resend
+        await sleep(1200);
+      }
+      index++;
 
-      // Si aucun contenu (ni actions en retard ni à venir), on ne spam pas
-      if (planning.counts.totalUpcoming === 0 && planning.counts.totalOverdue === 0) {
-        console.log(`ℹ️ No planning for ${agent.name}, skipping email.`);
-        results.push({
-          agent: agent.name,
-          success: true,
-          skipped: true,
-          reason: "no_actions",
-        });
-        continue;
+      const { overdue, upcoming } = await getAgentActions(agent.id);
+      const html = buildAgentActionPlanHtml(agent, overdue, upcoming);
+
+      const to: string[] = [];
+      const cc: string[] = [];
+
+      if (SEND_TO_AGENTS && agent.email) {
+        to.push(agent.email);
+        cc.push(...MANAGER_RECIPIENTS);
+      } else {
+        to.push(...MANAGER_RECIPIENTS);
       }
 
-      const html = buildAgentPlanningHtml(agent, planning);
-
-      // Pour le moment : envoi UNIQUEMENT aux managers (toi + Christelle via RESEND_TO)
       const { data, error } = await resend.emails.send({
         from: RESEND_FROM,
-        to: MANAGER_RECIPIENTS,
-        subject: `🗓️ Plan d'Actions - ${agent.name}`,
+        to,
+        cc: cc.length ? cc : undefined,
+        subject: `🔥 Plan d'actions de la semaine - ${agent.name}`,
         html,
       });
 
       if (error) {
-        console.error(`❌ Error sending planning for ${agent.name}:`, error);
+        console.error(`❌ Error sending action plan for ${agent.name}:`, error);
         results.push({ agent: agent.name, success: false, error });
       } else {
-        console.log(`✅ Planning sent for ${agent.name}:`, data);
+        console.log(`✅ Action plan sent for ${agent.name}:`, data);
         results.push({ agent: agent.name, success: true, data });
       }
     }
@@ -492,7 +486,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Agent planning reports processed",
+        message: "Agent action plans processed",
         results,
       }),
       {
@@ -501,7 +495,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     );
   } catch (err: unknown) {
-    console.error("❌ Error in weekly-agent-planning:", err);
+    console.error("❌ Error in weekly-agent-action-plan:", err);
     const message = err instanceof Error ? err.message : String(err);
     return new Response(JSON.stringify({ error: "Internal server error", details: message }), {
       status: 500,
