@@ -1,4 +1,3 @@
-// supabase/functions/weekly-planning-report/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
@@ -9,188 +8,173 @@ const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
-const RESEND_TO = Deno.env.get("RESEND_TO")!;     // "pierre@gadait-international.com"
+const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.com"
 
-// Supabase + Resend
+// --- CLIENTS ---
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-// ---- DESTINATAIRES ----
-// Managers = RESEND_TO + Christelle
+// --- MANAGERS (toi + Christelle par ex.) ---
 const EXTRA_MANAGER_EMAILS = ["christelle@gadait-international.com"];
 
 const MANAGER_RECIPIENTS = [
-  ...RESEND_TO.split(",").map((email) => email.trim()).filter(Boolean),
+  ...RESEND_TO.split(",")
+    .map((email) => email.trim())
+    .filter(Boolean),
   ...EXTRA_MANAGER_EMAILS,
 ];
 
-// ---- TYPES ----
+// Mode : si false => uniquement managers reçoivent les mails (phase test).
+// Si true  => mail envoyé à l’agent et managers en copie.
+const SEND_TO_AGENTS = false;
+
+// On commence avec ces 4 agents (filtre par EMAIL)
+const FOCUS_AGENT_EMAILS = [
+  "jade@gadait-international.com",
+  "franck.fontaine@gadait-international.com", // adresse correcte
+  "fleurs@gadait-international.com",
+  "matthieu@gadait-international.com",
+];
+
+// --- TYPES ---
 interface TeamMember {
   id: string;
   name: string;
+  email: string | null;
 }
 
-interface AgentDayStats {
-  dateKey: string;      // "YYYY-MM-DD"
-  dateLabel: string;    // "Lundi 02/12/2025"
-  total: number;
-  call: number;
-  follow_up: number;
-  visites: number;
-  estimation: number;
-  propositions: number;
-  prospection: number;
-  compromis: number;
-  acte_vente: number;
-  contrat_location: number;
+interface PlannedAction {
+  lead_id: string;
+  pipeline: string | null;
+  type: string;
+  scheduled_at: string; // ISO string
+  is_key: boolean; // compromis / acte / contrat loc / visite
 }
 
-interface AgentPlanningSummary {
-  agent_id: string;
-  agent_name: string;
-  days: AgentDayStats[];
-  overdueByType: Record<string, number>;
+interface AgentPlanning {
+  upcoming: PlannedAction[];
+  overdue: PlannedAction[];
+  counts: {
+    totalUpcoming: number;
+    totalOverdue: number;
+    compromis: number;
+    acteVente: number;
+    contratLocation: number;
+    visites: number;
+  };
 }
 
-// ---- HELPERS DATE / ACTION ----
+// --- CORS ---
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-// Date "0h00" Europe/Paris
-function getParisDate(daysOffset = 0): Date {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  const paris = new Date(
-    date.toLocaleString("en-US", { timeZone: "Europe/Paris" }),
-  );
+// --- HELPERS DATES ---
+
+// Date du jour à 00:00 en heure de Paris
+function getParisToday(): Date {
+  const now = new Date();
+  const paris = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   paris.setHours(0, 0, 0, 0);
   return paris;
 }
 
-// Prochaine semaine = aujourd'hui -> + 7 jours
-function getUpcomingWeekRange() {
-  const start = getParisDate(0); // aujourd'hui (lundi quand le cron tourne)
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-
-  return {
-    startDate: start.toISOString(),
-    endDate: end.toISOString(),
-  };
+// Lundi de la semaine à venir (si on est Lundi, on prend aujourd’hui)
+function getNextMonday(): Date {
+  const today = getParisToday();
+  const day = today.getDay(); // 0=dim, 1=lun, ...
+  // nb de jours à ajouter pour arriver au lundi (1)
+  const diff = (1 - day + 7) % 7;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
 }
 
-function getActionStatDate(action: any): Date | null {
-  const dateStr =
-    action.scheduledDate ||
-    action.completedDate ||
-    action.createdAt ||
-    action.date;
+function getComingWeekRange() {
+  const weekStart = getNextMonday(); // lundi 00:00
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 7); // lundi suivant
+  return { weekStart, weekEnd };
+}
 
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
+// Parse date d’une action
+function getActionScheduledDate(action: any): Date | null {
+  if (!action.scheduledDate) return null;
+  const d = new Date(action.scheduledDate);
   if (isNaN(d.getTime())) return null;
   return d;
 }
 
+// Détecter les emails auto (à exclure)
 function isAutoEmail(actionTypeRaw: any): boolean {
   if (!actionTypeRaw) return false;
   const t = String(actionTypeRaw).toLowerCase();
   return t.startsWith("email auto");
 }
 
-function formatDateLabel(d: Date): string {
-  const dayNames = [
-    "Dimanche",
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-  ];
-  const day = dayNames[d.getDay()];
-  const date = d.toLocaleDateString("fr-FR");
-  return `${day} ${date}`;
+function formatDateFr(d: Date): string {
+  return d.toLocaleString("fr-FR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
-}
+// --- DATA FETCHERS ---
 
-// ---- DATA ----
-
-async function getTeamMembers(): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from("team_members")
-    .select("id, name");
+// Agents ciblés (par email)
+async function getFocusedAgents(): Promise<TeamMember[]> {
+  const { data, error } = await supabase.from("team_members").select("id, name, email").in("email", FOCUS_AGENT_EMAILS);
 
   if (error || !data) {
-    console.error("Error fetching team_members:", error);
+    console.error("Error fetching focused agents:", error);
     return [];
   }
   return data as TeamMember[];
 }
 
-async function getWeeklyPlanningByAgent(): Promise<AgentPlanningSummary[]> {
-  const { startDate, endDate } = getUpcomingWeekRange();
-  const weekStart = new Date(startDate);
-  const weekEnd = new Date(endDate);
-  const now = new Date();
+// Planning pour 1 agent (actions à venir + en retard)
+async function getPlanningForAgent(agentId: string): Promise<AgentPlanning> {
+  const { weekStart, weekEnd } = getComingWeekRange();
+  const todayStart = getParisToday();
 
-  const members = await getTeamMembers();
-  if (members.length === 0) return [];
-
-  // On récupère tous les leads avec actions + assigned_to
   const { data: leads, error } = await supabase
     .from("leads")
-    .select("id, assigned_to, action_history")
+    .select("id, pipeline_type, action_history")
+    .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
   if (error || !leads) {
-    console.error("Error fetching leads:", error);
-    return [];
-  }
-
-  const map = new Map<string, AgentPlanningSummary>();
-
-  // Préparer la structure de base pour chaque agent
-  for (const m of members) {
-    const days: AgentDayStats[] = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(weekStart);
-      day.setDate(day.getDate() + i);
-
-      days.push({
-        dateKey: toDateKey(day),
-        dateLabel: formatDateLabel(day),
-        total: 0,
-        call: 0,
-        follow_up: 0,
-        visites: 0,
-        estimation: 0,
-        propositions: 0,
-        prospection: 0,
+    console.error("Error fetching leads for agent:", agentId, error);
+    return {
+      upcoming: [],
+      overdue: [],
+      counts: {
+        totalUpcoming: 0,
+        totalOverdue: 0,
         compromis: 0,
-        acte_vente: 0,
-        contrat_location: 0,
-      });
-    }
-
-    map.set(m.id, {
-      agent_id: m.id,
-      agent_name: m.name,
-      days,
-      overdueByType: {},
-    });
+        acteVente: 0,
+        contratLocation: 0,
+        visites: 0,
+      },
+    };
   }
 
-  // Parcours des actions
-  for (const lead of leads) {
-    const agentId = lead.assigned_to as string | null;
-    if (!agentId) continue;
-    if (!map.has(agentId)) continue;
+  const upcoming: PlannedAction[] = [];
+  const overdue: PlannedAction[] = [];
 
-    const summary = map.get(agentId)!;
-    const days = summary.days;
-    const overdueByType = summary.overdueByType;
+  let compromis = 0;
+  let acteVente = 0;
+  let contratLocation = 0;
+  let visites = 0;
+
+  for (const lead of leads) {
+    const leadId = lead.id as string;
+    const pipeline = (lead as any).pipeline_type as string | null;
 
     if (!lead.action_history || !Array.isArray(lead.action_history)) continue;
 
@@ -198,159 +182,104 @@ async function getWeeklyPlanningByAgent(): Promise<AgentPlanningSummary[]> {
       const typeRaw = (action.actionType || action.type || "").toString();
       if (isAutoEmail(typeRaw)) continue;
 
-      const type = typeRaw.toLowerCase();
-      const sched = action.scheduledDate ? new Date(action.scheduledDate) : null;
-      const statDate = getActionStatDate(action);
-      if (!statDate) continue;
+      const scheduled = getActionScheduledDate(action);
+      if (!scheduled) continue;
 
-      // -------- RETARDS --------
-      if (sched && sched < now && !action.completedDate) {
-        const key = typeRaw || "Autre";
-        overdueByType[key] = (overdueByType[key] || 0) + 1;
+      const completed = action.completedDate ? new Date(action.completedDate) : null;
+      const isCompleted = !!completed && !isNaN(completed.getTime());
+
+      // On ne planifie que les actions non terminées
+      if (isCompleted) continue;
+
+      const typeLower = typeRaw.toLowerCase();
+      const isKey =
+        typeLower === "compromis" ||
+        typeLower === "acte de vente" ||
+        typeLower === "contrat de location" ||
+        typeLower === "visites";
+
+      if (scheduled >= weekStart && scheduled < weekEnd) {
+        upcoming.push({
+          lead_id: leadId,
+          pipeline,
+          type: typeRaw,
+          scheduled_at: scheduled.toISOString(),
+          is_key: isKey,
+        });
+
+        if (typeLower === "compromis") compromis++;
+        if (typeLower === "acte de vente") acteVente++;
+        if (typeLower === "contrat de location") contratLocation++;
+        if (typeLower === "visites") visites++;
+      } else if (scheduled < todayStart) {
+        overdue.push({
+          lead_id: leadId,
+          pipeline,
+          type: typeRaw,
+          scheduled_at: scheduled.toISOString(),
+          is_key: isKey,
+        });
       }
-
-      // -------- A VENIR SUR LA SEMAINE --------
-      if (!sched || sched < weekStart || sched >= weekEnd) continue;
-      if (action.completedDate) continue; // déjà fait
-
-      const dayKey = toDateKey(sched);
-      const dayStats = days.find((d) => d.dateKey === dayKey);
-      if (!dayStats) continue;
-
-      dayStats.total += 1;
-
-      if (type === "call") dayStats.call++;
-      else if (type === "follow up") dayStats.follow_up++;
-      else if (type === "visites") dayStats.visites++;
-      else if (type === "estimation") dayStats.estimation++;
-      else if (type === "propositions") dayStats.propositions++;
-      else if (type === "prospection") dayStats.prospection++;
-      else if (type === "compromis") dayStats.compromis++;
-      else if (type === "acte de vente") dayStats.acte_vente++;
-      else if (type === "contrat de location") dayStats.contrat_location++;
     }
   }
 
-  return Array.from(map.values()).sort((a, b) =>
-    a.agent_name.localeCompare(b.agent_name),
-  );
+  // tri par date
+  upcoming.sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
+  overdue.sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
+
+  return {
+    upcoming,
+    overdue,
+    counts: {
+      totalUpcoming: upcoming.length,
+      totalOverdue: overdue.length,
+      compromis,
+      acteVente,
+      contratLocation,
+      visites,
+    },
+  };
 }
 
-// ---- HTML ----
+// --- HTML ---
 
-function buildPlanningHtml(summaries: AgentPlanningSummary[]): string {
-  const { startDate, endDate } = getUpcomingWeekRange();
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  end.setDate(end.getDate() - 1); // on affiche inclusivement
+function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanning) {
+  const { weekStart, weekEnd } = getComingWeekRange();
+  const dateRange = `${weekStart.toLocaleDateString("fr-FR")} - ${weekEnd.toLocaleDateString("fr-FR")}`;
 
-  const dateRange = `${start.toLocaleDateString(
-    "fr-FR",
-  )} - ${end.toLocaleDateString("fr-FR")}`;
-
-  const agentBlocks =
-    summaries.length === 0
-      ? "<p>Aucune donnée disponible.</p>"
-      : summaries
-          .map((s) => {
-            const totalOverdue = Object.values(s.overdueByType).reduce(
-              (a, b) => a + b,
-              0,
-            );
-
-            const overdueRows =
-              totalOverdue === 0
-                ? "<tr><td colspan='2' style='color:#9ca3af;'>Aucune action en retard 👍</td></tr>"
-                : Object.entries(s.overdueByType)
-                    .map(
-                      ([t, c]) => `
-                  <tr>
-                    <td>${t}</td>
-                    <td><span class="badge badge-warning">${c}</span></td>
-                  </tr>
-                `,
-                    )
-                    .join("");
-
-            const dayRows = s.days
-              .map((d) => {
-                if (d.total === 0) {
-                  return `
-                  <tr>
-                    <td>${d.dateLabel}</td>
-                    <td>0</td>
-                    <td colspan="4" style="color:#9ca3af;">Aucune action programmée</td>
-                  </tr>
-                `;
-                }
-
-                const keyDeals: string[] = [];
-                if (d.visites > 0) keyDeals.push(`Visites : ${d.visites}`);
-                if (d.compromis > 0) keyDeals.push(`Compromis : ${d.compromis}`);
-                if (d.acte_vente > 0)
-                  keyDeals.push(`Actes de vente : ${d.acte_vente}`);
-                if (d.contrat_location > 0)
-                  keyDeals.push(`Contrats loc. : ${d.contrat_location}`);
-
-                const keyDealsText =
-                  keyDeals.length > 0
-                    ? keyDeals.join(" · ")
-                    : "—";
-
-                return `
-                <tr>
-                  <td>${d.dateLabel}</td>
-                  <td><span class="badge badge-info">${d.total}</span></td>
-                  <td>Calls / Follow up / Prospection : ${
-                    d.call + d.follow_up + d.prospection
-                  }</td>
-                  <td>Estim. / Prop. : ${
-                    d.estimation + d.propositions
-                  }</td>
-                  <td>${keyDealsText}</td>
-                </tr>
-              `;
-              })
-              .join("");
-
+  const upcomingRows =
+    planning.upcoming.length === 0
+      ? `<tr><td colspan="4" style="color:#9ca3af;">Aucune action planifiée sur la semaine à venir.</td></tr>`
+      : planning.upcoming
+          .map((a) => {
+            const d = new Date(a.scheduled_at);
+            const badgeClass = a.is_key ? "badge-warning" : "badge-info";
             return `
-          <div class="agent-block">
-            <h2>${s.agent_name}</h2>
+        <tr>
+          <td>${formatDateFr(d)}</td>
+          <td><span class="badge ${badgeClass}">${a.type}</span></td>
+          <td>${a.pipeline ?? "-"}</td>
+          <td>${a.lead_id}</td>
+        </tr>
+      `;
+          })
+          .join("");
 
-            <div class="sub-section">
-              <div class="sub-title">Actions en retard</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Type d'action</th>
-                    <th>Nombre</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${overdueRows}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="sub-section">
-              <div class="sub-title">Actions programmées cette semaine</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Jour</th>
-                    <th>Total actions</th>
-                    <th>Contact (call + relances)</th>
-                    <th>Avancement (estim. / prop.)</th>
-                    <th>Focus deals (visites, compromis, actes, loc.)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${dayRows}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
+  const overdueRows =
+    planning.overdue.length === 0
+      ? `<tr><td colspan="4" style="color:#9ca3af;">Aucune action en retard 🎯</td></tr>`
+      : planning.overdue
+          .map((a) => {
+            const d = new Date(a.scheduled_at);
+            const badgeClass = a.is_key ? "badge-warning" : "badge-muted";
+            return `
+        <tr>
+          <td>${formatDateFr(d)}</td>
+          <td><span class="badge ${badgeClass}">${a.type}</span></td>
+          <td>${a.pipeline ?? "-"}</td>
+          <td>${a.lead_id}</td>
+        </tr>
+      `;
           })
           .join("");
 
@@ -360,103 +289,174 @@ function buildPlanningHtml(summaries: AgentPlanningSummary[]): string {
 <head>
   <meta charset="UTF-8" />
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #111827; max-width: 960px; margin: 0 auto; padding: 24px; background:#f3f4f6; }
-    .header { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); color: white; padding: 26px; border-radius: 12px; margin-bottom: 24px; }
-    .header h1 { margin: 0; font-size: 24px; }
-    .header p { margin: 6px 0 0 0; opacity: 0.95; }
-    .section { background: white; border-radius: 10px; border: 1px solid #e5e7eb; padding: 20px; margin-bottom: 20px; }
-    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #111827; }
-    .section-sub { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
-    .agent-block { border-top: 1px solid #e5e7eb; padding-top: 16px; margin-top: 16px; }
-    .agent-block h2 { font-size: 17px; margin: 0 0 8px 0; }
-    .sub-section { margin-top: 10px; }
-    .sub-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; color:#374151; }
-    table { width: 100%; border-collapse: collapse; margin-top: 4px; }
-    th { background:#f9fafb; padding: 8px 10px; font-size: 12px; text-align:left; border-bottom:1px solid #e5e7eb; color:#4b5563; }
-    td { padding: 7px 10px; font-size: 12px; border-bottom:1px solid #f3f4f6; vertical-align: top; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #111827; max-width: 900px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%); color:#fff; padding:24px; border-radius:12px; margin-bottom:24px; }
+    .header h1 { margin:0; font-size:24px; }
+    .header p { margin:4px 0 0; opacity:.9; }
+    .stats-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:24px 0; }
+    .stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:14px; text-align:center; }
+    .stat-label { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:#6b7280; }
+    .stat-value { font-size:22px; font-weight:700; margin-top:6px; color:#111827; }
+    .section { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-bottom:18px; }
+    .section-title { font-size:16px; font-weight:600; margin-bottom:10px; border-bottom:2px solid #e5e7eb; padding-bottom:6px; color:#111827; }
+    table { width:100%; border-collapse:collapse; }
+    th { background:#f9fafb; padding:8px 10px; text-align:left; font-size:12px; font-weight:600; color:#374151; border-bottom:1px solid #e5e7eb; }
+    td { padding:8px 10px; border-bottom:1px solid #f3f4f6; font-size:13px; }
     tr:last-child td { border-bottom:none; }
-    .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; }
+    .badge { display:inline-block; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:600; }
     .badge-info { background:#dbeafe; color:#1d4ed8; }
     .badge-warning { background:#fef3c7; color:#92400e; }
-    .footer { text-align:center; font-size:12px; color:#9ca3af; margin-top:20px; }
+    .badge-muted { background:#e5e7eb; color:#4b5563; }
+    .footer { text-align:center; margin-top:20px; font-size:12px; color:#6b7280; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🗓️ Plan d'Actions Hebdomadaire</h1>
-    <p>Gadait International CRM – Semaine du ${dateRange}</p>
+    <h1>🗓️ Plan d'action de la semaine - ${agent.name}</h1>
+    <p>Gadait International CRM</p>
+    <p>Planification du ${dateRange}</p>
   </div>
 
-  <div class="section">
-    <div class="section-title">Objectif</div>
-    <div class="section-sub">
-      Synthèse des actions <strong>à rattraper</strong> et des actions <strong>programmées</strong> par agent
-      pour les 7 prochains jours : calls, relances, visites, estimations, propositions, compromis, actes de vente et contrats de location.
+  <p>Bonjour ${agent.name.split(" ")[0]},</p>
+  <p>Voici ton plan d'action pour la semaine à venir, avec les points clés à prioriser.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Actions prévues</div>
+      <div class="stat-value">${planning.counts.totalUpcoming}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Actions en retard</div>
+      <div class="stat-value">${planning.counts.totalOverdue}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Compromis / Actes / Contrats loc.</div>
+      <div class="stat-value">
+        ${planning.counts.compromis + planning.counts.acteVente + planning.counts.contratLocation}
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Visites planifiées</div>
+      <div class="stat-value">${planning.counts.visites}</div>
     </div>
   </div>
 
   <div class="section">
-    ${agentBlocks}
+    <div class="section-title">✅ Actions à venir cette semaine</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date & heure</th>
+          <th>Type</th>
+          <th>Pipeline</th>
+          <th>ID lead</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${upcomingRows}
+      </tbody>
+    </table>
   </div>
 
+  <div class="section">
+    <div class="section-title">⚠️ Actions en retard à régulariser</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Date prévue</th>
+          <th>Type</th>
+          <th>Pipeline</th>
+          <th>ID lead</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${overdueRows}
+      </tbody>
+    </table>
+  </div>
+
+  <p>Bonne semaine, et vois avec la direction si tu souhaites ajuster certaines priorités.</p>
+
   <div class="footer">
-    Rapport généré automatiquement par Gadait CRM – Planification hebdomadaire
+    Rapport de planification généré automatiquement par Gadait CRM.
   </div>
 </body>
 </html>
   `;
 }
 
-// ---- HANDLER ----
+// --- HANDLER ---
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type" } });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("🚀 Generating weekly planning report...");
+    console.log("🚀 Generating weekly planning reports (per agent)...");
 
-    const summaries = await getWeeklyPlanningByAgent();
-    const html = buildPlanningHtml(summaries);
-
-    const { data, error } = await resend.emails.send({
-      from: RESEND_FROM,
-      to: MANAGER_RECIPIENTS,
-      subject: "🗓️ Plan d'Actions – Semaine à venir (Gadait CRM)",
-      html,
-    });
-
-    if (error) {
-      console.error("❌ Error sending weekly planning report:", error);
-      return new Response(
-        JSON.stringify({ error: "Failed to send weekly planning report", details: error }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-        },
-      );
+    const agents = await getFocusedAgents();
+    if (agents.length === 0) {
+      console.log("No focused agents found.");
+      return new Response(JSON.stringify({ success: false, message: "No agents found" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    console.log("✅ Weekly planning report sent:", data);
+    const results: any[] = [];
+
+    for (const agent of agents) {
+      const planning = await getPlanningForAgent(agent.id);
+      const html = buildAgentPlanningHtml(agent, planning);
+
+      let to: string[] = [];
+      let cc: string[] = [];
+
+      if (SEND_TO_AGENTS && agent.email) {
+        to = [agent.email];
+        cc = MANAGER_RECIPIENTS;
+      } else {
+        // mode test : uniquement managers
+        to = MANAGER_RECIPIENTS;
+        cc = [];
+      }
+
+      const { data, error } = await resend.emails.send({
+        from: RESEND_FROM,
+        to,
+        cc,
+        subject: `🗓️ Plan d'action de la semaine - ${agent.name}`,
+        html,
+      });
+
+      if (error) {
+        console.error(`❌ Error sending planning for ${agent.name}:`, error);
+        results.push({ agent: agent.name, success: false, error });
+      } else {
+        console.log(`✅ Planning sent for ${agent.name}:`, data);
+        results.push({ agent: agent.name, success: true });
+      }
+    }
 
     return new Response(
-      JSON.stringify({ success: true, message: "Weekly planning report sent", data }),
+      JSON.stringify({
+        success: true,
+        message: "Planning reports processed",
+        results,
+      }),
       {
         status: 200,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       },
     );
   } catch (err: unknown) {
     console.error("❌ Error in weekly-planning-report:", err);
     const message = err instanceof Error ? err.message : String(err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error", details: message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      },
-    );
+    return new Response(JSON.stringify({ error: "Internal server error", details: message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 };
 
