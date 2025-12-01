@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
 
-// --- ENV VARS ---
+// --- ENV VARS (mêmes que pour tes autres rapports) ---
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
@@ -10,16 +10,18 @@ const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!; // "Gadait Team <team@gadait-international.com>"
 const RESEND_TO = Deno.env.get("RESEND_TO")!; // "pierre@gadait-international.com"
 
-// URL de base pour ouvrir un lead dans Success (à ADAPTER si besoin)
-const SUCCESS_LEAD_BASE_URL = Deno.env.get("SUCCESS_LEAD_BASE_URL") ?? "https://crm.gadait-international.com/leads";
+// URL de base pour ouvrir un lead dans Success (configurable)
+const SUCCESS_LEAD_BASE_URL = Deno.env.get("SUCCESS_LEAD_BASE_URL") ?? "https://success.gadait-international.com/leads";
 
-// --- CLIENTS ---
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = new Resend(resendApiKey);
 
-// --- MANAGERS EN COPIE : RESEND_TO + Christelle ---
+// ---- MANAGERS & AGENTS ----
+
+// Emails managers supplémentaires (Christelle)
 const EXTRA_MANAGER_EMAILS = ["christelle@gadait-international.com"];
 
+// Les destinataires managers (toi + éventuellement d'autres via RESEND_TO)
 const MANAGER_RECIPIENTS = [
   ...RESEND_TO.split(",")
     .map((email) => email.trim())
@@ -27,10 +29,11 @@ const MANAGER_RECIPIENTS = [
   ...EXTRA_MANAGER_EMAILS,
 ];
 
-// Pour l'instant : on n’envoie PAS aux agents directement
+// Toggle : si false => uniquement managers reçoivent le mail
+// si true => l'agent reçoit le mail, managers en copie.
 const SEND_TO_AGENTS = false;
 
-// On commence avec ces 4 agents (filtre par EMAIL)
+// Agents ciblés pour le planning (par EMAIL)
 const FOCUS_AGENT_EMAILS = [
   "jade@gadait-international.com",
   "franck.fontaine@gadait-international.com",
@@ -38,20 +41,33 @@ const FOCUS_AGENT_EMAILS = [
   "matthieu@gadait-international.com",
 ];
 
-// --- TYPES ---
 interface TeamMember {
   id: string;
   name: string;
   email: string | null;
 }
 
-interface ActionRow {
-  scheduledDate: Date;
+interface PlanningAction {
+  lead_id: string;
+  lead_name: string;
+  pipeline: string | null;
   type: string;
-  pipeline: string;
-  leadId: string;
-  leadName: string;
-  notes: string;
+  scheduled_at: Date | null;
+  notes?: string | null;
+  is_overdue: boolean;
+}
+
+interface AgentPlanningSummary {
+  upcoming: PlanningAction[];
+  overdue: PlanningAction[];
+  counts: {
+    totalUpcoming: number;
+    totalOverdue: number;
+    visites: number;
+    compromis: number;
+    acteVente: number;
+    contratLocation: number;
+  };
 }
 
 const corsHeaders = {
@@ -59,17 +75,70 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// --- HELPERS GÉNÉRAUX ---
+// ---- HELPERS ----
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-function getParisToday(): Date {
-  const now = new Date();
-  const paris = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-  paris.setHours(0, 0, 0, 0);
-  return paris;
+function getParisDate(daysAgo: number = 0): Date {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  const parisDate = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+  parisDate.setHours(0, 0, 0, 0);
+  return parisDate;
 }
 
+function getParisNow(): Date {
+  const now = new Date();
+  return new Date(now.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+}
+
+// Prochaine "fenêtre" de 7 jours à partir d'aujourd'hui (0h Paris)
+function getComingWeekRange() {
+  const start = getParisDate(0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return {
+    startDate: start,
+    endDate: end,
+  };
+}
+
+// Date de référence pour l'action (pour le planning on utilise surtout scheduledDate)
+function getActionStatDate(action: any): Date | null {
+  const dateStr = action.scheduledDate || action.completedDate || action.createdAt || action.date;
+
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+function isAutoEmail(actionTypeRaw: any): boolean {
+  if (!actionTypeRaw) return false;
+  const t = String(actionTypeRaw).toLowerCase();
+  return t.startsWith("email auto");
+}
+
+function formatDateFR(d: Date | null): string {
+  if (!d || isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
+function formatHoursToHuman(hours: number): string {
+  const h = Math.floor(hours);
+  let m = Math.round((hours - h) * 60);
+  if (m === 60) {
+    m = 0;
+    return `${h + 1}h00`;
+  }
+  return `${h}h${m.toString().padStart(2, "0")}`;
+}
+
+// Helpers HTML pour les noms de leads (mobile friendly)
 function escapeHtml(value: string | null | undefined): string {
   if (!value) return "";
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -80,44 +149,36 @@ function truncate(value: string, max: number): string {
   return value.slice(0, max - 1) + "…";
 }
 
-function formatDateFr(d: Date): string {
-  return d.toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  });
-}
-
-function getLeadDisplayName(lead: any): string {
-  return lead.full_name || lead.name || `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim() || `Lead #${lead.id}`;
-}
-
 function makeLeadUrl(leadId: string): string {
-  // Ajuste ce pattern si ton URL de Success est différente
   return `${SUCCESS_LEAD_BASE_URL}/${leadId}`;
 }
 
-// Noms lisibles & cliquables même sur mobile
-function formatLeadNameHtml(name: string, url?: string | null): string {
+function formatLeadNameHtml(name: string, url?: string | null, color?: string): string {
   const safe = escapeHtml(name || "Lead");
   const withNbsp = safe.replace(/ /g, "&nbsp;");
 
-  const inner = `<span style="white-space:nowrap;">${withNbsp}</span>`;
+  const baseStyle = `
+    display:inline-block;
+    max-width:160px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  `;
 
-  if (!url) return inner;
+  if (!url) {
+    return `<span style="${baseStyle}">${withNbsp}</span>`;
+  }
+
+  const linkColor = color ?? "#2563eb";
 
   return `
-    <a 
-      href="${url}" 
+    <a
+      href="${url}"
       style="
-        color:#2563eb;
+        color:${linkColor};
         text-decoration:underline;
         font-weight:500;
-        display:inline-block;
-        max-width:160px;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
+        ${baseStyle}
       "
     >
       ${withNbsp}
@@ -125,14 +186,9 @@ function formatLeadNameHtml(name: string, url?: string | null): string {
   `;
 }
 
-function isAutoEmail(actionTypeRaw: any): boolean {
-  if (!actionTypeRaw) return false;
-  const t = String(actionTypeRaw).toLowerCase();
-  return t.startsWith("email auto");
-}
+// ---- DATA FETCHERS ----
 
-// --- DATA FETCHERS ---
-
+// Agents ciblés par EMAIL
 async function getFocusedAgents(): Promise<TeamMember[]> {
   const { data, error } = await supabase.from("team_members").select("id, name, email").in("email", FOCUS_AGENT_EMAILS);
 
@@ -144,122 +200,186 @@ async function getFocusedAgents(): Promise<TeamMember[]> {
   return data as TeamMember[];
 }
 
-async function getAgentActions(agentId: string): Promise<{
-  overdue: ActionRow[];
-  upcoming: ActionRow[];
-}> {
-  const today = getParisToday();
-  const nextWeek = new Date(today);
-  nextWeek.setDate(nextWeek.getDate() + 7);
+// Récupère les actions en retard + à venir pour un agent donné
+async function getAgentPlanning(agentId: string): Promise<AgentPlanningSummary> {
+  const { startDate, endDate } = getComingWeekRange();
+  const parisNow = getParisNow();
 
   const { data: leads, error } = await supabase
     .from("leads")
-    .select("id, full_name, name, first_name, last_name, pipeline_type, action_history")
+    .select("id, name, pipeline_type, action_history")
     .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
   if (error || !leads) {
-    console.error("Error fetching leads for agent", agentId, error);
-    return { overdue: [], upcoming: [] };
+    console.error("Error fetching leads for planning:", error);
+    return {
+      upcoming: [],
+      overdue: [],
+      counts: {
+        totalUpcoming: 0,
+        totalOverdue: 0,
+        visites: 0,
+        compromis: 0,
+        acteVente: 0,
+        contratLocation: 0,
+      },
+    };
   }
 
-  const overdue: ActionRow[] = [];
-  const upcoming: ActionRow[] = [];
+  const upcoming: PlanningAction[] = [];
+  const overdue: PlanningAction[] = [];
 
-  for (const lead of leads) {
-    const pipeline = lead.pipeline_type || "—";
-    const leadName = getLeadDisplayName(lead);
+  let visitesCount = 0;
+  let compromisCount = 0;
+  let acteVenteCount = 0;
+  let contratLocationCount = 0;
+
+  for (const lead of leads as any[]) {
     const leadId = lead.id as string;
+    const leadName = (lead.name as string) || "Lead sans nom";
+    const pipeline = (lead.pipeline_type as string) || null;
 
-    if (!Array.isArray(lead.action_history)) continue;
+    if (!lead.action_history || !Array.isArray(lead.action_history)) continue;
 
     for (const action of lead.action_history) {
       const typeRaw = (action.actionType || action.type || "").toString();
       if (isAutoEmail(typeRaw)) continue;
 
-      if (!action.scheduledDate) continue;
-
-      const sched = new Date(action.scheduledDate);
-      if (isNaN(sched.getTime())) continue;
-
+      const scheduled = action.scheduledDate ? new Date(action.scheduledDate) : null;
       const completed = action.completedDate ? new Date(action.completedDate) : null;
-      const isCompleted = completed && !isNaN(completed.getTime());
 
-      // On ne s'intéresse qu'aux actions non complétées
-      if (isCompleted) continue;
+      // Si pas de scheduledDate, ça n'entre pas dans le planning
+      if (!scheduled || isNaN(scheduled.getTime())) continue;
 
-      const row: ActionRow = {
-        scheduledDate: sched,
-        type: typeRaw || "Action",
+      const isOverdue = scheduled < parisNow && !completed;
+      const inComingWeek = scheduled >= startDate && scheduled < endDate;
+
+      if (!isOverdue && !inComingWeek) continue;
+
+      const typeLower = typeRaw.toLowerCase();
+
+      if (typeLower === "visites") visitesCount++;
+      if (typeLower === "compromis") compromisCount++;
+      if (typeLower === "acte de vente") acteVenteCount++;
+      if (typeLower === "contrat de location") contratLocationCount++;
+
+      const pa: PlanningAction = {
+        lead_id: leadId,
+        lead_name: leadName,
         pipeline,
-        leadId,
-        leadName,
-        notes: action.notes || action.comment || action.description || "",
+        type: typeRaw,
+        scheduled_at: scheduled,
+        notes: action.notes || null,
+        is_overdue: isOverdue,
       };
 
-      if (sched < today) {
-        overdue.push(row);
-      } else if (sched >= today && sched < nextWeek) {
-        upcoming.push(row);
+      if (isOverdue) {
+        overdue.push(pa);
+      } else if (inComingWeek) {
+        upcoming.push(pa);
       }
     }
   }
 
-  // Tri par date
-  overdue.sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
-  upcoming.sort((a, b) => a.scheduledDate.getTime() - b.scheduledDate.getTime());
+  // Tri : en retard -> date croissante, à venir -> date croissante
+  overdue.sort((a, b) => {
+    if (!a.scheduled_at || !b.scheduled_at) return 0;
+    return a.scheduled_at.getTime() - b.scheduled_at.getTime();
+  });
 
-  return { overdue, upcoming };
+  upcoming.sort((a, b) => {
+    if (!a.scheduled_at || !b.scheduled_at) return 0;
+    return a.scheduled_at.getTime() - b.scheduled_at.getTime();
+  });
+
+  return {
+    upcoming,
+    overdue,
+    counts: {
+      totalUpcoming: upcoming.length,
+      totalOverdue: overdue.length,
+      visites: visitesCount,
+      compromis: compromisCount,
+      acteVente: acteVenteCount,
+      contratLocation: contratLocationCount,
+    },
+  };
 }
 
-// --- HTML ---
+// ---- HTML BUILDER ----
 
-function buildAgentActionPlanHtml(agent: TeamMember, overdue: ActionRow[], upcoming: ActionRow[]): string {
-  const today = getParisToday();
-  const nextWeek = new Date(today);
-  nextWeek.setDate(nextWeek.getDate() + 7);
+function buildAgentPlanningHtml(agent: TeamMember, planning: AgentPlanningSummary): string {
+  const { startDate, endDate } = getComingWeekRange();
 
-  const rangeLabel = `${today.toLocaleDateString("fr-FR")} - ${nextWeek.toLocaleDateString("fr-FR")}`;
+  const dateRange = `${startDate.toLocaleDateString(
+    "fr-FR",
+  )} - ${new Date(endDate.getTime() - 1).toLocaleDateString("fr-FR")}`;
 
-  const overdueRows =
-    overdue.length === 0
-      ? `<tr><td colspan="5" style="color:#9ca3af; padding:12px;">Aucune action en retard 🎯</td></tr>`
-      : overdue
+  const firstName = agent.name.split(" ")[0];
+
+  // Bandeau alerte si beaucoup de retard
+  const overdueAlert =
+    planning.counts.totalOverdue >= 10
+      ? `
+  <div style="background:#fee2e2;color:#b91c1c;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:13px;">
+    ⚠️ Tu as <strong>${planning.counts.totalOverdue}</strong> actions en retard.
+    L'objectif de la semaine est de revenir à un niveau maîtrisé avant d'ajouter trop de nouveaux dossiers.
+  </div>
+  `
+      : "";
+
+  // Coaching simple
+  let coaching = "";
+  if (planning.counts.totalOverdue > 0 && planning.counts.totalUpcoming > 0) {
+    coaching =
+      "Commence par les actions en retard les plus anciennes, puis concentre-toi sur les visites et dossiers les plus proches du compromis / acte.";
+  } else if (planning.counts.totalOverdue > 0) {
+    coaching =
+      "Ta priorité cette semaine est de régulariser les actions en retard pour sécuriser la relation avec les leads.";
+  } else if (planning.counts.totalUpcoming > 0) {
+    coaching =
+      "Tu es à jour sur tes actions : profite-en pour transformer tes visites et suivis en offres, compromis et actes.";
+  } else {
+    coaching =
+      "Tu n'as pas encore d'actions planifiées sur la semaine : pense à programmer tes prochains suivis dans Success.";
+  }
+
+  const upcomingRows =
+    planning.upcoming.length === 0
+      ? `<tr><td colspan="5" style="color:#9ca3af;font-size:13px;">Aucune action planifiée dans les 7 prochains jours.</td></tr>`
+      : planning.upcoming
           .map((a) => {
-            const date = formatDateFr(a.scheduledDate);
-            const notes = truncate(escapeHtml(a.notes || ""), 120);
-            const leadLink = formatLeadNameHtml(a.leadName, makeLeadUrl(a.leadId));
-
+            const notes = truncate(escapeHtml(a.notes || ""), 80);
+            const leadLink = formatLeadNameHtml(a.lead_name, makeLeadUrl(a.lead_id), "#2563eb");
             return `
-              <tr>
-                <td>${date}</td>
-                <td>${escapeHtml(a.type)}</td>
-                <td>${escapeHtml(a.pipeline)}</td>
-                <td>${leadLink}</td>
-                <td>${notes}</td>
-              </tr>
-            `;
+        <tr>
+          <td>${formatDateFR(a.scheduled_at)}</td>
+          <td>${escapeHtml(a.type)}</td>
+          <td>${escapeHtml(a.pipeline || "-")}</td>
+          <td>${leadLink}</td>
+          <td>${notes}</td>
+        </tr>
+      `;
           })
           .join("");
 
-  const upcomingRows =
-    upcoming.length === 0
-      ? `<tr><td colspan="5" style="color:#9ca3af; padding:12px;">Aucune action planifiée sur les 7 prochains jours.</td></tr>`
-      : upcoming
+  const overdueRows =
+    planning.overdue.length === 0
+      ? `<tr><td colspan="5" style="color:#9ca3af;font-size:13px;">Aucune action en retard 🎯</td></tr>`
+      : planning.overdue
           .map((a) => {
-            const date = formatDateFr(a.scheduledDate);
-            const notes = truncate(escapeHtml(a.notes || ""), 120);
-            const leadLink = formatLeadNameHtml(a.leadName, makeLeadUrl(a.leadId));
-
+            const notes = truncate(escapeHtml(a.notes || ""), 80);
+            const leadLink = formatLeadNameHtml(a.lead_name, makeLeadUrl(a.lead_id), "#b91c1c");
             return `
-              <tr>
-                <td>${date}</td>
-                <td>${escapeHtml(a.type)}</td>
-                <td>${escapeHtml(a.pipeline)}</td>
-                <td>${leadLink}</td>
-                <td>${notes}</td>
-              </tr>
-            `;
+        <tr>
+          <td>${formatDateFR(a.scheduled_at)}</td>
+          <td>${escapeHtml(a.type)}</td>
+          <td>${escapeHtml(a.pipeline || "-")}</td>
+          <td>${leadLink}</td>
+          <td>${notes}</td>
+        </tr>
+      `;
           })
           .join("");
 
@@ -269,106 +389,60 @@ function buildAgentActionPlanHtml(agent: TeamMember, overdue: ActionRow[], upcom
 <head>
   <meta charset="UTF-8" />
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      color: #111827;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f9fafb;
-    }
-    .header {
-      background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
-      color: #fff;
-      padding: 22px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-    }
-    .header h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-    .header p {
-      margin: 4px 0 0;
-      opacity: 0.9;
-      font-size: 13px;
-    }
-    .section {
-      background: #ffffff;
-      border-radius: 12px;
-      border: 1px solid #e5e7eb;
-      padding: 18px;
-      margin-bottom: 18px;
-    }
-    .section-title {
-      font-size: 17px;
-      font-weight: 600;
-      margin: 0 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .section-title span.icon {
-      font-size: 18px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-    th {
-      text-align: left;
-      padding: 8px 10px;
-      background: #f3f4f6;
-      font-weight: 600;
-      color: #374151;
-      border-bottom: 1px solid #e5e7eb;
-      white-space: nowrap;
-    }
-    td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #f3f4f6;
-      vertical-align: top;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .note {
-      color: #4b5563;
-    }
-    .hint {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 8px;
-    }
-    @media (max-width: 600px) {
-      body {
-        padding: 12px;
-      }
-      table {
-        font-size: 12px;
-      }
-      th, td {
-        padding: 6px 6px;
-      }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#111827;max-width:900px;margin:0 auto;padding:20px;background:#f9fafb; }
+    .header { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:white;padding:24px 26px;border-radius:12px;margin-bottom:24px; }
+    .header h1 { margin:0;font-size:22px; }
+    .header p { margin:4px 0 0 0;opacity:0.9;font-size:13px; }
+    .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0 8px 0; }
+    .stat-card { background:white;border-radius:10px;padding:14px;border:1px solid #e5e7eb;text-align:center; }
+    .stat-label { font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em; }
+    .stat-value { font-size:22px;font-weight:700;color:#4f46e5;margin-top:4px; }
+    .section { background:white;border-radius:10px;border:1px solid #e5e7eb;padding:18px;margin-bottom:18px; }
+    .section-title { font-size:16px;font-weight:600;margin-bottom:10px;color:#111827;border-bottom:2px solid #e5e7eb;padding-bottom:6px; }
+    table { width:100%;border-collapse:collapse;margin-top:4px; }
+    th { background:#f9fafb;padding:8px 8px;text-align:left;font-size:12px;color:#374151;border-bottom:1px solid #e5e7eb;white-space:nowrap; }
+    td { padding:7px 8px;font-size:12px;border-bottom:1px solid #f3f4f6;vertical-align:top; }
+    tr:last-child td { border-bottom:none; }
+    .small-text { font-size:12px;color:#6b7280; }
+    @media (max-width:600px) {
+      body { padding:12px; }
+      table { font-size:11px; }
+      th, td { padding:6px 6px; }
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🔥 Plan d'actions - ${escapeHtml(agent.name)}</h1>
-    <p>Gadait International · Période ${rangeLabel}</p>
+    <h1>🗓️ Plan d'Actions - ${escapeHtml(agent.name)}</h1>
+    <p>Semaine du ${dateRange}</p>
   </div>
 
-  <p>Bonjour ${escapeHtml(agent.name.split(" ")[0] || agent.name)},</p>
-  <p>Voici ton récapitulatif des actions à rattraper et de celles prévues sur la semaine à venir.</p>
+  <p>Bonjour ${escapeHtml(firstName)},</p>
+  <p>Voici ton plan d'action pour les prochains jours : actions en retard à rattraper et rendez-vous déjà planifiés.</p>
+
+  ${overdueAlert}
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Actions à venir</div>
+      <div class="stat-value">${planning.counts.totalUpcoming}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Actions en retard</div>
+      <div class="stat-value">${planning.counts.totalOverdue}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Visites à réaliser</div>
+      <div class="stat-value">${planning.counts.visites}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dossiers à closer</div>
+      <div class="stat-value">${planning.counts.compromis + planning.counts.acteVente + planning.counts.contratLocation}</div>
+    </div>
+  </div>
 
   <div class="section">
-    <h2 class="section-title">
-      <span class="icon">🚨</span>
-      <span>Actions en retard à rattraper</span>
-    </h2>
+    <div class="section-title">🔥 Actions en retard à rattraper</div>
     <table>
       <thead>
         <tr>
@@ -386,10 +460,7 @@ function buildAgentActionPlanHtml(agent: TeamMember, overdue: ActionRow[], upcom
   </div>
 
   <div class="section">
-    <h2 class="section-title">
-      <span class="icon">📅</span>
-      <span>Actions planifiées sur les 7 prochains jours</span>
-    </h2>
+    <div class="section-title">📅 Actions planifiées sur les 7 prochains jours</div>
     <table>
       <thead>
         <tr>
@@ -404,27 +475,27 @@ function buildAgentActionPlanHtml(agent: TeamMember, overdue: ActionRow[], upcom
         ${upcomingRows}
       </tbody>
     </table>
-    <p class="hint">
-      Les noms des leads sont cliquables pour ouvrir directement leur fiche dans Success.
-    </p>
+    <p class="small-text">Les leads sont cliquables pour ouvrir directement la fiche dans Success.</p>
   </div>
 
-  <p class="note">
-    Objectif : terminer les actions en retard dès que possible, et sécuriser les visites, compromis,
-    actes de vente et contrats de location prévus cette semaine.
+  <div class="section">
+    <div class="section-title">🎯 Focus de la semaine</div>
+    <p class="small-text">${escapeHtml(coaching)}</p>
+  </div>
+
+  <p class="small-text">
+    Ce planning est généré automatiquement à partir des actions Success (hors emails automatiques J+).
+    Si tu vois une incohérence, signale-le à la direction.
   </p>
 
-  <p>Bonne semaine 🙌</p>
+  <p class="small-text">Bonne semaine 🙌</p>
 
-  <p style="font-size:12px; color:#9ca3af; margin-top:24px;">
-    Rapport généré automatiquement par Gadait CRM.
-  </p>
 </body>
 </html>
   `;
 }
 
-// --- HANDLER ---
+// ---- HANDLER ----
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -432,7 +503,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log("🚀 Generating weekly agent action plans...");
+    console.log("🚀 Generating weekly planning reports for agents...");
 
     const agents = await getFocusedAgents();
     if (agents.length === 0) {
@@ -448,13 +519,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const agent of agents) {
       if (index > 0) {
-        // On espace les appels pour respecter le rate limit Resend
+        // petit délai entre chaque mail pour respecter le rate limit Resend
         await sleep(1200);
       }
       index++;
 
-      const { overdue, upcoming } = await getAgentActions(agent.id);
-      const html = buildAgentActionPlanHtml(agent, overdue, upcoming);
+      const planning = await getAgentPlanning(agent.id);
+
+      // Si aucun contenu (ni actions en retard ni à venir), on ne spam pas
+      if (planning.counts.totalUpcoming === 0 && planning.counts.totalOverdue === 0) {
+        console.log(`ℹ️ No planning for ${agent.name}, skipping email.`);
+        results.push({
+          agent: agent.name,
+          success: true,
+          skipped: true,
+          reason: "no_actions",
+        });
+        continue;
+      }
+
+      const html = buildAgentPlanningHtml(agent, planning);
 
       const to: string[] = [];
       const cc: string[] = [];
@@ -470,15 +554,15 @@ const handler = async (req: Request): Promise<Response> => {
         from: RESEND_FROM,
         to,
         cc: cc.length ? cc : undefined,
-        subject: `🔥 Plan d'actions de la semaine - ${agent.name}`,
+        subject: `🗓️ Plan d'Actions - ${agent.name}`,
         html,
       });
 
       if (error) {
-        console.error(`❌ Error sending action plan for ${agent.name}:`, error);
+        console.error(`❌ Error sending planning for ${agent.name}:`, error);
         results.push({ agent: agent.name, success: false, error });
       } else {
-        console.log(`✅ Action plan sent for ${agent.name}:`, data);
+        console.log(`✅ Planning sent for ${agent.name}:`, data);
         results.push({ agent: agent.name, success: true, data });
       }
     }
@@ -486,7 +570,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Agent action plans processed",
+        message: "Agent planning reports processed",
         results,
       }),
       {
@@ -495,7 +579,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     );
   } catch (err: unknown) {
-    console.error("❌ Error in weekly-agent-action-plan:", err);
+    console.error("❌ Error in weekly-agent-planning:", err);
     const message = err instanceof Error ? err.message : String(err);
     return new Response(JSON.stringify({ error: "Internal server error", details: message }), {
       status: 500,
