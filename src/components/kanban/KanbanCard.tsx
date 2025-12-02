@@ -29,7 +29,9 @@ export type TaskType =
   | 'Estimation'
   | 'Prospection'
   | 'Admin'
-  | 'Mandat'
+  | 'Mandat location'
+  | 'Mandat vente'
+  | 'Suivi owners'
   | 'Photos'
   | 'Publication'
   | 'Offre';
