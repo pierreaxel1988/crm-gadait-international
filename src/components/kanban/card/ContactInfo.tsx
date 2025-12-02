@@ -14,9 +14,10 @@ interface ContactInfoProps {
   email: string;
   phone?: string;
   leadId?: string;
+  pipelineType?: string;
 }
 
-const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
+const ContactInfo = ({ email, phone, leadId, pipelineType }: ContactInfoProps) => {
   const navigate = useNavigate();
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<TaskType | null>(null);
@@ -203,6 +204,7 @@ const ContactInfo = ({ email, phone, leadId }: ContactInfoProps) => {
           setActionNotes={setActionNotes}
           onConfirm={handleActionConfirm}
           getActionTypeIcon={getActionTypeIcon}
+          pipelineType={pipelineType}
         />
       )}
     </div>
