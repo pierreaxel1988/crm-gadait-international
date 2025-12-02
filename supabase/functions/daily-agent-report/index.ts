@@ -4,21 +4,22 @@ import { Resend } from "npm:resend@2.0.0";
 
 // --- ENV VARS ---
 const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const supabaseServiceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const resendApiKey = Deno.env.get("RESEND_API_KEY")!;
 const RESEND_FROM = Deno.env.get("RESEND_FROM")!;
 const RESEND_TO = Deno.env.get("RESEND_TO")!;
-const SUCCESS_LEAD_BASE_URL =
-  Deno.env.get("SUCCESS_LEAD_BASE_URL") ?? "https://success.gadait-international.com/leads";
+const SUCCESS_LEAD_BASE_URL = Deno.env.get("SUCCESS_LEAD_BASE_URL") ?? "https://success.gadait-international.com/leads";
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(supabaseUrl, supabaseServiceRole);
 const resend = new Resend(resendApiKey);
 
-// ---- MANAGERS / AGENTS ----
+// ---- CONFIGURATION ----
 const EXTRA_MANAGER_EMAILS = ["christelle@gadait-international.com"];
 
 const MANAGER_RECIPIENTS = [
-  ...RESEND_TO.split(",").map((e) => e.trim()).filter(Boolean),
+  ...RESEND_TO.split(",")
+    .map((e) => e.trim())
+    .filter(Boolean),
   ...EXTRA_MANAGER_EMAILS,
 ];
 
@@ -37,7 +38,6 @@ interface TeamMember {
   name: string;
   email: string | null;
 }
-
 interface PlanningAction {
   lead_id: string;
   lead_name: string;
@@ -49,70 +49,42 @@ interface PlanningAction {
 }
 
 // ---- HELPERS ----
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function getParisDate(daysAgo = 0) {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const getParisDate = (daysAgo = 0) => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
   const p = new Date(d.toLocaleString("en-US", { timeZone: "Europe/Paris" }));
   p.setHours(0, 0, 0, 0);
   return p;
-}
+};
+const getParisNow = () => new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+const escapeHtml = (t: string | null | undefined) =>
+  t ? t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+const formatDateFR = (d: Date | null) =>
+  !d
+    ? "-"
+    : d.toLocaleDateString("fr-FR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+      });
+const isAutoEmail = (t: string) => t.toLowerCase().startsWith("email auto");
+const makeLeadUrl = (id: string) => `${SUCCESS_LEAD_BASE_URL}/${id}`;
 
-function getParisNow() {
-  return new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
-}
-
-function escapeHtml(value: string | null | undefined): string {
-  if (!value) return "";
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function formatDateFR(d: Date | null): string {
-  if (!d) return "-";
-  return d.toLocaleDateString("fr-FR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
-  });
-}
-
-function truncate(value: string, max: number): string {
-  return value.length <= max ? value : value.slice(0, max - 1) + "…";
-}
-
-function makeLeadUrl(id: string) {
-  return `${SUCCESS_LEAD_BASE_URL}/${id}`;
-}
-
-function isAutoEmail(type: string) {
-  return type.toLowerCase().startsWith("email auto");
-}
-
-// ---- FETCH AGENTS ----
+// ---- QUERY AGENTS ----
 async function getFocusedAgents(): Promise<TeamMember[]> {
-  const { data, error } = await supabase
-    .from("team_members")
-    .select("id, name, email")
-    .in("email", FOCUS_AGENT_EMAILS);
+  const { data, error } = await supabase.from("team_members").select("id, name, email").in("email", FOCUS_AGENT_EMAILS);
 
   if (error || !data) return [];
   return data as TeamMember[];
 }
 
 // ---- DAILY RANGE ----
-
 function getParisTodayRange() {
   const start = getParisDate(0);
   const end = new Date(start);
@@ -120,7 +92,7 @@ function getParisTodayRange() {
   return { startDate: start, endDate: end };
 }
 
-// ---- DAILY REPORT LOGIC ----
+// ---- DAILY REPORT ----
 async function getAgentDailyPlanning(agentId: string) {
   const { startDate, endDate } = getParisTodayRange();
   const now = getParisNow();
@@ -131,20 +103,14 @@ async function getAgentDailyPlanning(agentId: string) {
     .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
-  if (error || !leads) {
-    return { today: [], overdue: [], counts: { today: 0, overdue: 0 } };
-  }
+  if (error || !leads) return { today: [], overdue: [], counts: { today: 0, overdue: 0 } };
 
   const today: PlanningAction[] = [];
   const overdue: PlanningAction[] = [];
 
   for (const lead of leads as any[]) {
-    const leadId = lead.id;
-    const leadName = lead.name || "Lead sans nom";
-    const pipeline = lead.pipeline_type;
-
     for (const action of lead.action_history || []) {
-      const type = (action.actionType || action.type || "").toString();
+      const type = (action.actionType || action.type).toString();
       if (isAutoEmail(type)) continue;
 
       const scheduled = action.scheduledDate ? new Date(action.scheduledDate) : null;
@@ -157,23 +123,20 @@ async function getAgentDailyPlanning(agentId: string) {
 
       if (!is_overdue && !is_today) continue;
 
-      const pa: PlanningAction = {
-        lead_id: leadId,
-        lead_name: leadName,
-        pipeline,
+      const item: PlanningAction = {
+        lead_id: lead.id,
+        lead_name: lead.name,
+        pipeline: lead.pipeline_type,
         type,
         scheduled_at: scheduled,
-        notes: action.notes,
+        notes: action.notes || null,
         is_overdue,
       };
 
-      if (is_overdue) overdue.push(pa);
-      else today.push(pa);
+      if (is_overdue) overdue.push(item);
+      else today.push(item);
     }
   }
-
-  today.sort((a, b) => a.scheduled_at!.getTime() - b.scheduled_at!.getTime());
-  overdue.sort((a, b) => a.scheduled_at!.getTime() - b.scheduled_at!.getTime());
 
   return {
     today,
@@ -185,29 +148,68 @@ async function getAgentDailyPlanning(agentId: string) {
   };
 }
 
-function buildDailyReportHtml(agent: TeamMember, summary: any) {
+// ---- UPCOMING (7 DAYS) ----
+function getComingWeekRange() {
+  const start = getParisDate(0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return { startDate: start, endDate: end };
+}
+
+async function getAgentUpcomingPlanning(agentId: string) {
+  const { startDate, endDate } = getComingWeekRange();
+
+  const { data: leads, error } = await supabase
+    .from("leads")
+    .select("id, name, pipeline_type, action_history")
+    .eq("assigned_to", agentId)
+    .is("deleted_at", null);
+
+  if (error || !leads) return { upcoming: [], count: 0 };
+
+  const upcoming: PlanningAction[] = [];
+
+  for (const lead of leads as any[]) {
+    for (const action of lead.action_history || []) {
+      const type = (action.actionType || action.type).toString();
+      if (isAutoEmail(type)) continue;
+
+      const scheduled = action.scheduledDate ? new Date(action.scheduledDate) : null;
+      if (!scheduled || isNaN(scheduled.getTime())) continue;
+
+      const isUpcoming = scheduled >= startDate && scheduled < endDate;
+      if (!isUpcoming) continue;
+
+      upcoming.push({
+        lead_id: lead.id,
+        lead_name: lead.name,
+        pipeline: lead.pipeline_type,
+        type,
+        scheduled_at: scheduled,
+        notes: action.notes,
+        is_overdue: false,
+      });
+    }
+  }
+
+  upcoming.sort((a, b) => a.scheduled_at!.getTime() - b.scheduled_at!.getTime());
+  return { upcoming, count: upcoming.length };
+}
+
+// ---- HTML BUILDER ----
+function buildDailyReportHtml(agent: TeamMember, summary: any, upcoming: any) {
   const firstName = agent.name.split(" ")[0];
 
-  const listToday =
-    summary.today.length === 0
-      ? "<li>Aucune action prévue</li>"
-      : summary.today
-          .map((a: PlanningAction) => {
-            return `<li><strong>${formatDateFR(a.scheduled_at)}</strong> – ${a.type} – <a href="${makeLeadUrl(
-              a.lead_id,
-            )}">${escapeHtml(a.lead_name)}</a></li>`;
-          })
-          .join("");
-
-  const listOverdue =
-    summary.overdue.length === 0
-      ? "<li>Aucun retard 🎯</li>"
-      : summary.overdue
-          .map((a: PlanningAction) => {
-            return `<li><strong>${formatDateFR(a.scheduled_at)}</strong> – ${a.type} – <a href="${makeLeadUrl(
-              a.lead_id,
-            )}">${escapeHtml(a.lead_name)}</a></li>`;
-          })
+  const list = (arr: PlanningAction[]) =>
+    arr.length === 0
+      ? "<li>Aucune action</li>"
+      : arr
+          .map(
+            (a) =>
+              `<li><strong>${formatDateFR(a.scheduled_at)}</strong> – ${escapeHtml(
+                a.type,
+              )} – <a href="${makeLeadUrl(a.lead_id)}">${escapeHtml(a.lead_name)}</a></li>`,
+          )
           .join("");
 
   return `
@@ -217,31 +219,37 @@ function buildDailyReportHtml(agent: TeamMember, summary: any) {
     <p>Bonjour ${escapeHtml(firstName)}, voici ton résumé du jour.</p>
 
     <h3>🔥 Actions en retard (${summary.counts.overdue})</h3>
-    <ul>${listOverdue}</ul>
+    <ul>${list(summary.overdue)}</ul>
 
     <h3>🗓️ Actions du jour (${summary.counts.today})</h3>
-    <ul>${listToday}</ul>
+    <ul>${list(summary.today)}</ul>
 
-    <p style="color:#777;font-size:12px;">Rapport généré automatiquement via Success.</p>
+    <h3>📅 Actions à venir (7 prochains jours) – ${upcoming.count}</h3>
+    <ul>${list(upcoming.upcoming)}</ul>
+
+    <p style="font-size:12px;color:#777;">Rapport généré automatiquement via Success.</p>
   </body>
   </html>
   `;
 }
 
+// ---- SEND DAILY ----
 async function sendDailyReports() {
-  console.log("📨 Sending DAILY reports...");
+  console.log("📨 Sending DAILY reports…");
+
   const agents = await getFocusedAgents();
-  if (agents.length === 0) return;
+  if (!agents.length) return;
 
   for (const agent of agents) {
     const summary = await getAgentDailyPlanning(agent.id);
+    const upcoming = await getAgentUpcomingPlanning(agent.id);
 
-    if (summary.counts.today === 0 && summary.counts.overdue === 0) {
-      console.log(`No daily content for ${agent.name}`);
+    if (summary.counts.today === 0 && summary.counts.overdue === 0 && upcoming.count === 0) {
+      console.log(`No content for ${agent.name}`);
       continue;
     }
 
-    const html = buildDailyReportHtml(agent, summary);
+    const html = buildDailyReportHtml(agent, summary, upcoming);
 
     const to: string[] = [];
     const cc: string[] = [];
@@ -265,10 +273,9 @@ async function sendDailyReports() {
   }
 }
 
-// ---- HTTP HANDLER ----
+// ---- HANDLER ----
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS")
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const url = new URL(req.url);
   const type = url.searchParams.get("type");
@@ -276,21 +283,16 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     if (type === "daily") {
       await sendDailyReports();
-      return new Response(
-        JSON.stringify({ success: true, message: "Daily reports sent" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ success: true, message: "Daily reports sent" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(
-      JSON.stringify({ success: false, message: "Invalid type" }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ success: false, message: "Invalid type" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (e) {
-    return new Response(
-      JSON.stringify({ error: "Internal error", details: e }),
-      { status: 500, headers: corsHeaders },
-    );
+    return new Response(JSON.stringify({ error: "Internal error", details: e }), { status: 500, headers: corsHeaders });
   }
 };
 
