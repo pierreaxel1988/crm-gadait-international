@@ -28,7 +28,11 @@ export type TaskType =
   | 'Follow up'
   | 'Estimation'
   | 'Prospection'
-  | 'Admin';
+  | 'Admin'
+  | 'Mandat'
+  | 'Photos'
+  | 'Publication'
+  | 'Offre';
 
 export interface KanbanItem {
   id: string;
