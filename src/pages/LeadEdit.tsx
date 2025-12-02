@@ -287,6 +287,7 @@ const LeadEdit = () => {
         setActionNotes={setActionNotes}
         onConfirm={handleActionConfirm}
         getActionTypeIcon={getActionTypeIcon}
+        pipelineType={lead?.pipelineType}
       />
 
       {lead && (

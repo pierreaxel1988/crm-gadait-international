@@ -255,7 +255,7 @@ const LeadDetailMobile = () => {
           <CheckCircle className="h-5 w-5" />
         </div>}
 
-      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} />
+      <ActionDialog isOpen={isActionDialogOpen} onClose={() => setIsActionDialogOpen(false)} selectedAction={selectedAction} setSelectedAction={setSelectedAction} actionDate={actionDate} setActionDate={setActionDate} actionTime={actionTime} setActionTime={setActionTime} actionNotes={actionNotes} setActionNotes={setActionNotes} onConfirm={handleActionConfirm} getActionTypeIcon={getActionTypeIcon} pipelineType={lead?.pipelineType} />
     </div>
   );
 

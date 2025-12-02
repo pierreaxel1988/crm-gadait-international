@@ -22,6 +22,7 @@ interface ActionDialogProps {
   setActionNotes: (notes: string) => void;
   onConfirm: () => void;
   getActionTypeIcon: (type: TaskType) => React.ReactNode;
+  pipelineType?: string;
 }
 const ActionDialog: React.FC<ActionDialogProps> = ({
   isOpen,
@@ -35,7 +36,8 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
   actionNotes,
   setActionNotes,
   onConfirm,
-  getActionTypeIcon
+  getActionTypeIcon,
+  pipelineType
 }) => {
   const isMobile = useIsMobile();
   if (!isOpen) return null;
@@ -66,7 +68,7 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
         </div>
         
         <div className="p-4">
-          {!selectedAction ? <ActionTypeSelector onSelect={setSelectedAction} /> : <div className="space-y-4">
+          {!selectedAction ? <ActionTypeSelector onSelect={setSelectedAction} pipelineType={pipelineType} /> : <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Date</label>
                 <Popover>
@@ -111,10 +113,31 @@ const ActionDialog: React.FC<ActionDialogProps> = ({
 };
 const ActionTypeSelector: React.FC<{
   onSelect: (action: TaskType) => void;
+  pipelineType?: string;
 }> = ({
-  onSelect
+  onSelect,
+  pipelineType
 }) => {
-  const actionGroups = [['Call', 'Follow up', 'Visites'], ['Estimation', 'Propositions', 'Prospection'], ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin'], ['Mandat vente', 'Mandat location', 'Suivi owners'], ['Photos', 'Publication', 'Offre']];
+  // Actions filtrées selon le type de pipeline
+  const getActionGroups = () => {
+    if (pipelineType === 'owners') {
+      return [
+        ['Mandat vente', 'Mandat location'],
+        ['Photos', 'Publication', 'Estimation'],
+        ['Suivi owners', 'Offre']
+      ];
+    }
+    // Actions par défaut pour purchase/rental
+    return [
+      ['Call', 'Follow up', 'Visites'],
+      ['Estimation', 'Propositions', 'Prospection'],
+      ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin'],
+      ['Mandat vente', 'Mandat location', 'Suivi owners'],
+      ['Photos', 'Publication', 'Offre']
+    ];
+  };
+  
+  const actionGroups = getActionGroups();
   return <div className="space-y-4">
       {actionGroups.map((group, groupIndex) => <div key={groupIndex} className="grid grid-cols-3 gap-2">
           {group.map(actionType => <CustomButton key={actionType} variant="outline" onClick={() => onSelect(actionType as TaskType)} className={cn("justify-center text-center py-2 text-sm h-auto rounded-md", "text-zinc-800 font-normal border-zinc-200")}>
