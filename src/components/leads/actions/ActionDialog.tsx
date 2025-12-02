@@ -134,13 +134,18 @@ const ActionTypeSelector: React.FC<{
         ['Compromis', 'Acte de vente', 'Admin']
       ];
     }
-    // Actions par défaut pour rental et autres
+    if (pipelineType === 'rental') {
+      return [
+        ['Call', 'Follow up', 'Visites'],
+        ['Propositions', 'Prospection', 'Offre'],
+        ['Contrat de Location', 'États des lieux', 'Admin']
+      ];
+    }
+    // Actions par défaut
     return [
       ['Call', 'Follow up', 'Visites'],
-      ['Estimation', 'Propositions', 'Prospection'],
-      ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin'],
-      ['Mandat vente', 'Mandat location', 'Suivi owners'],
-      ['Photos', 'Publication', 'Offre']
+      ['Propositions', 'Prospection', 'Offre'],
+      ['Admin']
     ];
   };
   
