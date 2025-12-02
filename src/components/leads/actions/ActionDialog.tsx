@@ -127,7 +127,14 @@ const ActionTypeSelector: React.FC<{
         ['Suivi owners', 'Offre']
       ];
     }
-    // Actions par défaut pour purchase/rental
+    if (pipelineType === 'purchase') {
+      return [
+        ['Call', 'Follow up', 'Visites'],
+        ['Propositions', 'Prospection', 'Offre'],
+        ['Compromis', 'Acte de vente', 'Admin']
+      ];
+    }
+    // Actions par défaut pour rental et autres
     return [
       ['Call', 'Follow up', 'Visites'],
       ['Estimation', 'Propositions', 'Prospection'],
