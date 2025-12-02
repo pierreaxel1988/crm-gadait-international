@@ -114,7 +114,7 @@ const ActionTypeSelector: React.FC<{
 }> = ({
   onSelect
 }) => {
-  const actionGroups = [['Call', 'Follow up', 'Visites'], ['Estimation', 'Propositions', 'Prospection'], ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin']];
+  const actionGroups = [['Call', 'Follow up', 'Visites'], ['Estimation', 'Propositions', 'Prospection'], ['Compromis', 'Acte de vente', 'Contrat de Location', 'Admin'], ['Mandat', 'Photos', 'Publication', 'Offre']];
   return <div className="space-y-4">
       {actionGroups.map((group, groupIndex) => <div key={groupIndex} className="grid grid-cols-3 gap-2">
           {group.map(actionType => <CustomButton key={actionType} variant="outline" onClick={() => onSelect(actionType as TaskType)} className={cn("justify-center text-center py-2 text-sm h-auto rounded-md", "text-zinc-800 font-normal border-zinc-200")}>
