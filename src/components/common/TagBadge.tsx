@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-export type LeadTag = 'Vip' | 'Hot' | 'Serious' | 'Cold' | 'No response' | 'No phone' | 'Fake' | 'Imported';
+export type LeadTag = 'Vip' | 'Hot' | 'Serious' | 'Cold' | 'No response' | 'No phone' | 'Fake' | 'Imported' | 'Not a fit';
 
 interface TagBadgeProps {
   tag: LeadTag;
@@ -30,6 +30,8 @@ const TagBadge = ({ tag, className }: TagBadgeProps) => {
         return 'bg-loro-pearl text-loro-navy hover:bg-loro-pearl border-loro-navy border-opacity-20';
       case 'Imported':
         return 'bg-loro-white text-loro-500 hover:bg-loro-white border-loro-500 border-opacity-20';
+      case 'Not a fit':
+        return 'bg-red-100 text-red-700 hover:bg-red-100 border-red-700 border-opacity-20';
       default:
         return 'bg-loro-100 text-loro-800 hover:bg-loro-100 border-loro-800 border-opacity-20';
     }
