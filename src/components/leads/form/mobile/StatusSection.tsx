@@ -44,7 +44,8 @@ const TAG_OPTIONS: LeadTag[] = [
   "Cold", 
   "No response", 
   "No phone", 
-  "Fake"
+  "Fake",
+  "Not a fit"
 ];
 
 interface StatusSectionProps {

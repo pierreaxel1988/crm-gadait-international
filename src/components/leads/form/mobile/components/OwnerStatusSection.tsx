@@ -92,7 +92,8 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
     "Cold", 
     "No response", 
     "No phone", 
-    "Fake"
+    "Fake",
+    "Not a fit"
   ];
 
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
