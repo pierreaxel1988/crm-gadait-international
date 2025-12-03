@@ -27,7 +27,8 @@ const TagsFilter: React.FC<TagsFilterProps> = ({
     'No response',
     'No phone',
     'Fake',
-    'Imported'
+    'Imported',
+    'Not a fit'
   ];
 
   return (
