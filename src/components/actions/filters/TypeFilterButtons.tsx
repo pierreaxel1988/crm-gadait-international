@@ -21,7 +21,13 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
     'Follow up', 
     'Estimation', 
     'Prospection', 
-    'Admin'
+    'Admin',
+    'Mandat location',
+    'Mandat vente',
+    'Suivi owners',
+    'Photos',
+    'Publication',
+    'Offre'
   ];
 
   // Helper function to get color for a task type (synchronize with TaskTypeIndicator)
@@ -47,6 +53,18 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         return '#F97316'; // Orange
       case 'Admin':
         return '#9BA3AD'; // Gray
+      case 'Mandat location':
+        return '#60A5FA'; // Light blue
+      case 'Mandat vente':
+        return '#F87171'; // Light red
+      case 'Suivi owners':
+        return '#A3E635'; // Lime
+      case 'Photos':
+        return '#FBBF24'; // Yellow
+      case 'Publication':
+        return '#C084FC'; // Light purple
+      case 'Offre':
+        return '#34D399'; // Emerald
       default:
         return '#F5F5F0'; // Default loro-white
     }
@@ -75,6 +93,18 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         return 'bg-orange-50 border-orange-200';
       case 'Admin':
         return 'bg-gray-50 border-gray-200';
+      case 'Mandat location':
+        return 'bg-blue-100 border-blue-300';
+      case 'Mandat vente':
+        return 'bg-red-100 border-red-300';
+      case 'Suivi owners':
+        return 'bg-lime-50 border-lime-200';
+      case 'Photos':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'Publication':
+        return 'bg-purple-100 border-purple-300';
+      case 'Offre':
+        return 'bg-emerald-50 border-emerald-200';
       default:
         return '';
     }
@@ -191,6 +221,18 @@ const TypeFilterButtons: React.FC<TypeFilterButtonsProps> = ({ typeFilter, setTy
         return '#7C2D12'; // Dark orange
       case 'Admin':
         return '#1F2937'; // Dark gray
+      case 'Mandat location':
+        return '#1E40AF'; // Dark blue
+      case 'Mandat vente':
+        return '#991B1B'; // Dark red
+      case 'Suivi owners':
+        return '#365314'; // Dark lime
+      case 'Photos':
+        return '#854D0E'; // Dark yellow
+      case 'Publication':
+        return '#6B21A8'; // Dark purple
+      case 'Offre':
+        return '#065F46'; // Dark emerald
       default:
         return '#221F26'; // Dark text
     }
