@@ -10,11 +10,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
+import TagFilterButtons from '@/components/actions/filters/TagFilterButtons';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import ActionsList from '@/components/actions/ActionsList';
 import { useDebounce } from '@/hooks/useDebounce';
 import PipelineSearchBar from '@/components/pipeline/PipelineSearchBar';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
+import { LeadTag } from '@/components/common/TagBadge';
 
 const Actions = () => {
   const { isMobile } = useBreakpoint();
@@ -24,12 +26,13 @@ const Actions = () => {
   const { isAdmin } = useAuth();
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
   const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
+  const [selectedTags, setSelectedTags] = useState<LeadTag[]>([]);
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const filteredActions = React.useMemo(() => {
     return actions.filter(action => {
-      if (!debouncedSearchTerm && !selectedAgent && typeFilter === 'all') return true;
+      if (!debouncedSearchTerm && !selectedAgent && typeFilter === 'all' && selectedTags.length === 0) return true;
 
       const searchLower = debouncedSearchTerm.toLowerCase();
       
@@ -44,10 +47,14 @@ const Actions = () => {
       
       const matchesAgent = !selectedAgent || action.assignedToId === selectedAgent;
       const matchesType = typeFilter === 'all' || action.actionType === typeFilter;
+      
+      // Match tags - action must have at least one of the selected tags
+      const matchesTags = selectedTags.length === 0 || 
+        (action.leadTags && action.leadTags.some(tag => selectedTags.includes(tag as LeadTag)));
 
-      return matchesSearch && matchesAgent && matchesType;
+      return matchesSearch && matchesAgent && matchesType && matchesTags;
     });
-  }, [actions, debouncedSearchTerm, selectedAgent, typeFilter]);
+  }, [actions, debouncedSearchTerm, selectedAgent, typeFilter, selectedTags]);
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -102,8 +109,9 @@ const Actions = () => {
             </div>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 space-y-4">
             <TypeFilterButtons typeFilter={typeFilter} setTypeFilter={setTypeFilter} />
+            <TagFilterButtons selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
           </div>
           
           <ActionsList 
@@ -119,3 +127,4 @@ const Actions = () => {
 };
 
 export default Actions;
+
