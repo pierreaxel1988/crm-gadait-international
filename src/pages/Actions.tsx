@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TypeFilterButtons from '@/components/actions/filters/TypeFilterButtons';
-import TagFilterButtons from '@/components/actions/filters/TagFilterButtons';
+import TagFilterButtons, { TagFilterValue } from '@/components/actions/filters/TagFilterButtons';
 import { TaskType } from '@/components/kanban/KanbanCard';
 import ActionsList from '@/components/actions/ActionsList';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -26,7 +26,7 @@ const Actions = () => {
   const { isAdmin } = useAuth();
   const { selectedAgent, handleAgentChange } = useSelectedAgent();
   const [typeFilter, setTypeFilter] = useState<TaskType | 'all'>('all');
-  const [selectedTags, setSelectedTags] = useState<LeadTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<TagFilterValue[]>([]);
   
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
@@ -48,9 +48,16 @@ const Actions = () => {
       const matchesAgent = !selectedAgent || action.assignedToId === selectedAgent;
       const matchesType = typeFilter === 'all' || action.actionType === typeFilter;
       
-      // Match tags - action must have at least one of the selected tags
-      const matchesTags = selectedTags.length === 0 || 
-        (action.leadTags && action.leadTags.some(tag => selectedTags.includes(tag as LeadTag)));
+      // Match tags - handle "no-tags" special case and regular tags
+      let matchesTags = true;
+      if (selectedTags.length > 0) {
+        const hasNoTagsFilter = selectedTags.includes('no-tags');
+        const regularTags = selectedTags.filter(t => t !== 'no-tags') as LeadTag[];
+        const leadHasNoTags = !action.leadTags || action.leadTags.length === 0;
+        const leadHasSelectedTag = action.leadTags && action.leadTags.some(tag => regularTags.includes(tag as LeadTag));
+        
+        matchesTags = (hasNoTagsFilter && leadHasNoTags) || (regularTags.length > 0 && leadHasSelectedTag);
+      }
 
       return matchesSearch && matchesAgent && matchesType && matchesTags;
     });
