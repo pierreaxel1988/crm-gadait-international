@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Tags } from 'lucide-react';
 import { LeadTag } from '@/components/common/TagBadge';
 
+export type TagFilterValue = LeadTag | 'no-tags';
+
 interface TagFilterButtonsProps {
-  selectedTags: LeadTag[];
-  setSelectedTags: (tags: LeadTag[]) => void;
+  selectedTags: TagFilterValue[];
+  setSelectedTags: (tags: TagFilterValue[]) => void;
 }
 
 const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSelectedTags }) => {
@@ -22,7 +24,7 @@ const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSe
     'Not a fit'
   ];
 
-  const toggleTag = (tag: LeadTag) => {
+  const toggleTag = (tag: TagFilterValue) => {
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter(t => t !== tag));
     } else {
@@ -35,7 +37,7 @@ const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSe
   };
 
   // Get background color for each tag (matching TagBadge styles)
-  const getTagBgColor = (tag: LeadTag): string => {
+  const getTagBgColor = (tag: TagFilterValue): string => {
     switch (tag) {
       case 'Vip':
         return '#D3C5B4'; // loro-300
@@ -55,13 +57,15 @@ const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSe
         return '#FAFAF8'; // loro-white
       case 'Not a fit':
         return '#FEE2E2'; // red-100
+      case 'no-tags':
+        return '#E5E7EB'; // gray-200
       default:
         return '#F0EDE8';
     }
   };
 
   // Get text color for each tag (matching TagBadge styles)
-  const getTagTextColor = (tag: LeadTag): string => {
+  const getTagTextColor = (tag: TagFilterValue): string => {
     switch (tag) {
       case 'Vip':
         return '#5C4B3A'; // loro-900
@@ -81,9 +85,42 @@ const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSe
         return '#8A7B6A'; // loro-500
       case 'Not a fit':
         return '#B91C1C'; // red-700
+      case 'no-tags':
+        return '#6B7280'; // gray-500
       default:
         return '#6B5D4D';
     }
+  };
+
+  const renderTagButton = (tag: TagFilterValue, label: string) => {
+    const isSelected = selectedTags.includes(tag);
+    const bgColor = isSelected ? getTagBgColor(tag) : 'transparent';
+    const textColor = isSelected ? getTagTextColor(tag) : '#8E9196';
+    
+    return (
+      <Button
+        key={tag}
+        variant="outline"
+        size="sm"
+        className={`text-xs font-futura rounded-full px-3 py-1 transition-all duration-200 ${isSelected ? 'ring-1 ring-offset-1 scale-105' : ''}`}
+        onClick={() => toggleTag(tag)}
+        style={{
+          background: isSelected ? bgColor : 'transparent',
+          border: isSelected 
+            ? `1px solid rgba(211, 197, 180, 0.7)` 
+            : '1px solid rgba(211, 197, 180, 0.3)',
+          color: textColor,
+          fontWeight: isSelected ? 600 : 400,
+          fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
+          letterSpacing: '0.035em',
+          boxShadow: isSelected ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
+          transition: 'all 0.2s ease-out',
+          outline: 'none'
+        }}
+      >
+        {label}
+      </Button>
+    );
   };
 
   return (
@@ -108,36 +145,8 @@ const TagFilterButtons: React.FC<TagFilterButtonsProps> = ({ selectedTags, setSe
         >
           Tous
         </Button>
-        {allTags.map(tag => {
-          const isSelected = selectedTags.includes(tag);
-          const bgColor = isSelected ? getTagBgColor(tag) : 'transparent';
-          const textColor = isSelected ? getTagTextColor(tag) : '#8E9196';
-          
-          return (
-            <Button
-              key={tag}
-              variant="outline"
-              size="sm"
-              className={`text-xs font-futura rounded-full px-3 py-1 transition-all duration-200 ${isSelected ? 'ring-1 ring-offset-1 scale-105' : ''}`}
-              onClick={() => toggleTag(tag)}
-              style={{
-                background: isSelected ? bgColor : 'transparent',
-                border: isSelected 
-                  ? `1px solid rgba(211, 197, 180, 0.7)` 
-                  : '1px solid rgba(211, 197, 180, 0.3)',
-                color: textColor,
-                fontWeight: isSelected ? 600 : 400,
-                fontFamily: 'Futura, Optima, Verdana, Geneva, sans-serif',
-                letterSpacing: '0.035em',
-                boxShadow: isSelected ? '0 2px 5px rgba(139, 111, 78, 0.1)' : undefined,
-                transition: 'all 0.2s ease-out',
-                outline: 'none'
-              }}
-            >
-              {tag}
-            </Button>
-          );
-        })}
+        {renderTagButton('no-tags', 'No Tags')}
+        {allTags.map(tag => renderTagButton(tag, tag))}
       </div>
     </div>
   );
