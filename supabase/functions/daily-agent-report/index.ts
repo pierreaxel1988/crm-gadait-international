@@ -38,6 +38,7 @@ interface TeamMember {
   name: string;
   email: string | null;
 }
+
 interface PlanningAction {
   lead_id: string;
   lead_name: string;
@@ -48,6 +49,11 @@ interface PlanningAction {
   is_overdue: boolean;
 }
 
+interface UntaggedLead {
+  lead_id: string;
+  lead_name: string;
+}
+
 // ---- HELPERS ----
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -55,6 +61,7 @@ const corsHeaders = {
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 const getParisDate = (daysAgo = 0) => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
@@ -62,9 +69,12 @@ const getParisDate = (daysAgo = 0) => {
   p.setHours(0, 0, 0, 0);
   return p;
 };
+
 const getParisNow = () => new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Paris" }));
+
 const escapeHtml = (t: string | null | undefined) =>
   t ? t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+
 const formatDateFR = (d: Date | null) =>
   !d
     ? "-"
@@ -73,7 +83,9 @@ const formatDateFR = (d: Date | null) =>
         day: "2-digit",
         month: "2-digit",
       });
+
 const isAutoEmail = (t: string) => t.toLowerCase().startsWith("email auto");
+
 const makeLeadUrl = (id: string) => `${SUCCESS_LEAD_BASE_URL}/${id}`;
 
 // ---- QUERY AGENTS ----
@@ -99,16 +111,36 @@ async function getAgentDailyPlanning(agentId: string) {
 
   const { data: leads, error } = await supabase
     .from("leads")
-    .select("id, name, pipeline_type, action_history")
+    .select("id, name, pipeline_type, action_history, tags")
     .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
-  if (error || !leads) return { today: [], overdue: [], counts: { today: 0, overdue: 0 } };
+  if (error || !leads) {
+    return {
+      today: [] as PlanningAction[],
+      overdue: [] as PlanningAction[],
+      counts: { today: 0, overdue: 0 },
+      untaggedLeads: [] as UntaggedLead[],
+    };
+  }
 
   const today: PlanningAction[] = [];
   const overdue: PlanningAction[] = [];
+  const untaggedLeads: UntaggedLead[] = [];
 
   for (const lead of leads as any[]) {
+    // --- détection des leads sans tag ---
+    const tags = (lead as any).tags;
+    const hasTags = Array.isArray(tags) ? tags.length > 0 : !!tags;
+
+    if (!hasTags) {
+      untaggedLeads.push({
+        lead_id: lead.id,
+        lead_name: lead.name,
+      });
+    }
+    // --- fin détection leads sans tag ---
+
     for (const action of lead.action_history || []) {
       const type = (action.actionType || action.type).toString();
       if (isAutoEmail(type)) continue;
@@ -138,6 +170,9 @@ async function getAgentDailyPlanning(agentId: string) {
     }
   }
 
+  // Optionnel : tri des leads sans tag par ordre alpha
+  untaggedLeads.sort((a, b) => a.lead_name.localeCompare(b.lead_name, "fr-FR"));
+
   return {
     today,
     overdue,
@@ -145,6 +180,7 @@ async function getAgentDailyPlanning(agentId: string) {
       today: today.length,
       overdue: overdue.length,
     },
+    untaggedLeads,
   };
 }
 
@@ -165,7 +201,7 @@ async function getAgentUpcomingPlanning(agentId: string) {
     .eq("assigned_to", agentId)
     .is("deleted_at", null);
 
-  if (error || !leads) return { upcoming: [], count: 0 };
+  if (error || !leads) return { upcoming: [] as PlanningAction[], count: 0 };
 
   const upcoming: PlanningAction[] = [];
 
@@ -212,6 +248,22 @@ function buildDailyReportHtml(agent: TeamMember, summary: any, upcoming: any) {
           )
           .join("");
 
+  const untaggedList =
+    summary.untaggedLeads && summary.untaggedLeads.length
+      ? `
+    <h3 style="color:#b00020;">⚠️ Attention : clients sans tag</h3>
+    <p style="font-size:14px;">
+      Les clients ci-dessous n'ont pas encore de tag attribué.<br/>
+      Vous pouvez leur attribuer un statut / tag dans l’onglet <strong>Statut</strong> de la fiche du lead.
+    </p>
+    <ul>
+      ${summary.untaggedLeads
+        .map((l: UntaggedLead) => `<li><a href="${makeLeadUrl(l.lead_id)}">${escapeHtml(l.lead_name)}</a></li>`)
+        .join("")}
+    </ul>
+    `
+      : "";
+
   return `
   <html>
   <body style="font-family: Arial; padding: 20px; color: #111;">
@@ -226,6 +278,8 @@ function buildDailyReportHtml(agent: TeamMember, summary: any, upcoming: any) {
 
     <h3>📅 Actions à venir (7 prochains jours) – ${upcoming.count}</h3>
     <ul>${list(upcoming.upcoming)}</ul>
+
+    ${untaggedList}
 
     <p style="font-size:12px;color:#777;">Rapport généré automatiquement via Success.</p>
   </body>
@@ -244,7 +298,12 @@ async function sendDailyReports() {
     const summary = await getAgentDailyPlanning(agent.id);
     const upcoming = await getAgentUpcomingPlanning(agent.id);
 
-    if (summary.counts.today === 0 && summary.counts.overdue === 0 && upcoming.count === 0) {
+    if (
+      summary.counts.today === 0 &&
+      summary.counts.overdue === 0 &&
+      upcoming.count === 0 &&
+      (!summary.untaggedLeads || summary.untaggedLeads.length === 0)
+    ) {
       console.log(`No content for ${agent.name}`);
       continue;
     }
@@ -292,7 +351,10 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: "Internal error", details: e }), { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ error: "Internal error", details: e }), {
+      status: 500,
+      headers: corsHeaders,
+    });
   }
 };
 
