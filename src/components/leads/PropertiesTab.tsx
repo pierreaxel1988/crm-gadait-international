@@ -57,6 +57,13 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({ leadId, lead }) => {
         .select('*')
         .eq('status', 'published');
 
+      // Filter by listing type based on pipeline type
+      if (lead.pipelineType === 'purchase') {
+        query = query.eq('listing_type', 'sale');
+      } else if (lead.pipelineType === 'rental') {
+        query = query.eq('listing_type', 'rental');
+      }
+
       // Filter by country - normalize to DatoCMS format
       if (lead.country) {
         const normalizedCountry = normalizeCountryForDatoCMS(lead.country);
