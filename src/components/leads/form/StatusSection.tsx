@@ -2,13 +2,14 @@
 import React, { useState } from 'react';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { LeadTag } from '@/components/common/TagBadge';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Home, Activity, Trash2 } from 'lucide-react';
+import { Home, Activity, Trash2, FolderOpen } from 'lucide-react';
 import MultiSelectButtons from './MultiSelectButtons';
 import {
   AlertDialog,
@@ -167,6 +168,25 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             onToggle={handleTagToggle}
           />
         </div>
+
+        {(lead.pipelineType === 'purchase' || lead.pipelineType === 'rental') && (
+          <div className="space-y-2">
+            <Label htmlFor="googleDriveLink" className="text-sm font-medium">Lien KYC (Google Drive)</Label>
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 border border-r-0 rounded-l-md bg-white">
+                <FolderOpen className="h-4 w-4 text-gray-500" />
+              </div>
+              <Input
+                id="googleDriveLink"
+                type="url"
+                placeholder="https://drive.google.com/..."
+                value={lead.google_drive_link || ''}
+                onChange={(e) => handleInputChange('google_drive_link', e.target.value)}
+                className="rounded-l-none"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="assignedTo" className="text-sm font-medium">Responsable du suivi</Label>
