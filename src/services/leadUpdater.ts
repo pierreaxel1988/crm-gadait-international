@@ -73,7 +73,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         .eq('id', leadData.id)
         .is('deleted_at', null) // Only update non-deleted leads
         .select()
-        .single();
+        .maybeSingle();
       
       if (result.error) {
         console.error("Error updating lead:", result.error);
@@ -108,7 +108,7 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
         .eq('id', leadData.id)
         .is('deleted_at', null) // Only update non-deleted leads
         .select()
-        .single();
+        .maybeSingle();
       
       if (result.error) {
         console.error("Error updating lead:", result.error);
