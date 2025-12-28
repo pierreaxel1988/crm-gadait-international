@@ -24,19 +24,25 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { softDeleteLead } from '@/services/leadSoftDelete';
 import { toast } from '@/hooks/use-toast';
+import { getStatusesForPipeline } from '@/utils/pipelineUtils';
 
-const STATUS_OPTIONS: LeadStatus[] = [
-  'New',
-  'Contacted',
-  'Qualified',
-  'Proposal',
-  'Visit',
-  'Offre',
-  'Deposit',
-  'Signed',
-  'Gagné',
-  'Perdu'
-];
+const getStatusLabel = (status: LeadStatus, pipelineType: PipelineType): string => {
+  const isOwners = pipelineType === 'owners';
+  const statusLabels: Record<string, string> = {
+    'New': isOwners ? 'Premier contact' : 'Nouveaux',
+    'Contacted': isOwners ? 'Rendez-vous programmé' : 'Contactés',
+    'Qualified': isOwners ? 'Visite effectuée' : 'Qualifiés',
+    'Proposal': isOwners ? 'Mandat en négociation' : 'Propositions',
+    'Visit': isOwners ? 'Bien en commercialisation' : 'Visites en cours',
+    'Offre': isOwners ? 'Offre reçue' : 'Offre en cours',
+    'Deposit': isOwners ? 'Compromis signé' : 'Dépôt reçu',
+    'Signed': isOwners ? 'Mandat signé' : 'Signature finale',
+    'Gagné': isOwners ? 'Vente finalisée' : 'Conclus',
+    'Perdu': isOwners ? 'Perdu/Annulé' : 'Perdu',
+    'Deleted': 'Supprimé'
+  };
+  return statusLabels[status] || status;
+};
 
 const TAG_OPTIONS: LeadTag[] = [
   "Vip", 
@@ -181,9 +187,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 <SelectValue placeholder="Sélectionner un statut" />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTIONS.map(status => (
+                {getStatusesForPipeline(lead.pipelineType || 'purchase').map(status => (
                   <SelectItem key={status} value={status} className="font-futura">
-                    {status}
+                    {getStatusLabel(status, lead.pipelineType || 'purchase')}
                   </SelectItem>
                 ))}
               </SelectContent>
