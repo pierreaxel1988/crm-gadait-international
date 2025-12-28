@@ -5231,10 +5231,6 @@ export type Database = {
             }
           }
         | {
-            Args: { headers?: Json; payload: Json; url: string }
-            Returns: Json
-          }
-        | {
             Args: { data: Json; uri: string }
             Returns: Database["public"]["CompositeTypes"]["http_response"]
             SetofOptions: {
@@ -5243,6 +5239,10 @@ export type Database = {
               isOneToOne: true
               isSetofReturn: false
             }
+          }
+        | {
+            Args: { headers?: Json; payload: Json; url: string }
+            Returns: Json
           }
       http_put: {
         Args: { content: string; content_type: string; uri: string }
