@@ -185,6 +185,18 @@ const StatusSection: React.FC<StatusSectionProps> = ({
                 className="rounded-l-none"
               />
             </div>
+            {lead.google_drive_link && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(lead.google_drive_link!, '_blank')}
+                className="w-full"
+              >
+                <FolderOpen className="h-4 w-4 mr-2" />
+                Ouvrir le dossier KYC
+              </Button>
+            )}
           </div>
         )}
 
