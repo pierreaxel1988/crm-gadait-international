@@ -18,21 +18,43 @@ import { DesktopPipelineViewProps, SortBy } from './types/pipelineTypes';
 import { PipelineType } from '@/types/lead';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const statusTranslations: Record<string, string> = {
-  'New': 'Nouveaux',
-  'Contacted': 'Contactés',
-  'Qualified': 'Qualifiés',
-  'Proposal': 'Propositions',
-  'Visit': 'Visites en cours',
-  'Offer': 'Offre en cours',
-  'Offre': 'Offre en cours',
-  'Deposit': 'Dépôt reçu',
-  'Signed': 'Signature finale',
-  'Perdu': 'Perdu',
-  'Gagné': 'Conclus'
+const getStatusTranslations = (pipelineType: string): Record<string, string> => {
+  if (pipelineType === 'owners') {
+    return {
+      'New': 'Premier contact',
+      'Contacted': 'Rendez-vous programmé',
+      'Qualified': 'Visite effectuée',
+      'Proposal': 'Mandat en négociation',
+      'Signed': 'Mandat signé',
+      'Visit': 'Bien en commercialisation',
+      'Offre': 'Offre reçue',
+      'Offer': 'Offre reçue',
+      'Deposit': 'Compromis signé',
+      'Gagné': 'Vente finalisée',
+      'Perdu': 'Perdu/Annulé'
+    };
+  }
+  return {
+    'New': 'Nouveaux',
+    'Contacted': 'Contactés',
+    'Qualified': 'Qualifiés',
+    'Proposal': 'Propositions',
+    'Visit': 'Visites en cours',
+    'Offer': 'Offre en cours',
+    'Offre': 'Offre en cours',
+    'Deposit': 'Dépôt reçu',
+    'Signed': 'Signature finale',
+    'Perdu': 'Perdu',
+    'Gagné': 'Conclus'
+  };
 };
 
-const statusOrder = ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Offre', 'Deposit', 'Signed', 'Perdu', 'Gagné'];
+const getStatusOrder = (pipelineType: string): string[] => {
+  if (pipelineType === 'owners') {
+    return ['New', 'Contacted', 'Qualified', 'Proposal', 'Signed', 'Visit', 'Offre', 'Deposit', 'Gagné', 'Perdu'];
+  }
+  return ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offer', 'Offre', 'Deposit', 'Signed', 'Perdu', 'Gagné'];
+};
 
 const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
   activeTab,
@@ -256,7 +278,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
                 Tous ({totalLeadCount})
               </TabsTrigger>
               {filteredColumns
-                .sort((a, b) => statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status))
+                .sort((a, b) => getStatusOrder(activeTab).indexOf(a.status) - getStatusOrder(activeTab).indexOf(b.status))
                 .map(column => 
                 leadCountByStatus[column.status] > 0 && (
                   <TabsTrigger 
@@ -264,7 +286,7 @@ const DesktopPipelineView: React.FC<DesktopPipelineViewProps> = ({
                     value={column.status} 
                     className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
-                    {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                    {getStatusTranslations(activeTab)[column.status]} ({leadCountByStatus[column.status]})
                   </TabsTrigger>
                 )
               )}
