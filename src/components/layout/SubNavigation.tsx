@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, Calendar, ListTodo, File, ClipboardList } from 'lucide-react';
+import { MessageSquare, Calendar, ListTodo, File, ClipboardList, FolderOpen } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
@@ -25,6 +25,10 @@ const SubNavigation = () => {
     name: 'Propriétés',
     path: '/properties',
     icon: File
+  }, {
+    name: 'Resources',
+    path: '/resources',
+    icon: FolderOpen
   }];
 
   // Mobile navigation with horizontal scrolling - icons only
