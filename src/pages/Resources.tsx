@@ -33,10 +33,6 @@ const resources: CountryResources[] = [
 ];
 
 const Resources = () => {
-  const handleOpenFolder = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
   return (
     <div className="min-h-screen bg-loro-50">
       <Navbar />
@@ -58,22 +54,26 @@ const Resources = () => {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {countryResource.folders.map((folder) => (
-                  <Card 
+                  <a
                     key={folder.language}
-                    className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-loro-pearl bg-white"
-                    onClick={() => handleOpenFolder(folder.url)}
+                    href={folder.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
                   >
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="p-2 bg-loro-sand/30 rounded-lg">
-                        <FolderOpen className="h-6 w-6 text-loro-terracotta" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-loro-navy">{folder.language}</p>
-                        <p className="text-sm text-loro-navy/60">Documents</p>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-loro-navy/40" />
-                    </CardContent>
-                  </Card>
+                    <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] border-loro-pearl bg-white">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className="p-2 bg-loro-sand/30 rounded-lg">
+                          <FolderOpen className="h-6 w-6 text-loro-terracotta" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-loro-navy">{folder.language}</p>
+                          <p className="text-sm text-loro-navy/60">Documents</p>
+                        </div>
+                        <ExternalLink className="h-4 w-4 text-loro-navy/40" />
+                      </CardContent>
+                    </Card>
+                  </a>
                 ))}
               </div>
             </div>
