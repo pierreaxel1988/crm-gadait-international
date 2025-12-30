@@ -40,6 +40,7 @@ const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
 const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
+const Resources = lazy(() => import('./pages/Resources'));
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -112,6 +113,11 @@ const AppContent = () => {
             <Route path="/analytics" element={
               <ProtectedRoute commercialAllowed={true}>
                 <LeadsAnalytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/resources" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <Resources />
               </ProtectedRoute>
             } />
             
