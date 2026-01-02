@@ -78,11 +78,12 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
   };
 
   useEffect(() => {
-    // Reset et charger la première page
+    // Reset et charger la première page - wait for exchange rates to be loaded
+    if (!exchangeRates) return;
     setProperties([]);
     setHasMore(true);
     fetchSuggestedProperties(true);
-  }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, lead.bedrooms]);
+  }, [lead.country, lead.desiredLocation, lead.propertyTypes, lead.budget, (lead as any).budgetMin, lead.bedrooms, exchangeRates]);
 
   const fetchSuggestedProperties = async (reset: boolean = false) => {
     if (reset) {
@@ -141,12 +142,40 @@ const SuggestedPropertiesFullView: React.FC<SuggestedPropertiesFullViewProps> = 
         }
       }
 
-      // Filter by budget (maximum) - use price_eur for consistency
+      // Filter by budget range - use price_eur for consistency
+      // Parse budget max
+      let budgetMax: number | null = null;
+      let budgetMin: number | null = null;
+      
       if (lead.budget) {
-        const budgetNumber = parseFloat(lead.budget.replace(/[^\d.-]/g, ''));
-        if (!isNaN(budgetNumber)) {
-          query = query.lte('price_eur', budgetNumber);
+        budgetMax = parseFloat(lead.budget.replace(/[^\d.-]/g, ''));
+        if (isNaN(budgetMax)) budgetMax = null;
+      }
+      
+      // Parse budget min (use budgetMin property from lead)
+      if ((lead as any).budgetMin) {
+        budgetMin = parseFloat((lead as any).budgetMin.replace(/[^\d.-]/g, ''));
+        if (isNaN(budgetMin)) budgetMin = null;
+      }
+      
+      // Convert budgets to EUR if needed for comparison with price_eur
+      const leadCurrency = (lead.currency || 'EUR').toUpperCase();
+      if (exchangeRates && leadCurrency !== 'EUR') {
+        if (leadCurrency === 'USD') {
+          if (budgetMax) budgetMax = budgetMax * exchangeRates.usd_to_eur;
+          if (budgetMin) budgetMin = budgetMin * exchangeRates.usd_to_eur;
+        } else if (leadCurrency === 'MUR') {
+          if (budgetMax) budgetMax = budgetMax * exchangeRates.mur_to_eur;
+          if (budgetMin) budgetMin = budgetMin * exchangeRates.mur_to_eur;
         }
+      }
+      
+      // Apply budget filters - properties must be within the lead's budget range
+      if (budgetMax !== null && budgetMax > 0) {
+        query = query.lte('price_eur', budgetMax);
+      }
+      if (budgetMin !== null && budgetMin > 0) {
+        query = query.gte('price_eur', budgetMin);
       }
 
       // Pagination pour scroll infini
