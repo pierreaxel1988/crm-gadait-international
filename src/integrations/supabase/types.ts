@@ -5089,6 +5089,41 @@ export type Database = {
       }
     }
     Functions: {
+      api_properties_list: {
+        Args: {
+          p_bedrooms?: number
+          p_country?: string
+          p_cursor_created_at?: string
+          p_cursor_id?: string
+          p_limit?: number
+          p_listing_type?: string
+          p_location?: string
+          p_max_price?: number
+          p_min_price?: number
+          p_property_type?: string
+          p_search?: string
+        }
+        Returns: {
+          bathrooms: number
+          bedrooms: number
+          country: string
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          images: string[]
+          listing_type: string
+          location: string
+          main_image: string
+          price_eur: number
+          property_type: string
+          published_at: string
+          slug_en: string
+          slug_fr: string
+          status: string
+          title: string
+        }[]
+      }
       bytea_to_text: { Args: { data: string }; Returns: string }
       cleanup_old_notifications: { Args: never; Returns: undefined }
       close_stale_sessions: { Args: never; Returns: number }
@@ -5292,6 +5327,41 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+        }[]
+      }
+      rpc_properties_mauritius_list: {
+        Args: {
+          p_bedrooms_min?: number
+          p_cursor_created_at?: string
+          p_cursor_price?: number
+          p_limit?: number
+          p_listing_type?: string
+          p_location?: string
+          p_price_max?: number
+          p_price_min?: number
+          p_property_type?: string
+          p_search?: string
+          p_sort?: string
+        }
+        Returns: {
+          bathrooms: number
+          bedrooms: number
+          country: string
+          created_at: string
+          description: string
+          id: string
+          images: string[]
+          listing_type: string
+          location: string
+          main_image: string
+          price_eur: number
+          property_type: string
+          published_at: string
+          slug: string
+          slug_en: string
+          slug_fr: string
+          status: string
+          title: string
         }[]
       }
       seo_truncate: {
