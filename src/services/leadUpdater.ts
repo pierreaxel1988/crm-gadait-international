@@ -56,6 +56,23 @@ export const updateLead = async (leadData: LeadDetailed): Promise<LeadDetailed |
       cleanedData.property_type = leadData.propertyType;
     }
 
+    // Protection contre la suppression accidentelle des tags
+    if (cleanedData.tags === null || (Array.isArray(cleanedData.tags) && cleanedData.tags.length === 0)) {
+      // Si les tags sont vides, récupérer les tags actuels du lead
+      const { data: currentLead } = await supabase
+        .from('leads')
+        .select('tags')
+        .eq('id', leadData.id)
+        .single();
+      
+      if (currentLead?.tags && currentLead.tags.length > 0) {
+        console.log(`[TAGS PROTECTION] Preserving existing tags for lead ${leadData.id}:`, currentLead.tags);
+        cleanedData.tags = currentLead.tags;
+      }
+    } else if (cleanedData.tags && cleanedData.tags.length > 0) {
+      console.log(`[TAGS UPDATE] Updating tags for lead ${leadData.id}:`, cleanedData.tags);
+    }
+
     console.log("Final cleaned data for update:", cleanedData);
     
     // Special handling for multiple bedroom selections
