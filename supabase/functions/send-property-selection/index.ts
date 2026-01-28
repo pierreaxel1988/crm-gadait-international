@@ -117,10 +117,13 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', leadId)
       .single();
 
+    // Lien Cal.com par défaut de la société
+    const DEFAULT_CAL_BOOKING_LINK = 'https://cal.com/gadait-international/15min';
+    
     // Récupérer le numéro WhatsApp, l'email et le lien Cal.com de l'agent assigné
     let agentWhatsApp = null;
     let agentEmail = null;
-    let agentCalBookingLink = null;
+    let agentCalBookingLink = DEFAULT_CAL_BOOKING_LINK; // Utiliser le lien par défaut
     if (leadData?.assigned_to) {
       const { data: agentData } = await supabase
         .from('team_members')
@@ -138,9 +141,12 @@ const handler = async (req: Request): Promise<Response> => {
         console.log(`Agent email trouvé: ${agentEmail}`);
       }
       
+      // Utiliser le lien Cal.com de l'agent s'il existe, sinon garder le lien par défaut
       if (agentData?.cal_booking_link) {
         agentCalBookingLink = agentData.cal_booking_link;
         console.log(`Agent Cal.com booking link trouvé: ${agentCalBookingLink}`);
+      } else {
+        console.log(`Utilisation du lien Cal.com par défaut: ${DEFAULT_CAL_BOOKING_LINK}`);
       }
     }
 
