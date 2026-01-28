@@ -117,13 +117,14 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', leadId)
       .single();
 
-    // Récupérer le numéro WhatsApp et l'email de l'agent assigné
+    // Récupérer le numéro WhatsApp, l'email et le lien Cal.com de l'agent assigné
     let agentWhatsApp = null;
     let agentEmail = null;
+    let agentCalBookingLink = null;
     if (leadData?.assigned_to) {
       const { data: agentData } = await supabase
         .from('team_members')
-        .select('whatsapp_number, email')
+        .select('whatsapp_number, email, cal_booking_link')
         .eq('id', leadData.assigned_to)
         .single();
       
@@ -135,6 +136,11 @@ const handler = async (req: Request): Promise<Response> => {
       if (agentData?.email) {
         agentEmail = agentData.email;
         console.log(`Agent email trouvé: ${agentEmail}`);
+      }
+      
+      if (agentData?.cal_booking_link) {
+        agentCalBookingLink = agentData.cal_booking_link;
+        console.log(`Agent Cal.com booking link trouvé: ${agentCalBookingLink}`);
       }
     }
 
@@ -175,6 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
       intro: 'We have carefully selected these properties that perfectly match your search criteria. Each property has been chosen for its exceptional quality and investment potential.',
       readyNext: '🤝 Ready for the next step?',
       teamMessage: 'Our team of experts is at your disposal to organize visits, answer your questions or support you in your investment project.',
+      bookAppointment: '📅 Book an appointment',
       callUs: '📞 Call us',
       writeUs: 'Write to us',
       regards: 'Best regards,',
@@ -188,6 +195,7 @@ const handler = async (req: Request): Promise<Response> => {
       intro: 'Nous avons soigneusement sélectionné ces propriétés qui correspondent parfaitement à vos critères de recherche. Chaque propriété a été choisie pour sa qualité exceptionnelle et son potentiel d\'investissement.',
       readyNext: '🤝 Prêt pour la suite ?',
       teamMessage: 'Notre équipe d\'experts est à votre disposition pour organiser des visites, répondre à vos questions ou vous accompagner dans votre projet d\'investissement.',
+      bookAppointment: '📅 Prendre rendez-vous',
       callUs: '📞 Nous appeler',
       writeUs: 'Nous écrire',
       regards: 'Cordialement,',
@@ -536,13 +544,28 @@ const handler = async (req: Request): Promise<Response> => {
                 </p>
                 <div style="
                   display: flex;
-                  gap: 16px;
+                  gap: 12px;
                   justify-content: center;
                   flex-wrap: wrap;
                 ">
+                  ${agentCalBookingLink ? `
+                    <a href="${agentCalBookingLink}" target="_blank" style="
+                      display: inline-block;
+                      background: #111827;
+                      color: white;
+                      text-decoration: none;
+                      padding: 12px 24px;
+                      border-radius: 12px;
+                      font-weight: 600;
+                      font-size: 14px;
+                      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                    ">
+                      ${t.bookAppointment}
+                    </a>
+                  ` : ''}
                   <a href="tel:+33123456789" style="
                     display: inline-block;
-                    background: #111827;
+                    background: ${agentCalBookingLink ? '#374151' : '#111827'};
                     color: white;
                     text-decoration: none;
                     padding: 12px 24px;
@@ -553,9 +576,9 @@ const handler = async (req: Request): Promise<Response> => {
                   ">
                     ${t.callUs}
                   </a>
-                  <a href="mailto:contact@gadait-international.com" style="
+                  <a href="mailto:${agentEmail || 'contact@gadait-international.com'}" style="
                     display: inline-block;
-                    background: #374151;
+                    background: ${agentCalBookingLink ? '#6B7280' : '#374151'};
                     color: white;
                     text-decoration: none;
                     padding: 12px 24px;
