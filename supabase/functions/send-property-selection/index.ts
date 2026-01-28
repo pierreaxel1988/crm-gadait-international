@@ -501,15 +501,15 @@ const handler = async (req: Request): Promise<Response> => {
                style="
                  display: block;
                  width: 100%;
-                 background: white;
-                 color: #1e293b;
+                 background: #111827;
+                 color: white;
                  text-align: center;
-                 padding: 10px 20px;
+                 padding: 12px 20px;
                  border-radius: 8px;
                  font-weight: 600;
                  font-size: 14px;
                  text-decoration: none;
-                 border: 1px solid #e5e7eb;
+                 border: none;
                  box-sizing: border-box;
                ">
               ${leadLanguage === 'en' ? 'View on GADAIT' : 'Voir sur GADAIT'}
@@ -520,10 +520,10 @@ const handler = async (req: Request): Promise<Response> => {
                style="
                  display: block;
                  width: 100%;
-                 background: #25D366;
+                 background: #374151;
                  color: white;
                  text-align: center;
-                 padding: 10px 20px;
+                 padding: 12px 20px;
                  border-radius: 8px;
                  font-weight: 600;
                  font-size: 14px;
@@ -565,13 +565,13 @@ const handler = async (req: Request): Promise<Response> => {
             .container {
               max-width: 650px;
               margin: 0 auto;
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              background: #FFFFFF;
               padding: 0;
             }
             
             .header {
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
+              background: #FFFFFF;
+              color: #111827;
               text-align: center;
               padding: 40px 32px;
             }
@@ -588,7 +588,7 @@ const handler = async (req: Request): Promise<Response> => {
             }
           </style>
         </head>
-        <body style="margin: 0; padding: 0; background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%); min-height: 100vh;">
+        <body style="margin: 0; padding: 0; background: #F9FAFB; min-height: 100vh;">
           <div class="container">
             <div class="content" style="padding-top: 40px;">
               <div style="text-align: center; margin-bottom: 40px;">
@@ -598,7 +598,7 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
               <div style="margin-bottom: 32px;">
                 <h2 style="
-                  color: #1a202c;
+                  color: #111827;
                   font-size: 24px;
                   font-weight: 700;
                   margin: 0 0 16px 0;
@@ -606,7 +606,7 @@ const handler = async (req: Request): Promise<Response> => {
                   ${t.greeting} ${leadName}
                 </h2>
                 <p style="
-                  color: #4a5568;
+                  color: #6B7280;
                   font-size: 16px;
                   line-height: 1.6;
                   margin: 0;
@@ -620,14 +620,14 @@ const handler = async (req: Request): Promise<Response> => {
               </div>
 
               <div style="
-                background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+                background: #F9FAFB;
                 border-radius: 16px;
                 padding: 32px;
                 text-align: center;
-                border: 1px solid #e2e8f0;
+                border: 1px solid #E5E7EB;
               ">
                 <h3 style="
-                  color: #1a202c;
+                  color: #111827;
                   font-size: 20px;
                   font-weight: 700;
                   margin: 0 0 16px 0;
@@ -635,7 +635,7 @@ const handler = async (req: Request): Promise<Response> => {
                   ${t.readyNext}
                 </h3>
                 <p style="
-                  color: #4a5568;
+                  color: #6B7280;
                   font-size: 16px;
                   margin: 0 0 24px 0;
                   line-height: 1.6;
@@ -650,27 +650,27 @@ const handler = async (req: Request): Promise<Response> => {
                 ">
                   <a href="tel:+33123456789" style="
                     display: inline-block;
-                    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+                    background: #111827;
                     color: white;
                     text-decoration: none;
                     padding: 12px 24px;
                     border-radius: 12px;
                     font-weight: 600;
                     font-size: 14px;
-                    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
                   ">
                     ${t.callUs}
                   </a>
                   <a href="mailto:contact@gadait-international.com" style="
                     display: inline-block;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: #374151;
                     color: white;
                     text-decoration: none;
                     padding: 12px 24px;
                     border-radius: 12px;
                     font-weight: 600;
                     font-size: 14px;
-                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
                   ">
                     ${t.writeUs}
                   </a>
@@ -680,11 +680,11 @@ const handler = async (req: Request): Promise<Response> => {
               <div style="
                 margin-top: 32px;
                 padding-top: 24px;
-                border-top: 2px solid #e2e8f0;
+                border-top: 1px solid #E5E7EB;
                 text-align: center;
               ">
                 <p style="
-                  color: #718096;
+                  color: #6B7280;
                   font-size: 14px;
                   margin: 0 0 8px 0;
                   font-weight: 500;
@@ -692,7 +692,7 @@ const handler = async (req: Request): Promise<Response> => {
                   ${t.regards}
                 </p>
                 <p style="
-                  color: #1a202c;
+                  color: #111827;
                   font-size: 16px;
                   font-weight: 700;
                   margin: 0;
