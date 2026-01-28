@@ -249,292 +249,184 @@ const handler = async (req: Request): Promise<Response> => {
 
       const countryFlag = getCountryFlag(property.location?.split(',').pop()?.trim());
       
+      // Build specs line
+      const specs: string[] = [];
+      if (property.bedrooms) specs.push(`${property.bedrooms} ${leadLanguage === 'en' ? 'bd' : 'ch'}`);
+      if (property.bathrooms) specs.push(`${property.bathrooms} ${leadLanguage === 'en' ? 'ba' : 'sdb'}`);
+      if (property.area) specs.push(`${property.area} ${property.area_unit || 'm²'}`);
+      if (property.land_area) specs.push(`${leadLanguage === 'en' ? 'Land' : 'Terrain'}: ${property.land_area} ${property.land_area_unit || 'm²'}`);
+      const specsLine = specs.join('  •  ');
+
       return `
-      <!-- Carte de propriété -->
+      <!-- Carte de propriété - Design épuré Apple/Editorial -->
       <div style="
         background: white;
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
-        margin-bottom: 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e5e7eb;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #E5E7EB;
       ">
         
         ${property.main_image ? `
-          <!-- Image de la propriété avec overlay -->
-          <div style="position: relative; height: 300px; overflow: hidden; background: #f3f4f6;">
-            <a href="${trackedUrl}" target="_blank" style="display: block; width: 100%; height: 100%;">
+          <!-- Image ratio 4:3 -->
+          <a href="${trackedUrl}" target="_blank" style="display: block; text-decoration: none;">
+            <div style="position: relative; padding-top: 75%; overflow: hidden; background: #F3F4F6;">
               <img src="${property.main_image}" 
                    alt="${property.title}" 
                    style="
+                     position: absolute;
+                     top: 0;
+                     left: 0;
                      width: 100%; 
                      height: 100%; 
                      object-fit: cover;
-                     display: block;
                    " />
-            </a>
-            
-            <!-- Overlay gradient -->
-            <div style="
-              position: absolute;
-              inset: 0;
-              background: linear-gradient(to top, rgba(0,0,0,0.4), transparent, transparent);
-              pointer-events: none;
-            "></div>
-            
-            <!-- Badge type de propriété (en haut à gauche) -->
-            ${property.property_type ? `
+              
+              <!-- Badge discret type + pays en haut -->
               <div style="
                 position: absolute;
                 top: 16px;
                 left: 16px;
-                background: rgba(255, 255, 255, 0.95);
-                color: #1e293b;
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: lowercase;
-                border: 1px solid rgba(226, 232, 240, 0.8);
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-              ">
-                ${property.property_type}
-              </div>
-            ` : ''}
-            
-            <!-- Prix (en haut à droite) -->
-            <div style="
-              position: absolute;
-              top: 16px;
-              right: 16px;
-              background: rgba(255, 255, 255, 0.9);
-              color: #1e293b;
-              padding: 6px 12px;
-              border-radius: 6px;
-              font-size: 14px;
-              font-weight: 700;
-              border: 1px solid rgba(226, 232, 240, 0.8);
-              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            ">
-              ${formatPrice(property.price, property.currency)}
-            </div>
-            
-            <!-- Caractéristiques (en bas à gauche) -->
-            <div style="
-              position: absolute;
-              bottom: 16px;
-              left: 16px;
-              display: flex;
-              gap: 8px;
-              flex-wrap: wrap;
-            ">
-              ${property.area ? `
-                <div style="
-                  background: rgba(255, 255, 255, 0.9);
-                  color: #1e293b;
-                  padding: 6px 10px;
-                  border-radius: 6px;
-                  font-size: 11px;
-                  font-weight: 600;
-                  border: 1px solid rgba(226, 232, 240, 0.8);
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 4px;
-                ">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <path d="M21 14h-5"/>
-                    <path d="M14 21v-5"/>
-                    <path d="M3 10h5"/>
-                    <path d="M10 3v5"/>
-                  </svg>
-                  ${property.area} ${property.area_unit || 'm²'}
-                </div>
-              ` : ''}
-              
-              ${property.bedrooms ? `
-                <div style="
-                  background: rgba(255, 255, 255, 0.9);
-                  color: #1e293b;
-                  padding: 6px 10px;
-                  border-radius: 6px;
-                  font-size: 11px;
-                  font-weight: 600;
-                  border: 1px solid rgba(226, 232, 240, 0.8);
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 4px;
-                ">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <path d="M2 4v16"/>
-                    <path d="M2 8h18a2 2 0 0 1 2 2v10"/>
-                    <path d="M2 17h20"/>
-                    <path d="M6 8v9"/>
-                  </svg>
-                  ${property.bedrooms}
-                </div>
-              ` : ''}
-              
-              ${property.bathrooms ? `
-                <div style="
-                  background: rgba(255, 255, 255, 0.9);
-                  color: #1e293b;
-                  padding: 6px 10px;
-                  border-radius: 6px;
-                  font-size: 11px;
-                  font-weight: 600;
-                  border: 1px solid rgba(226, 232, 240, 0.8);
-                  display: inline-flex;
-                  align-items: center;
-                  gap: 4px;
-                ">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1 0l-1 1a1.5 1.5 0 0 0 0 1L7 9"/>
-                    <path d="m15 5-1.912 1.913A2 2 0 0 0 12.5 8.5V12"/>
-                    <path d="M13 17h6"/>
-                    <path d="M13 21h6"/>
-                  </svg>
-                  ${property.bathrooms}
-                </div>
-              ` : ''}
-            </div>
-            
-            <!-- Badge terrain en bas à droite -->
-            ${property.land_area ? `
-              <div style="
-                position: absolute;
-                bottom: 16px;
                 right: 16px;
-                background: rgba(255, 255, 255, 0.9);
-                color: #1e293b;
-                padding: 6px 10px;
-                border-radius: 6px;
-                font-size: 11px;
-                font-weight: 600;
-                border: 1px solid rgba(226, 232, 240, 0.8);
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
               ">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
-                  <path d="m12 8 6-3-6-3v10"/>
-                  <path d="M8 11.99 2 9l6-3"/>
-                  <path d="M2 9v8.5l6 3"/>
-                  <path d="M12 18v-7"/>
-                  <path d="M12 11l6 3v8.5l-6-3"/>
-                </svg>
-                ${property.land_area} ${property.land_area_unit || 'm²'}
+                ${property.property_type ? `
+                  <span style="
+                    background: rgba(255, 255, 255, 0.92);
+                    backdrop-filter: blur(8px);
+                    color: #374151;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    font-weight: 500;
+                    letter-spacing: 0.3px;
+                    text-transform: uppercase;
+                  ">
+                    ${property.property_type}${countryFlag ? ` · ${countryFlag}` : ''}
+                  </span>
+                ` : (countryFlag ? `
+                  <span style="
+                    background: rgba(255, 255, 255, 0.92);
+                    backdrop-filter: blur(8px);
+                    color: #374151;
+                    padding: 6px 12px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    font-weight: 500;
+                  ">
+                    ${countryFlag}
+                  </span>
+                ` : '<span></span>')}
               </div>
-            ` : ''}
-          </div>
-          </div>
+            </div>
+          </a>
         ` : ''}
         
         <!-- Contenu de la carte -->
-        <div style="padding: 20px;">
+        <div style="padding: 28px;">
+          
           <!-- Titre -->
           <a href="${trackedUrl}" target="_blank" style="text-decoration: none; color: inherit;">
             <h3 style="
-              margin: 0 0 12px 0;
-              color: #1e293b;
-              font-size: 18px;
+              margin: 0 0 8px 0;
+              color: #111827;
+              font-size: 20px;
               font-weight: 600;
-              line-height: 1.4;
+              line-height: 1.35;
+              letter-spacing: -0.2px;
             ">
               ${property.title}
             </h3>
           </a>
           
-          <!-- Localisation et pays -->
-          <div style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            gap: 8px;
+          <!-- Localisation -->
+          <p style="
+            margin: 0 0 16px 0;
+            color: #6B7280;
+            font-size: 14px;
+            font-weight: 400;
           ">
-            <div style="
-              display: flex;
-              align-items: center;
-              gap: 6px;
-              color: #64748b;
-              font-size: 14px;
-              flex: 1;
+            ${property.location || 'Localisation non spécifiée'}
+          </p>
+          
+          <!-- Prix - Style éditorial grand -->
+          <p style="
+            margin: 0 0 12px 0;
+            color: #111827;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+          ">
+            ${formatPrice(property.price, property.currency)}
+          </p>
+          
+          <!-- Specs inline avec séparateurs -->
+          ${specsLine ? `
+            <p style="
+              margin: 0 0 20px 0;
+              color: #9CA3AF;
+              font-size: 13px;
+              font-weight: 400;
+              letter-spacing: 0.2px;
             ">
-              <span style="font-size: 14px;">📍</span>
-              <span style="font-weight: 500;">${property.location || 'Localisation non spécifiée'}</span>
-            </div>
-            
-            ${countryFlag ? `
-              <div style="
-                background: rgba(241, 245, 249, 0.5);
-                color: #1e293b;
-                padding: 4px 10px;
-                border-radius: 6px;
-                font-size: 11px;
-                font-weight: 600;
-                border: 1px solid #e2e8f0;
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-              ">
-                <span>${countryFlag}</span>
-                ${property.location?.split(',').pop()?.trim() || ''}
-              </div>
-            ` : ''}
-          </div>
+              ${specsLine}
+            </p>
+          ` : ''}
           
-          <!-- Référence -->
-              ${property.reference ? `
-                <div style="
-                  color: #64748b;
-                  font-size: 14px;
-                  margin-bottom: 16px;
-                ">
-                  ${t.ref} ${property.reference}
-                </div>
-              ` : ''}
+          <!-- Référence discrète -->
+          ${property.reference ? `
+            <p style="
+              margin: 0 0 24px 0;
+              color: #D1D5DB;
+              font-size: 11px;
+              font-weight: 400;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            ">
+              ${t.ref} ${property.reference}
+            </p>
+          ` : '<div style="margin-bottom: 24px;"></div>'}
           
-          <!-- Boutons CTA -->
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <a href="${trackedUrl}" 
-               target="_blank" 
-               style="
-                 display: block;
-                 width: 100%;
-                 background: #111827;
-                 color: white;
-                 text-align: center;
-                 padding: 12px 20px;
-                 border-radius: 8px;
-                 font-weight: 600;
-                 font-size: 14px;
-                 text-decoration: none;
-                 border: none;
-                 box-sizing: border-box;
-               ">
-              ${leadLanguage === 'en' ? 'View on GADAIT' : 'Voir sur GADAIT'}
-            </a>
-            ${whatsappUrl ? `
+          <!-- CTA principal -->
+          <a href="${trackedUrl}" 
+             target="_blank" 
+             style="
+               display: block;
+               width: 100%;
+               background: #111827;
+               color: white;
+               text-align: center;
+               padding: 14px 24px;
+               border-radius: 10px;
+               font-weight: 500;
+               font-size: 14px;
+               text-decoration: none;
+               box-sizing: border-box;
+               letter-spacing: 0.2px;
+             ">
+            ${leadLanguage === 'en' ? 'View on GADAIT →' : 'Voir sur GADAIT →'}
+          </a>
+          
+          <!-- WhatsApp en lien texte discret -->
+          ${whatsappUrl ? `
             <a href="${whatsappUrl}" 
                target="_blank" 
                style="
                  display: block;
                  width: 100%;
-                 background: #374151;
-                 color: white;
                  text-align: center;
-                 padding: 12px 20px;
-                 border-radius: 8px;
-                 font-weight: 600;
-                 font-size: 14px;
+                 padding: 14px 0 4px 0;
+                 color: #6B7280;
+                 font-size: 13px;
                  text-decoration: none;
-                 border: none;
-                 box-sizing: border-box;
+                 font-weight: 400;
                ">
-              ${leadLanguage === 'en' ? 'Discuss on WhatsApp' : 'Discuter sur WhatsApp'}
+              💬 ${leadLanguage === 'en' ? 'Discuss on WhatsApp' : 'Discuter sur WhatsApp'}
             </a>
-            ` : ''}
-          </div>
+          ` : ''}
         </div>
       </div>
     `;
