@@ -593,6 +593,117 @@ export type Database = {
         }
         Relationships: []
       }
+      cimalpes_holidays_listings: {
+        Row: {
+          biens_json: Json | null
+          created_at: string | null
+          detail_json: Json | null
+          duree: number | null
+          etages: string | null
+          id_bien: string
+          infos_xml: string | null
+          latitude: number | null
+          longitude: number | null
+          montant_max: number | null
+          montant_sr_max: number | null
+          nb_adultes: number | null
+          nb_chambres: number | null
+          nb_enfants: number | null
+          nom_bien: string | null
+          nom_bien_en: string | null
+          photo_web: string | null
+          photos: string[] | null
+          prix_appel_ete: number | null
+          prix_appel_hiver: number | null
+          quartier: string | null
+          quartier_en: string | null
+          secteur: string | null
+          secteur_en: string | null
+          source: string | null
+          station: string | null
+          station_en: string | null
+          surface: number | null
+          taux_promo: boolean | null
+          type_bien: string | null
+          updated_at: string | null
+          url_rewriting: string | null
+          url_rewriting_en: string | null
+          wifi: boolean | null
+        }
+        Insert: {
+          biens_json?: Json | null
+          created_at?: string | null
+          detail_json?: Json | null
+          duree?: number | null
+          etages?: string | null
+          id_bien: string
+          infos_xml?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          montant_max?: number | null
+          montant_sr_max?: number | null
+          nb_adultes?: number | null
+          nb_chambres?: number | null
+          nb_enfants?: number | null
+          nom_bien?: string | null
+          nom_bien_en?: string | null
+          photo_web?: string | null
+          photos?: string[] | null
+          prix_appel_ete?: number | null
+          prix_appel_hiver?: number | null
+          quartier?: string | null
+          quartier_en?: string | null
+          secteur?: string | null
+          secteur_en?: string | null
+          source?: string | null
+          station?: string | null
+          station_en?: string | null
+          surface?: number | null
+          taux_promo?: boolean | null
+          type_bien?: string | null
+          updated_at?: string | null
+          url_rewriting?: string | null
+          url_rewriting_en?: string | null
+          wifi?: boolean | null
+        }
+        Update: {
+          biens_json?: Json | null
+          created_at?: string | null
+          detail_json?: Json | null
+          duree?: number | null
+          etages?: string | null
+          id_bien?: string
+          infos_xml?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          montant_max?: number | null
+          montant_sr_max?: number | null
+          nb_adultes?: number | null
+          nb_chambres?: number | null
+          nb_enfants?: number | null
+          nom_bien?: string | null
+          nom_bien_en?: string | null
+          photo_web?: string | null
+          photos?: string[] | null
+          prix_appel_ete?: number | null
+          prix_appel_hiver?: number | null
+          quartier?: string | null
+          quartier_en?: string | null
+          secteur?: string | null
+          secteur_en?: string | null
+          source?: string | null
+          station?: string | null
+          station_en?: string | null
+          surface?: number | null
+          taux_promo?: boolean | null
+          type_bien?: string | null
+          updated_at?: string | null
+          url_rewriting?: string | null
+          url_rewriting_en?: string | null
+          wifi?: boolean | null
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           country: string | null
@@ -4590,6 +4701,117 @@ export type Database = {
       }
     }
     Views: {
+      cimalpes_holidays_courchevel: {
+        Row: {
+          biens_json: Json | null
+          created_at: string | null
+          detail_json: Json | null
+          duree: number | null
+          etages: string | null
+          id_bien: string | null
+          infos_xml: string | null
+          latitude: number | null
+          longitude: number | null
+          montant_max: number | null
+          montant_sr_max: number | null
+          nb_adultes: number | null
+          nb_chambres: number | null
+          nb_enfants: number | null
+          nom_bien: string | null
+          nom_bien_en: string | null
+          photo_web: string | null
+          photos: string[] | null
+          prix_appel_ete: number | null
+          prix_appel_hiver: number | null
+          quartier: string | null
+          quartier_en: string | null
+          secteur: string | null
+          secteur_en: string | null
+          source: string | null
+          station: string | null
+          station_en: string | null
+          surface: number | null
+          taux_promo: boolean | null
+          type_bien: string | null
+          updated_at: string | null
+          url_rewriting: string | null
+          url_rewriting_en: string | null
+          wifi: boolean | null
+        }
+        Insert: {
+          biens_json?: Json | null
+          created_at?: string | null
+          detail_json?: Json | null
+          duree?: number | null
+          etages?: string | null
+          id_bien?: string | null
+          infos_xml?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          montant_max?: number | null
+          montant_sr_max?: number | null
+          nb_adultes?: number | null
+          nb_chambres?: number | null
+          nb_enfants?: number | null
+          nom_bien?: string | null
+          nom_bien_en?: string | null
+          photo_web?: string | null
+          photos?: string[] | null
+          prix_appel_ete?: number | null
+          prix_appel_hiver?: number | null
+          quartier?: string | null
+          quartier_en?: string | null
+          secteur?: string | null
+          secteur_en?: string | null
+          source?: string | null
+          station?: string | null
+          station_en?: string | null
+          surface?: number | null
+          taux_promo?: boolean | null
+          type_bien?: string | null
+          updated_at?: string | null
+          url_rewriting?: string | null
+          url_rewriting_en?: string | null
+          wifi?: boolean | null
+        }
+        Update: {
+          biens_json?: Json | null
+          created_at?: string | null
+          detail_json?: Json | null
+          duree?: number | null
+          etages?: string | null
+          id_bien?: string | null
+          infos_xml?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          montant_max?: number | null
+          montant_sr_max?: number | null
+          nb_adultes?: number | null
+          nb_chambres?: number | null
+          nb_enfants?: number | null
+          nom_bien?: string | null
+          nom_bien_en?: string | null
+          photo_web?: string | null
+          photos?: string[] | null
+          prix_appel_ete?: number | null
+          prix_appel_hiver?: number | null
+          quartier?: string | null
+          quartier_en?: string | null
+          secteur?: string | null
+          secteur_en?: string | null
+          source?: string | null
+          station?: string | null
+          station_en?: string | null
+          surface?: number | null
+          taux_promo?: boolean | null
+          type_bien?: string | null
+          updated_at?: string | null
+          url_rewriting?: string | null
+          url_rewriting_en?: string | null
+          wifi?: boolean | null
+        }
+        Relationships: []
+      }
       country_facets: {
         Row: {
           count: number | null
