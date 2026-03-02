@@ -835,6 +835,82 @@ export type Database = {
           },
         ]
       }
+      deals: {
+        Row: {
+          agent_id: string | null
+          commission_amount: number
+          commission_percentage: number
+          created_at: string
+          currency: string
+          deal_date: string
+          id: string
+          lead_id: string | null
+          lead_name: string
+          lead_source: string | null
+          notes: string | null
+          pipeline_type: string | null
+          sale_price: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id?: string | null
+          commission_amount?: number
+          commission_percentage?: number
+          created_at?: string
+          currency?: string
+          deal_date?: string
+          id?: string
+          lead_id?: string | null
+          lead_name: string
+          lead_source?: string | null
+          notes?: string | null
+          pipeline_type?: string | null
+          sale_price?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string | null
+          commission_amount?: number
+          commission_percentage?: number
+          created_at?: string
+          currency?: string
+          deal_date?: string
+          id?: string
+          lead_id?: string | null
+          lead_name?: string
+          lead_source?: string | null
+          notes?: string | null
+          pipeline_type?: string | null
+          sale_price?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_no_response_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       destination_content: {
         Row: {
           created_at: string
