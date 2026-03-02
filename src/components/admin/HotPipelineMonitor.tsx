@@ -53,7 +53,7 @@ const STATUS_CONFIG = [
   { key: 'Deposit', label: 'Dépôt reçu', icon: Landmark, color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
 ];
 
-function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastActionDate: Date | null; lastActionType: string | null } {
+function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boolean; lastActionDate: Date | null; lastActionType: string | null } {
   if (!actionHistory || !Array.isArray(actionHistory) || actionHistory.length === 0) {
     return { hasNoAction: true, lastActionDate: null, lastActionType: null };
   }
@@ -72,11 +72,16 @@ function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastA
     const dateStr = action.completedDate || action.scheduledDate || action.createdAt;
     if (dateStr) {
       const d = new Date(dateStr);
-      if (!isNaN(d.getTime()) && (!latestDate || d > latestDate)) {
+      if (!isNaN(d.getTime()) && d <= now && (!latestDate || d > latestDate)) {
         latestDate = d;
         latestActionType = action.actionType || null;
       }
     }
+  }
+
+  // If all actions are in the future, treat as no past action
+  if (!latestDate) {
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
   }
 
   return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType };
@@ -117,7 +122,7 @@ const HotPipelineMonitor: React.FC = () => {
   const analyzedLeads = useMemo<AnalyzedLead[]>(() => {
     const now = new Date();
     return leads.map((lead) => {
-      const { hasNoAction, lastActionDate, lastActionType } = analyzeActionHistory(lead.action_history);
+      const { hasNoAction, lastActionDate, lastActionType } = analyzeActionHistory(lead.action_history, now);
       const daysSince = lastActionDate ? differenceInDays(now, lastActionDate) : null;
       return {
         ...lead,
