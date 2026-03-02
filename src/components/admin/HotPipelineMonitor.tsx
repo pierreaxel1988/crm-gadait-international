@@ -372,10 +372,10 @@ const HotPipelineMonitor: React.FC = () => {
                               {lead.name || 'Sans nom'}
                             </button>
                           </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
+                          <TableCell className="text-sm">
                             <div className="flex flex-col gap-0.5">
-                              {lead.email ? <a href={`mailto:${lead.email}`} className="hover:underline truncate max-w-[180px]">{lead.email}</a> : '—'}
-                              {lead.phone && <a href={`tel:${lead.phone_country_code || ''}${lead.phone.replace(/\s/g, '')}`} className="hover:underline">{lead.phone_country_code ? `${lead.phone_country_code} ` : ''}{lead.phone}</a>}
+                              {lead.email ? <a href={`mailto:${lead.email}`} className="hover:underline truncate max-w-[180px] text-xs text-muted-foreground">{lead.email}</a> : '—'}
+                              {lead.phone && <a href={`tel:${lead.phone_country_code || ''}${lead.phone.replace(/\s/g, '')}`} className="hover:underline text-xs text-muted-foreground">{lead.phone_country_code ? `${lead.phone_country_code} ` : ''}{lead.phone}</a>}
                             </div>
                           </TableCell>
                           <TableCell className="text-sm">{lead.budget || '—'}</TableCell>
