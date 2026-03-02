@@ -34,6 +34,7 @@ interface AnalyzedLead extends LeadRow {
   hasNoAction: boolean;
   isDormant: boolean;
   lastActionDate: Date | null;
+  lastActionType: string | null;
   daysSinceLastAction: number | null;
 }
 
@@ -52,9 +53,9 @@ const STATUS_CONFIG = [
   { key: 'Deposit', label: 'Dépôt reçu', icon: Landmark, color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
 ];
 
-function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastActionDate: Date | null } {
+function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastActionDate: Date | null; lastActionType: string | null } {
   if (!actionHistory || !Array.isArray(actionHistory) || actionHistory.length === 0) {
-    return { hasNoAction: true, lastActionDate: null };
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
   }
 
   const realActions = actionHistory.filter(
@@ -62,21 +63,23 @@ function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastA
   );
 
   if (realActions.length === 0) {
-    return { hasNoAction: true, lastActionDate: null };
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
   }
 
   let latestDate: Date | null = null;
+  let latestActionType: string | null = null;
   for (const action of realActions) {
     const dateStr = action.completedDate || action.scheduledDate || action.createdAt;
     if (dateStr) {
       const d = new Date(dateStr);
       if (!isNaN(d.getTime()) && (!latestDate || d > latestDate)) {
         latestDate = d;
+        latestActionType = action.actionType || null;
       }
     }
   }
 
-  return { hasNoAction: false, lastActionDate: latestDate };
+  return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType };
 }
 
 const HotPipelineMonitor: React.FC = () => {
@@ -114,13 +117,14 @@ const HotPipelineMonitor: React.FC = () => {
   const analyzedLeads = useMemo<AnalyzedLead[]>(() => {
     const now = new Date();
     return leads.map((lead) => {
-      const { hasNoAction, lastActionDate } = analyzeActionHistory(lead.action_history);
+      const { hasNoAction, lastActionDate, lastActionType } = analyzeActionHistory(lead.action_history);
       const daysSince = lastActionDate ? differenceInDays(now, lastActionDate) : null;
       return {
         ...lead,
         hasNoAction,
         isDormant: !hasNoAction && daysSince !== null && daysSince > 10,
         lastActionDate,
+        lastActionType,
         daysSinceLastAction: daysSince,
       };
     });
@@ -305,6 +309,7 @@ const HotPipelineMonitor: React.FC = () => {
                         <TableHead>Email</TableHead>
                         <TableHead>Budget</TableHead>
                         <TableHead>Dernière action</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Alerte</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -336,6 +341,11 @@ const HotPipelineMonitor: React.FC = () => {
                               : lead.daysSinceLastAction !== null
                               ? `il y a ${lead.daysSinceLastAction}j`
                               : '—'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {lead.lastActionType ? (
+                              <Badge variant="outline" className="text-xs">{lead.lastActionType}</Badge>
+                            ) : '—'}
                           </TableCell>
                           <TableCell>
                             {lead.isDormant && (
