@@ -341,7 +341,7 @@ const HotPipelineMonitor: React.FC = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Lead</TableHead>
-                        <TableHead>Email</TableHead>
+                        <TableHead>Contact</TableHead>
                         <TableHead>Budget</TableHead>
                         <TableHead>Dernière action</TableHead>
                         <TableHead>Type</TableHead>
@@ -371,7 +371,12 @@ const HotPipelineMonitor: React.FC = () => {
                               {lead.name || 'Sans nom'}
                             </button>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{lead.email || '—'}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            <div className="flex flex-col gap-0.5">
+                              {lead.email ? <a href={`mailto:${lead.email}`} className="hover:underline truncate max-w-[180px]">{lead.email}</a> : '—'}
+                              {lead.phone && <a href={`tel:${lead.phone}`} className="hover:underline">{lead.phone}</a>}
+                            </div>
+                          </TableCell>
                           <TableCell className="text-sm">{lead.budget || '—'}</TableCell>
                           <TableCell className="text-sm">
                             {lead.hasNoAction
