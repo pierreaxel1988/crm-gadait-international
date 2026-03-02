@@ -1,18 +1,23 @@
 
 
-# Fix : "il y a -31j" — dates futures dans le Pipeline Chaud
+# Amélioration : Distinguer "Dormant" vs "Dormant avec action prévue"
 
 ## Problème
-Dans `analyzeActionHistory()`, la date retenue est `completedDate || scheduledDate || createdAt`. Quand une action est planifiée dans le futur sans `completedDate`, la `scheduledDate` future est utilisée, ce qui donne un `differenceInDays` négatif → "il y a -31j".
+Un lead avec une action planifiée dans les prochains jours est quand même affiché en rouge "Dormant", ce qui est alarmant alors que l'agent a déjà programmé un suivi.
 
-## Correction dans `src/components/admin/HotPipelineMonitor.tsx`
+## Solution dans `src/components/admin/HotPipelineMonitor.tsx`
 
-### 1. Filtrer les dates futures dans `analyzeActionHistory()`
-- Ne retenir que les dates **passées ou aujourd'hui** (`d <= now`) lors de la recherche de la dernière action
-- Passer `now` en paramètre de la fonction
+### 1. Ajouter un état intermédiaire
+- Nouveau booléen `hasUpcomingAction` dans `AnalyzedLead` : `true` si `nextActionDate` existe et est dans les 7 prochains jours
+- Nouveau statut visuel : **"Dormant (action prévue)"** en orange au lieu de rouge
 
-### 2. Affichage défensif
-- Ajouter un garde dans le rendu : si `daysSinceLastAction` est négatif, afficher "Planifié" ou la date prévue au lieu de "il y a -Xj"
+### 2. Modifier l'affichage conditionnel
+- Lead dormant **sans** action prévue → rouge (`bg-red-50`) + "🔴 Dormant"
+- Lead dormant **avec** action prévue prochainement → orange clair (`bg-amber-50`) + "⏳ Action prévue" 
+- Lead sans action → orange comme actuellement
 
-Cela corrige aussi la détection "dormant" qui ne doit se baser que sur des actions réellement effectuées, pas sur des actions futures planifiées.
+### 3. Mettre à jour les compteurs des summary cards
+- Séparer le compteur dormant en deux : "dormants critiques" (sans action prévue) vs "dormants suivis" (action prévue)
+
+Cela permet au manager de se concentrer sur les vrais problèmes sans être noyé par de faux positifs.
 
