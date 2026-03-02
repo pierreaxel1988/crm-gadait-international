@@ -6,9 +6,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, Eye, FileText, Landmark, Users } from 'lucide-react';
+import { AlertTriangle, Download, Eye, FileText, Landmark, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface LeadRow {
   id: string;
@@ -149,6 +153,34 @@ const HotPipelineMonitor: React.FC = () => {
     return result;
   }, [analyzedLeads, agentFilter, teamMap]);
 
+  const problematicLeads = useMemo(() => {
+    return analyzedLeads.filter((l) => l.hasNoAction || l.isDormant);
+  }, [analyzedLeads]);
+
+  const exportProblematicCSV = () => {
+    if (problematicLeads.length === 0) {
+      toast.info('Aucun lead problématique à exporter');
+      return;
+    }
+    const data = problematicLeads.map((l) => ({
+      'Nom': l.name || 'Sans nom',
+      'Email': l.email || '',
+      'Téléphone': l.phone || '',
+      'Statut': l.status,
+      'Budget': l.budget || '',
+      'Agent': l.assigned_to ? (teamMap[l.assigned_to] || l.assigned_to) : 'Non assigné',
+      'Alerte': l.hasNoAction ? 'Sans action' : l.isDormant ? 'Dormant' : '',
+      'Dernière action': l.lastActionDate ? format(l.lastActionDate, 'dd/MM/yyyy', { locale: fr }) : '—',
+      'Jours depuis dernière action': l.daysSinceLastAction ?? '',
+    }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws['!cols'] = Object.keys(data[0]).map((k) => ({ wch: Math.max(k.length, 18) }));
+    XLSX.utils.book_append_sheet(wb, ws, 'Leads problématiques');
+    XLSX.writeFile(wb, `pipeline_chaud_alertes_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    toast.success(`${data.length} leads exportés`);
+  };
+
   const summaryCards = useMemo(() => {
     return STATUS_CONFIG.map((s) => {
       const statusLeads = analyzedLeads.filter((l) => l.status === s.key);
@@ -172,20 +204,26 @@ const HotPipelineMonitor: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Agent filter */}
-      <div className="flex items-center gap-3">
-        <Users className="h-4 w-4 text-muted-foreground" />
-        <Select value={agentFilter} onValueChange={setAgentFilter}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filtrer par agent" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les agents</SelectItem>
-            {teamMembers.map((m) => (
-              <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Agent filter + Export */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Filtrer par agent" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les agents</SelectItem>
+              {teamMembers.map((m) => (
+                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <Button variant="outline" size="sm" onClick={exportProblematicCSV} disabled={problematicLeads.length === 0}>
+          <Download className="h-4 w-4 mr-2" />
+          Exporter alertes ({problematicLeads.length})
+        </Button>
       </div>
 
       {/* Summary cards */}
