@@ -33,6 +33,7 @@ interface TeamMember {
 interface AnalyzedLead extends LeadRow {
   hasNoAction: boolean;
   isDormant: boolean;
+  hasUpcomingAction: boolean;
   lastActionDate: Date | null;
   lastActionType: string | null;
   daysSinceLastAction: number | null;
@@ -46,6 +47,7 @@ interface AgentMetrics {
   total: number;
   noAction: number;
   dormant: number;
+  dormantWithAction: number;
   leads: AnalyzedLead[];
 }
 
@@ -139,10 +141,13 @@ const HotPipelineMonitor: React.FC = () => {
     return leads.map((lead) => {
       const { hasNoAction, lastActionDate, lastActionType, nextActionDate, nextActionType } = analyzeActionHistory(lead.action_history, now);
       const daysSince = lastActionDate ? differenceInDays(now, lastActionDate) : null;
+      const isDormant = !hasNoAction && daysSince !== null && daysSince > 10;
+      const hasUpcoming = !!nextActionDate && differenceInDays(nextActionDate, now) <= 7;
       return {
         ...lead,
         hasNoAction,
-        isDormant: !hasNoAction && daysSince !== null && daysSince > 10,
+        isDormant,
+        hasUpcomingAction: hasUpcoming,
         lastActionDate,
         lastActionType,
         daysSinceLastAction: daysSince,
@@ -172,7 +177,8 @@ const HotPipelineMonitor: React.FC = () => {
           agentName: agentId === 'unassigned' ? 'Non assigné' : teamMap[agentId] || agentId,
           total: agentLeads.length,
           noAction: agentLeads.filter((l) => l.hasNoAction).length,
-          dormant: agentLeads.filter((l) => l.isDormant).length,
+          dormant: agentLeads.filter((l) => l.isDormant && !l.hasUpcomingAction).length,
+          dormantWithAction: agentLeads.filter((l) => l.isDormant && l.hasUpcomingAction).length,
           leads: agentLeads,
         }))
         .sort((a, b) => b.total - a.total);
@@ -215,7 +221,8 @@ const HotPipelineMonitor: React.FC = () => {
         ...s,
         total: statusLeads.length,
         noAction: statusLeads.filter((l) => l.hasNoAction).length,
-        dormant: statusLeads.filter((l) => l.isDormant).length,
+        dormant: statusLeads.filter((l) => l.isDormant && !l.hasUpcomingAction).length,
+        dormantWithAction: statusLeads.filter((l) => l.isDormant && l.hasUpcomingAction).length,
       };
     });
   }, [analyzedLeads]);
@@ -285,7 +292,10 @@ const HotPipelineMonitor: React.FC = () => {
                   {card.dormant > 0 && (
                     <span className="text-red-600 font-medium">🔴 {card.dormant} dormant{card.dormant > 1 ? 's' : ''}</span>
                   )}
-                  {card.noAction === 0 && card.dormant === 0 && (
+                  {card.dormantWithAction > 0 && (
+                    <span className="text-amber-600 font-medium">⏳ {card.dormantWithAction} suivi{card.dormantWithAction > 1 ? 's' : ''}</span>
+                  )}
+                  {card.noAction === 0 && card.dormant === 0 && card.dormantWithAction === 0 && (
                     <span className="text-green-600">✓ Tout est suivi</span>
                   )}
                 </div>
@@ -322,6 +332,9 @@ const HotPipelineMonitor: React.FC = () => {
                       {agent.dormant > 0 && (
                         <Badge className="bg-red-100 text-red-700 hover:bg-red-100">{agent.dormant} dormant{agent.dormant > 1 ? 's' : ''}</Badge>
                       )}
+                      {agent.dormantWithAction > 0 && (
+                        <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">{agent.dormantWithAction} suivi{agent.dormantWithAction > 1 ? 's' : ''}</Badge>
+                      )}
                     </div>
                   </div>
                   <Table>
@@ -341,8 +354,10 @@ const HotPipelineMonitor: React.FC = () => {
                         <TableRow
                           key={lead.id}
                           className={
-                            lead.isDormant
+                            lead.isDormant && !lead.hasUpcomingAction
                               ? 'bg-red-50'
+                              : lead.isDormant && lead.hasUpcomingAction
+                              ? 'bg-amber-50'
                               : lead.hasNoAction
                               ? 'bg-orange-50'
                               : ''
@@ -381,10 +396,13 @@ const HotPipelineMonitor: React.FC = () => {
                             ) : <span className="text-muted-foreground">—</span>}
                           </TableCell>
                           <TableCell>
-                            {lead.isDormant && (
+                            {lead.isDormant && !lead.hasUpcomingAction && (
                               <span className="flex items-center gap-1 text-red-600 text-sm font-medium">
                                 <AlertTriangle className="h-3.5 w-3.5" /> Dormant
                               </span>
+                            )}
+                            {lead.isDormant && lead.hasUpcomingAction && (
+                              <span className="text-amber-600 text-sm font-medium">⏳ Action prévue</span>
                             )}
                             {lead.hasNoAction && (
                               <span className="text-orange-600 text-sm font-medium">Sans action</span>
