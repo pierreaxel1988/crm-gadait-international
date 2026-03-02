@@ -388,7 +388,7 @@ const HotPipelineMonitor: React.FC = () => {
                           <TableCell className="text-sm">
                             {lead.nextActionDate ? (
                               <span className="flex flex-col">
-                                <span className="font-medium">{format(lead.nextActionDate, 'dd/MM/yyyy', { locale: fr })}</span>
+                                <span className="text-xs">{format(lead.nextActionDate, 'dd/MM/yyyy', { locale: fr })}</span>
                                 {lead.nextActionType && (
                                   <Badge variant="outline" className="text-xs mt-0.5 w-fit">{lead.nextActionType}</Badge>
                                 )}
