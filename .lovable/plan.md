@@ -1,15 +1,18 @@
 
 
-# Ajouter un accès "Pipeline Chaud" dans le menu utilisateur
+# Fix : "il y a -31j" — dates futures dans le Pipeline Chaud
 
-## Constat
-Le screenshot montre le menu déroulant utilisateur (icône profil en haut à droite). L'utilisateur veut un accès direct au tableau de bord "Pipeline Chaud" depuis ce menu.
+## Problème
+Dans `analyzeActionHistory()`, la date retenue est `completedDate || scheduledDate || createdAt`. Quand une action est planifiée dans le futur sans `completedDate`, la `scheduledDate` future est utilisée, ce qui donne un `differenceInDays` négatif → "il y a -31j".
 
-## Modification
+## Correction dans `src/components/admin/HotPipelineMonitor.tsx`
 
-### Fichier : `src/components/layout/navbar/UserMenu.tsx`
-- Ajouter un nouveau `DropdownMenuItem` avec l'icône `Flame` (lucide-react) et le label **"🔥 Pipeline Chaud"**
-- Au clic, naviguer vers `/admin?tab=hot-pipeline`
-- Placer cet item en première position dans le menu (avant "Analytics des leads")
-- Visible uniquement pour les admins (`isAdmin`), comme les autres items admin
+### 1. Filtrer les dates futures dans `analyzeActionHistory()`
+- Ne retenir que les dates **passées ou aujourd'hui** (`d <= now`) lors de la recherche de la dernière action
+- Passer `now` en paramètre de la fonction
+
+### 2. Affichage défensif
+- Ajouter un garde dans le rendu : si `daysSinceLastAction` est négatif, afficher "Planifié" ou la date prévue au lieu de "il y a -Xj"
+
+Cela corrige aussi la détection "dormant" qui ne doit se baser que sur des actions réellement effectuées, pas sur des actions futures planifiées.
 
