@@ -11,6 +11,7 @@ import LeadsExport from '@/components/admin/LeadsExport';
 import SourceAnalytics from '@/components/admin/SourceAnalytics';
 import SalesAnalytics from '@/components/admin/SalesAnalytics';
 import AutomatedEmailsManagement from '@/components/admin/AutomatedEmailsManagement';
+import HotPipelineMonitor from '@/components/admin/HotPipelineMonitor';
 
 // Données mockées initiales pour le graphique
 const initialChartData = [
@@ -51,6 +52,7 @@ const Admin = () => {
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="mb-8">
+          <TabsTrigger value="hot-pipeline">🔥 Pipeline Chaud</TabsTrigger>
           <TabsTrigger value="chart-data">Données du graphique</TabsTrigger>
           <TabsTrigger value="analytics">Analyse des sources</TabsTrigger>
           <TabsTrigger value="sales-analytics">Activité commerciaux</TabsTrigger>
@@ -61,6 +63,10 @@ const Admin = () => {
           <TabsTrigger value="deleted-leads">Corbeille</TabsTrigger>
         </TabsList>
         
+        <TabsContent value="hot-pipeline" className="space-y-6">
+          <HotPipelineMonitor />
+        </TabsContent>
+
         <TabsContent value="chart-data" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <DashboardCard 
