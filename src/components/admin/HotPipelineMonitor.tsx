@@ -81,6 +81,7 @@ function analyzeActionHistory(actionHistory: any): { hasNoAction: boolean; lastA
 
 const HotPipelineMonitor: React.FC = () => {
   const [agentFilter, setAgentFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const navigate = useNavigate();
 
   const { data: teamMembers = [] } = useQuery({
@@ -206,7 +207,7 @@ const HotPipelineMonitor: React.FC = () => {
     <div className="space-y-6">
       {/* Agent filter + Export */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Users className="h-4 w-4 text-muted-foreground" />
           <Select value={agentFilter} onValueChange={setAgentFilter}>
             <SelectTrigger className="w-[220px]">
@@ -219,6 +220,17 @@ const HotPipelineMonitor: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Filtrer par stade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les stades</SelectItem>
+              {STATUS_CONFIG.map((s) => (
+                <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <Button variant="outline" size="sm" onClick={exportProblematicCSV} disabled={problematicLeads.length === 0}>
           <Download className="h-4 w-4 mr-2" />
@@ -228,7 +240,7 @@ const HotPipelineMonitor: React.FC = () => {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {summaryCards.map((card) => {
+        {summaryCards.filter((c) => statusFilter === 'all' || c.key === statusFilter).map((card) => {
           const Icon = card.icon;
           return (
             <Card key={card.key} className={`border ${card.bgColor}`}>
@@ -258,7 +270,7 @@ const HotPipelineMonitor: React.FC = () => {
       </div>
 
       {/* Detail sections per status */}
-      {STATUS_CONFIG.map((status) => {
+      {STATUS_CONFIG.filter((s) => statusFilter === 'all' || s.key === statusFilter).map((status) => {
         const agents = metricsByStatus[status.key] || [];
         const Icon = status.icon;
         if (agents.length === 0) return null;
