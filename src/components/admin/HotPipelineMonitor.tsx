@@ -36,6 +36,8 @@ interface AnalyzedLead extends LeadRow {
   lastActionDate: Date | null;
   lastActionType: string | null;
   daysSinceLastAction: number | null;
+  nextActionDate: Date | null;
+  nextActionType: string | null;
 }
 
 interface AgentMetrics {
@@ -53,9 +55,9 @@ const STATUS_CONFIG = [
   { key: 'Deposit', label: 'Dépôt reçu', icon: Landmark, color: 'text-green-600', bgColor: 'bg-green-50 border-green-200' },
 ];
 
-function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boolean; lastActionDate: Date | null; lastActionType: string | null } {
+function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boolean; lastActionDate: Date | null; lastActionType: string | null; nextActionDate: Date | null; nextActionType: string | null } {
   if (!actionHistory || !Array.isArray(actionHistory) || actionHistory.length === 0) {
-    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null, nextActionDate: null, nextActionType: null };
   }
 
   const realActions = actionHistory.filter(
@@ -63,28 +65,41 @@ function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boo
   );
 
   if (realActions.length === 0) {
-    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null, nextActionDate: null, nextActionType: null };
   }
 
   let latestDate: Date | null = null;
   let latestActionType: string | null = null;
+  let nextDate: Date | null = null;
+  let nextType: string | null = null;
+
   for (const action of realActions) {
     const dateStr = action.completedDate || action.scheduledDate || action.createdAt;
     if (dateStr) {
       const d = new Date(dateStr);
-      if (!isNaN(d.getTime()) && d <= now && (!latestDate || d > latestDate)) {
-        latestDate = d;
-        latestActionType = action.actionType || null;
+      if (!isNaN(d.getTime())) {
+        if (d <= now && (!latestDate || d > latestDate)) {
+          latestDate = d;
+          latestActionType = action.actionType || null;
+        }
+      }
+    }
+    // Check for future scheduled actions (only scheduledDate, not completed)
+    const scheduledStr = action.scheduledDate;
+    if (scheduledStr && !action.completedDate) {
+      const sd = new Date(scheduledStr);
+      if (!isNaN(sd.getTime()) && sd > now && (!nextDate || sd < nextDate)) {
+        nextDate = sd;
+        nextType = action.actionType || null;
       }
     }
   }
 
-  // If all actions are in the future, treat as no past action
   if (!latestDate) {
-    return { hasNoAction: true, lastActionDate: null, lastActionType: null };
+    return { hasNoAction: true, lastActionDate: null, lastActionType: null, nextActionDate: nextDate, nextActionType: nextType };
   }
 
-  return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType };
+  return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType, nextActionDate: nextDate, nextActionType: nextType };
 }
 
 const HotPipelineMonitor: React.FC = () => {
@@ -122,7 +137,7 @@ const HotPipelineMonitor: React.FC = () => {
   const analyzedLeads = useMemo<AnalyzedLead[]>(() => {
     const now = new Date();
     return leads.map((lead) => {
-      const { hasNoAction, lastActionDate, lastActionType } = analyzeActionHistory(lead.action_history, now);
+      const { hasNoAction, lastActionDate, lastActionType, nextActionDate, nextActionType } = analyzeActionHistory(lead.action_history, now);
       const daysSince = lastActionDate ? differenceInDays(now, lastActionDate) : null;
       return {
         ...lead,
@@ -131,6 +146,8 @@ const HotPipelineMonitor: React.FC = () => {
         lastActionDate,
         lastActionType,
         daysSinceLastAction: daysSince,
+        nextActionDate,
+        nextActionType,
       };
     });
   }, [leads]);
@@ -315,6 +332,7 @@ const HotPipelineMonitor: React.FC = () => {
                         <TableHead>Budget</TableHead>
                         <TableHead>Dernière action</TableHead>
                         <TableHead>Type</TableHead>
+                        <TableHead>Prochaine action</TableHead>
                         <TableHead>Alerte</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -351,6 +369,16 @@ const HotPipelineMonitor: React.FC = () => {
                             {lead.lastActionType ? (
                               <Badge variant="outline" className="text-xs">{lead.lastActionType}</Badge>
                             ) : '—'}
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {lead.nextActionDate ? (
+                              <span className="flex flex-col">
+                                <span className="font-medium">{format(lead.nextActionDate, 'dd/MM/yyyy', { locale: fr })}</span>
+                                {lead.nextActionType && (
+                                  <Badge variant="outline" className="text-xs mt-0.5 w-fit">{lead.nextActionType}</Badge>
+                                )}
+                              </span>
+                            ) : <span className="text-muted-foreground">—</span>}
                           </TableCell>
                           <TableCell>
                             {lead.isDormant && (
