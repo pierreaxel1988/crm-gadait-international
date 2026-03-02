@@ -1,23 +1,14 @@
 
 
-# Amélioration : Distinguer "Dormant" vs "Dormant avec action prévue"
+## Modification : Combiner Email + Téléphone dans une seule colonne "Contact"
 
-## Problème
-Un lead avec une action planifiée dans les prochains jours est quand même affiché en rouge "Dormant", ce qui est alarmant alors que l'agent a déjà programmé un suivi.
+Remplacer la colonne "Email" par une colonne **"Contact"** qui affiche l'email et le téléphone empilés verticalement en petite taille, pour gagner de l'espace et avoir les deux informations visibles.
 
-## Solution dans `src/components/admin/HotPipelineMonitor.tsx`
+### Changements dans `src/components/admin/HotPipelineMonitor.tsx`
 
-### 1. Ajouter un état intermédiaire
-- Nouveau booléen `hasUpcomingAction` dans `AnalyzedLead` : `true` si `nextActionDate` existe et est dans les 7 prochains jours
-- Nouveau statut visuel : **"Dormant (action prévue)"** en orange au lieu de rouge
-
-### 2. Modifier l'affichage conditionnel
-- Lead dormant **sans** action prévue → rouge (`bg-red-50`) + "🔴 Dormant"
-- Lead dormant **avec** action prévue prochainement → orange clair (`bg-amber-50`) + "⏳ Action prévue" 
-- Lead sans action → orange comme actuellement
-
-### 3. Mettre à jour les compteurs des summary cards
-- Séparer le compteur dormant en deux : "dormants critiques" (sans action prévue) vs "dormants suivis" (action prévue)
-
-Cela permet au manager de se concentrer sur les vrais problèmes sans être noyé par de faux positifs.
+1. **En-tête** : Renommer `<TableHead>Email</TableHead>` → `<TableHead>Contact</TableHead>`
+2. **Cellule** : Remplacer l'affichage simple de l'email par un bloc empilé :
+   - Email en `text-xs`
+   - Téléphone en `text-xs` en dessous
+   - Les deux cliquables (mailto / tel)
 
