@@ -22,6 +22,7 @@ interface LeadRow {
   action_history: any;
   email: string | null;
   phone: string | null;
+  phone_country_code: string | null;
   budget: string | null;
 }
 
@@ -122,7 +123,7 @@ const HotPipelineMonitor: React.FC = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('leads')
-        .select('id, name, status, assigned_to, action_history, email, phone, budget')
+        .select('id, name, status, assigned_to, action_history, email, phone, phone_country_code, budget')
         .eq('pipeline_type', 'purchase')
         .in('status', ['Visit', 'Offre', 'Deposit'])
         .is('deleted_at', null);
@@ -374,7 +375,7 @@ const HotPipelineMonitor: React.FC = () => {
                           <TableCell className="text-xs text-muted-foreground">
                             <div className="flex flex-col gap-0.5">
                               {lead.email ? <a href={`mailto:${lead.email}`} className="hover:underline truncate max-w-[180px]">{lead.email}</a> : '—'}
-                              {lead.phone && <a href={`tel:${lead.phone}`} className="hover:underline">{lead.phone}</a>}
+                              {lead.phone && <a href={`tel:${lead.phone_country_code || ''}${lead.phone.replace(/\s/g, '')}`} className="hover:underline">{lead.phone_country_code ? `${lead.phone_country_code} ` : ''}{lead.phone}</a>}
                             </div>
                           </TableCell>
                           <TableCell className="text-sm">{lead.budget || '—'}</TableCell>
