@@ -1,50 +1,40 @@
 
 
-# Nouvelle interface : Suivi du Chiffre d'Affaires (CA)
+# Option A : Dialog de saisie de deal au changement de statut
 
-## Contexte
-Les leads au statut "Deposit" et "Gagné" existent mais n'ont pas de données financières renseignées (`commission_ht`, `desired_price`, `fees` sont vides). Il faut une interface dédiée pour saisir et suivre le CA.
+## Principe
+Quand un commercial change le statut d'un lead vers **Deposit**, **Signed** ou **Gagné**, un dialog s'ouvre automatiquement pour saisir le prix de vente et le % de commission. Un deal est alors créé/mis à jour dans la table `deals`.
 
-## Architecture proposée
+## Composants impactés
 
-### 1. Nouvelle table `deals` en base de données
-Stocker les transactions closes séparément des leads pour un suivi financier propre :
+### 1. Nouveau composant `DealDialog`
+Créer `src/components/leads/form/DealDialog.tsx` :
+- Dialog avec champs : Prix de vente, % Commission, Commission calculée (lecture seule), Notes
+- Calcul auto : `commission_amount = sale_price * commission_percentage / 100`
+- À la validation : upsert dans la table `deals` (si un deal existe déjà pour ce lead, on le met à jour)
+- Bouton "Passer" pour permettre de fermer sans saisir (le statut change quand même)
+- Props : `leadId`, `leadName`, `leadSource`, `pipelineType`, `assignedTo`, `status`, `open`, `onClose`
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| `id` | uuid | PK |
-| `lead_id` | uuid | FK vers leads |
-| `lead_name` | text | Nom du lead (dénormalisé) |
-| `agent_id` | uuid | FK vers team_members |
-| `sale_price` | numeric | Prix de vente |
-| `commission_percentage` | numeric | % de commission |
-| `commission_amount` | numeric | Montant de la commission (calculé ou saisi) |
-| `lead_source` | text | Source du lead |
-| `pipeline_type` | text | purchase/rental/owners |
-| `deal_date` | date | Date du dépôt/closing |
-| `currency` | text | EUR par défaut |
-| `notes` | text | Commentaires |
-| `status` | text | deposit / signed / won |
-| `created_at` / `updated_at` | timestamptz | Timestamps |
+### 2. Modification des 3 StatusSection
+Intercepter le changement de statut dans les 3 fichiers :
+- `src/components/leads/form/StatusSection.tsx` (desktop)
+- `src/components/leads/form/mobile/StatusSection.tsx` (mobile)
+- `src/components/leads/form/mobile/components/OwnerStatusSection.tsx` (owners mobile)
 
-### 2. Nouveau composant `src/components/admin/RevenueTracker.tsx`
-- **Cards résumé** : CA total, nombre de deals, commission moyenne, CA par pipeline
-- **Formulaire d'ajout** : Saisir un nouveau deal (sélection du lead existant au statut Deposit/Gagné, prix, commission, source)
-- **Tableau des deals** : Liste triable avec toutes les colonnes demandées
-- **Filtres** : Par période, par agent, par source, par pipeline type
-- **Calcul auto** : commission_amount = sale_price × commission_percentage / 100
+Logique ajoutée :
+- Quand `onValueChange` du Select de statut reçoit `'Deposit'`, `'Signed'` ou `'Gagné'` → ouvrir le `DealDialog`
+- Le statut est appliqué immédiatement, le dialog est un complément
+- Importer et rendre `<DealDialog />` dans chaque composant
 
-### 3. Nouvel onglet Admin
-Ajouter un onglet **"💰 Chiffre d'Affaires"** dans `src/pages/Admin.tsx`, positionné après "Pipeline Chaud".
+### 3. Aucune migration SQL nécessaire
+La table `deals` existe déjà avec tous les champs requis.
 
-### 4. Fonctionnalités du tableau
-- Colonnes : Lead | Agent | Prix de vente | % Commission | Montant commission | Source | Date | Statut
-- Tri par date, montant, agent
-- Total en bas du tableau
-- Export CSV possible
-
-### Détail technique
-- Migration SQL pour créer la table `deals` avec RLS policies
-- Le composant fetch les `team_members` pour le dropdown agent et les `leads` au statut Deposit/Signed/Gagné pour le dropdown lead
-- Calcul automatique de `commission_amount` quand `sale_price` et `commission_percentage` changent
+## Flux utilisateur
+1. Commercial ouvre la fiche lead
+2. Change le statut vers "Dépôt reçu" / "Signature finale" / "Conclus"
+3. Le statut est sauvegardé normalement
+4. Un dialog apparaît : "Félicitations ! Renseignez les détails du deal"
+5. Le commercial saisit prix + % commission → commission calculée automatiquement
+6. Clic "Enregistrer" → upsert dans `deals`
+7. Ou clic "Passer" → le dialog se ferme, le deal pourra être saisi plus tard dans l'admin
 
