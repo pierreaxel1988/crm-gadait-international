@@ -15,6 +15,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Trophy } from 'lucide-react';
 
+export interface DealInitialData {
+  sale_price?: number;
+  commission_percentage?: number;
+  notes?: string;
+}
+
 interface DealDialogProps {
   open: boolean;
   onClose: () => void;
@@ -24,6 +30,7 @@ interface DealDialogProps {
   pipelineType?: string;
   assignedTo?: string;
   status: string;
+  initialData?: DealInitialData;
 }
 
 const DEAL_STATUSES: Record<string, string> = {
@@ -41,12 +48,14 @@ const DealDialog: React.FC<DealDialogProps> = ({
   pipelineType,
   assignedTo,
   status,
+  initialData,
 }) => {
   const [salePrice, setSalePrice] = useState('');
   const [commissionPercentage, setCommissionPercentage] = useState('');
   const [commissionAmount, setCommissionAmount] = useState('0.00');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const isEditing = !!initialData;
 
   useEffect(() => {
     const price = parseFloat(salePrice) || 0;
@@ -57,11 +66,11 @@ const DealDialog: React.FC<DealDialogProps> = ({
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
-      setSalePrice('');
-      setCommissionPercentage('');
-      setNotes('');
+      setSalePrice(initialData?.sale_price?.toString() || '');
+      setCommissionPercentage(initialData?.commission_percentage?.toString() || '');
+      setNotes(initialData?.notes || '');
     }
-  }, [open]);
+  }, [open, initialData]);
 
   const handleSave = async () => {
     const price = parseFloat(salePrice);
@@ -131,10 +140,10 @@ const DealDialog: React.FC<DealDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-yellow-500" />
-            Félicitations !
+            {isEditing ? 'Modifier le deal' : 'Félicitations !'}
           </DialogTitle>
           <DialogDescription>
-            Renseignez les détails financiers du deal pour <strong>{leadName}</strong>.
+            {isEditing ? 'Modifiez les détails financiers du deal pour' : 'Renseignez les détails financiers du deal pour'} <strong>{leadName}</strong>.
           </DialogDescription>
         </DialogHeader>
 

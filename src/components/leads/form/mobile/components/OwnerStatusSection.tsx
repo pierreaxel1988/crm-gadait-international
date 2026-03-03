@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import DealDialog from '@/components/leads/form/DealDialog';
+import DealDialog, { DealInitialData } from '@/components/leads/form/DealDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -43,13 +43,15 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
   const navigate = useNavigate();
 
   const [hasDeal, setHasDeal] = useState<boolean | null>(null);
+  const [dealData, setDealData] = useState<DealInitialData | undefined>(undefined);
 
   const DEAL_TRIGGER_STATUSES = ['Deposit', 'Signed', 'Gagné'];
 
   useEffect(() => {
     const checkDeal = async () => {
-      const { data } = await supabase.from('deals').select('id').eq('lead_id', lead.id).maybeSingle();
+      const { data } = await supabase.from('deals').select('id, sale_price, commission_percentage, notes').eq('lead_id', lead.id).maybeSingle();
       setHasDeal(!!data);
+      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, notes: data.notes || '' } : undefined);
     };
     if (DEAL_TRIGGER_STATUSES.includes(lead.status || '')) {
       checkDeal();
@@ -58,7 +60,10 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
 
   const handleDealDialogClose = () => {
     setIsDealDialogOpen(false);
-    supabase.from('deals').select('id').eq('lead_id', lead.id).maybeSingle().then(({ data }) => setHasDeal(!!data));
+    supabase.from('deals').select('id, sale_price, commission_percentage, notes').eq('lead_id', lead.id).maybeSingle().then(({ data }) => {
+      setHasDeal(!!data);
+      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, notes: data.notes || '' } : undefined);
+    });
   };
 
   const handleStatusChange = (value: string) => {
@@ -302,6 +307,19 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
           </div>
         )}
 
+        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && (
+          <div className="pt-4 border-t mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setDealStatus(lead.status || ''); setIsDealDialogOpen(true); }}
+              className="w-full flex items-center justify-center"
+            >
+              Modifier le deal
+            </Button>
+          </div>
+        )}
+
         <div className="pt-4 border-t mt-6">
           <Button 
             variant="destructive"
@@ -355,6 +373,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
         pipelineType={lead.pipelineType}
         assignedTo={lead.assignedTo}
         status={dealStatus}
+        initialData={dealData}
       />
     </div>
   );
