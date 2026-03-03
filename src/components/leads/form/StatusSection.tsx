@@ -80,9 +80,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({
 
   useEffect(() => {
     const checkDeal = async () => {
-      const { data } = await supabase.from('deals').select('id, sale_price, commission_percentage, notes').eq('lead_id', lead.id).maybeSingle();
+      const { data } = await supabase.from('deals').select('id, sale_price, commission_percentage, currency, notes').eq('lead_id', lead.id).maybeSingle();
       setHasDeal(!!data);
-      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, notes: data.notes || '' } : undefined);
+      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, currency: data.currency, notes: data.notes || '' } : undefined);
     };
     if (DEAL_TRIGGER_STATUSES.includes(lead.status || '')) {
       checkDeal();
@@ -91,9 +91,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({
 
   const handleDealDialogClose = () => {
     setIsDealDialogOpen(false);
-    supabase.from('deals').select('id, sale_price, commission_percentage, notes').eq('lead_id', lead.id).maybeSingle().then(({ data }) => {
+    supabase.from('deals').select('id, sale_price, commission_percentage, currency, notes').eq('lead_id', lead.id).maybeSingle().then(({ data }) => {
       setHasDeal(!!data);
-      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, notes: data.notes || '' } : undefined);
+      setDealData(data ? { sale_price: data.sale_price, commission_percentage: data.commission_percentage, currency: data.currency, notes: data.notes || '' } : undefined);
     });
   };
 
