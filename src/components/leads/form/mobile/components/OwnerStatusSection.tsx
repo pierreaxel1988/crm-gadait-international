@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
+import DealDialog from '@/components/leads/form/DealDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,7 +37,19 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletionReason, setDeletionReason] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDealDialogOpen, setIsDealDialogOpen] = useState(false);
+  const [dealStatus, setDealStatus] = useState<string>('');
   const navigate = useNavigate();
+
+  const DEAL_TRIGGER_STATUSES = ['Deposit', 'Signed', 'Gagné'];
+
+  const handleStatusChange = (value: string) => {
+    handleInputChange('status', value as LeadStatus);
+    if (DEAL_TRIGGER_STATUSES.includes(value)) {
+      setDealStatus(value);
+      setIsDealDialogOpen(true);
+    }
+  };
   
   useEffect(() => {
     const measureHeader = () => {
@@ -186,7 +199,7 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
             </div>
             <Select 
               value={lead.status || ''} 
-              onValueChange={(value) => handleInputChange('status', value as LeadStatus)}
+              onValueChange={handleStatusChange}
             >
               <SelectTrigger id="status" className="w-full rounded-l-none font-futura">
                 <SelectValue placeholder="Sélectionner un statut" />
@@ -302,6 +315,16 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <DealDialog
+        open={isDealDialogOpen}
+        onClose={() => setIsDealDialogOpen(false)}
+        leadId={lead.id}
+        leadName={lead.name || ''}
+        leadSource={lead.source}
+        pipelineType={lead.pipelineType}
+        assignedTo={lead.assignedTo}
+        status={dealStatus}
+      />
     </div>
   );
 };

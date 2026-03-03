@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
+import DealDialog from './DealDialog';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -67,7 +68,19 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletionReason, setDeletionReason] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDealDialogOpen, setIsDealDialogOpen] = useState(false);
+  const [dealStatus, setDealStatus] = useState<string>('');
   const navigate = useNavigate();
+
+  const DEAL_TRIGGER_STATUSES = ['Deposit', 'Signed', 'Gagné'];
+
+  const handleStatusChange = (value: string) => {
+    handleInputChange('status', value as LeadStatus);
+    if (DEAL_TRIGGER_STATUSES.includes(value)) {
+      setDealStatus(value);
+      setIsDealDialogOpen(true);
+    }
+  };
 
   const handleInputChange = (field: keyof LeadDetailed, value: any) => {
     onDataChange({
@@ -150,7 +163,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
             </div>
             <Select 
               value={lead.status || ''} 
-              onValueChange={(value) => handleInputChange('status', value as LeadStatus)}
+              onValueChange={handleStatusChange}
             >
               <SelectTrigger id="status" className="w-full rounded-l-none">
                 <SelectValue placeholder="Sélectionner un statut" />
@@ -274,6 +287,17 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DealDialog
+        open={isDealDialogOpen}
+        onClose={() => setIsDealDialogOpen(false)}
+        leadId={lead.id}
+        leadName={lead.name || ''}
+        leadSource={lead.source}
+        pipelineType={lead.pipelineType}
+        assignedTo={lead.assignedTo}
+        status={dealStatus}
+      />
     </div>
   );
 };
