@@ -14,11 +14,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Trophy } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const CURRENCY_OPTIONS = [
+  { value: 'EUR', label: '€ Euro', symbol: '€' },
+  { value: 'USD', label: '$ Dollar US', symbol: '$' },
+  { value: 'MUR', label: 'Rs Roupie mauricienne', symbol: 'Rs' },
+];
 
 export interface DealInitialData {
   sale_price?: number;
   commission_percentage?: number;
   notes?: string;
+  currency?: string;
 }
 
 interface DealDialogProps {
@@ -53,9 +67,11 @@ const DealDialog: React.FC<DealDialogProps> = ({
   const [salePrice, setSalePrice] = useState('');
   const [commissionPercentage, setCommissionPercentage] = useState('');
   const [commissionAmount, setCommissionAmount] = useState('0.00');
+  const [currency, setCurrency] = useState('EUR');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const isEditing = !!initialData;
+  const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === currency)?.symbol || '€';
 
   useEffect(() => {
     const price = parseFloat(salePrice) || 0;
@@ -68,6 +84,7 @@ const DealDialog: React.FC<DealDialogProps> = ({
     if (open) {
       setSalePrice(initialData?.sale_price?.toString() || '');
       setCommissionPercentage(initialData?.commission_percentage?.toString() || '');
+      setCurrency(initialData?.currency || 'EUR');
       setNotes(initialData?.notes || '');
     }
   }, [open, initialData]);
@@ -97,6 +114,7 @@ const DealDialog: React.FC<DealDialogProps> = ({
         commission_percentage: pct,
         commission_amount: parseFloat(commissionAmount),
         status: DEAL_STATUSES[status] || 'deposit',
+        currency: currency,
         notes: notes.trim() || null,
         deal_date: new Date().toISOString().split('T')[0],
       };
@@ -123,7 +141,7 @@ const DealDialog: React.FC<DealDialogProps> = ({
 
       toast({
         title: '🎉 Deal enregistré !',
-        description: `Commission de ${parseFloat(commissionAmount).toLocaleString('fr-FR')} € enregistrée.`,
+        description: `Commission de ${parseFloat(commissionAmount).toLocaleString('fr-FR')} ${currencySymbol} enregistrée.`,
       });
       onClose();
     } catch (error) {
@@ -149,7 +167,21 @@ const DealDialog: React.FC<DealDialogProps> = ({
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="deal-sale-price" className="text-sm font-medium">Prix de vente (€)</Label>
+            <Label htmlFor="deal-currency" className="text-sm font-medium">Devise</Label>
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger id="deal-currency">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="deal-sale-price" className="text-sm font-medium">Prix de vente ({currencySymbol})</Label>
             <Input
               id="deal-sale-price"
               type="number"
@@ -176,9 +208,9 @@ const DealDialog: React.FC<DealDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Commission calculée (€)</Label>
+            <Label className="text-sm font-medium">Commission calculée ({currencySymbol})</Label>
             <div className="p-3 bg-muted rounded-md border text-sm font-semibold text-foreground">
-              {parseFloat(commissionAmount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+              {parseFloat(commissionAmount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} {currencySymbol}
             </div>
           </div>
 
