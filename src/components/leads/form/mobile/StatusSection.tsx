@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import DealDialog from '@/components/leads/form/DealDialog';
+import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { LeadTag } from '@/components/common/TagBadge';
 import TeamMemberSelect from '@/components/leads/TeamMemberSelect';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Home, Activity, Trash2, FolderOpen } from 'lucide-react';
+import { Home, Activity, Trash2, FolderOpen, Trophy } from 'lucide-react';
 import MultiSelectButtons from '@/components/leads/form/MultiSelectButtons';
 import {
   AlertDialog,
@@ -74,7 +75,24 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   const [dealStatus, setDealStatus] = useState<string>('');
   const navigate = useNavigate();
 
+  const [hasDeal, setHasDeal] = useState<boolean | null>(null);
+
   const DEAL_TRIGGER_STATUSES = ['Deposit', 'Signed', 'Gagné'];
+
+  useEffect(() => {
+    const checkDeal = async () => {
+      const { data } = await supabase.from('deals').select('id').eq('lead_id', lead.id).maybeSingle();
+      setHasDeal(!!data);
+    };
+    if (DEAL_TRIGGER_STATUSES.includes(lead.status || '')) {
+      checkDeal();
+    }
+  }, [lead.id, lead.status]);
+
+  const handleDealDialogClose = () => {
+    setIsDealDialogOpen(false);
+    supabase.from('deals').select('id').eq('lead_id', lead.id).maybeSingle().then(({ data }) => setHasDeal(!!data));
+  };
 
   const handleStatusChange = (value: string) => {
     handleInputChange('status', value as LeadStatus);
@@ -274,6 +292,19 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           </div>
         </div>
 
+        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === false && (
+          <div className="pt-4 border-t mt-6">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setDealStatus(lead.status || ''); setIsDealDialogOpen(true); }}
+              className="w-full flex items-center justify-center border-yellow-400 text-yellow-700 hover:bg-yellow-50"
+            >
+              <Trophy className="h-4 w-4 mr-2" /> Renseigner le deal
+            </Button>
+          </div>
+        )}
+
         <div className="pt-4 border-t mt-6">
           <Button 
             variant="destructive"
@@ -320,7 +351,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
       </AlertDialog>
       <DealDialog
         open={isDealDialogOpen}
-        onClose={() => setIsDealDialogOpen(false)}
+        onClose={handleDealDialogClose}
         leadId={lead.id}
         leadName={lead.name || ''}
         leadSource={lead.source}
