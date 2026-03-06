@@ -1,40 +1,29 @@
 
 
-# Option A : Dialog de saisie de deal au changement de statut
+## Améliorations possibles pour le système de deals
 
-## Principe
-Quand un commercial change le statut d'un lead vers **Deposit**, **Signed** ou **Gagné**, un dialog s'ouvre automatiquement pour saisir le prix de vente et le % de commission. Un deal est alors créé/mis à jour dans la table `deals`.
+Le système actuel couvre bien le flux principal. Voici quelques ajouts utiles à considérer :
 
-## Composants impactés
+### 1. Synchronisation du statut du deal avec le statut du lead
+Actuellement, quand un commercial change le statut d'un lead de "Deposit" vers "Signed" puis "Gagné", le deal garde le statut initial. On pourrait **mettre à jour automatiquement le `status` du deal** quand le lead change de statut entre les 3 paliers (deposit → signed → won).
 
-### 1. Nouveau composant `DealDialog`
-Créer `src/components/leads/form/DealDialog.tsx` :
-- Dialog avec champs : Prix de vente, % Commission, Commission calculée (lecture seule), Notes
-- Calcul auto : `commission_amount = sale_price * commission_percentage / 100`
-- À la validation : upsert dans la table `deals` (si un deal existe déjà pour ce lead, on le met à jour)
-- Bouton "Passer" pour permettre de fermer sans saisir (le statut change quand même)
-- Props : `leadId`, `leadName`, `leadSource`, `pipelineType`, `assignedTo`, `status`, `open`, `onClose`
+**Fichiers impactés** : `StatusSection.tsx` (desktop + mobile + owners) — dans `handleStatusChange`, si un deal existe déjà, on update aussi son `status`.
 
-### 2. Modification des 3 StatusSection
-Intercepter le changement de statut dans les 3 fichiers :
-- `src/components/leads/form/StatusSection.tsx` (desktop)
-- `src/components/leads/form/mobile/StatusSection.tsx` (mobile)
-- `src/components/leads/form/mobile/components/OwnerStatusSection.tsx` (owners mobile)
+### 2. Résumé du deal visible sur la fiche lead (lecture seule)
+Afficher un petit encart récapitulatif sous le bouton "Modifier le deal" :
+- Prix de vente : 1 500 000 €
+- Commission : 5% → 75 000 €
 
-Logique ajoutée :
-- Quand `onValueChange` du Select de statut reçoit `'Deposit'`, `'Signed'` ou `'Gagné'` → ouvrir le `DealDialog`
-- Le statut est appliqué immédiatement, le dialog est un complément
-- Importer et rendre `<DealDialog />` dans chaque composant
+Ça évite de rouvrir le dialog juste pour vérifier les montants.
 
-### 3. Aucune migration SQL nécessaire
-La table `deals` existe déjà avec tous les champs requis.
+**Fichiers impactés** : les 3 `StatusSection` — afficher `dealData` quand `hasDeal === true`.
 
-## Flux utilisateur
-1. Commercial ouvre la fiche lead
-2. Change le statut vers "Dépôt reçu" / "Signature finale" / "Conclus"
-3. Le statut est sauvegardé normalement
-4. Un dialog apparaît : "Félicitations ! Renseignez les détails du deal"
-5. Le commercial saisit prix + % commission → commission calculée automatiquement
-6. Clic "Enregistrer" → upsert dans `deals`
-7. Ou clic "Passer" → le dialog se ferme, le deal pourra être saisi plus tard dans l'admin
+### 3. Rien d'autre de critique
+Le reste (filtres par devise dans le RevenueTracker admin, export CSV avec devise, etc.) sont des améliorations secondaires qui peuvent attendre.
+
+---
+
+**Recommandation** : implémenter les points 1 et 2 ensemble — la synchro du statut du deal + le résumé visible. Ce sont des améliorations rapides et très utiles au quotidien pour les commerciaux.
+
+Voulez-vous que j'implémente ces deux points ?
 
