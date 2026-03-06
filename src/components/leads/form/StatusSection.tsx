@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { LeadDetailed, LeadStatus, PipelineType } from '@/types/lead';
 import DealDialog, { DealInitialData } from './DealDialog';
+import DealSummary from './DealSummary';
 import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -97,9 +98,14 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     });
   };
 
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = async (value: string) => {
     handleInputChange('status', value as LeadStatus);
     if (DEAL_TRIGGER_STATUSES.includes(value)) {
+      // Auto-sync deal status if deal already exists
+      if (hasDeal) {
+        const DEAL_STATUSES: Record<string, string> = { 'Deposit': 'deposit', 'Signed': 'signed', 'Gagné': 'won' };
+        await supabase.from('deals').update({ status: DEAL_STATUSES[value] || 'deposit' }).eq('lead_id', lead.id);
+      }
       setDealStatus(value);
       setIsDealDialogOpen(true);
     }
@@ -279,8 +285,9 @@ const StatusSection: React.FC<StatusSectionProps> = ({
           </div>
         )}
 
-        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && (
-          <div className="pt-4 border-t mt-6">
+        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && dealData && (
+          <div className="pt-4 border-t mt-6 space-y-3">
+            <DealSummary dealData={dealData} />
             <Button
               variant="outline"
               size="sm"

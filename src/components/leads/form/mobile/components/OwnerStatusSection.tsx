@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import DealDialog, { DealInitialData } from '@/components/leads/form/DealDialog';
+import DealSummary from '@/components/leads/form/DealSummary';
 import { supabase } from '@/integrations/supabase/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -66,9 +67,13 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
     });
   };
 
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = async (value: string) => {
     handleInputChange('status', value as LeadStatus);
     if (DEAL_TRIGGER_STATUSES.includes(value)) {
+      if (hasDeal) {
+        const DEAL_STATUSES: Record<string, string> = { 'Deposit': 'deposit', 'Signed': 'signed', 'Gagné': 'won' };
+        await supabase.from('deals').update({ status: DEAL_STATUSES[value] || 'deposit' }).eq('lead_id', lead.id);
+      }
       setDealStatus(value);
       setIsDealDialogOpen(true);
     }
@@ -307,8 +312,9 @@ const OwnerStatusSection: React.FC<OwnerStatusSectionProps> = ({ lead, onDataCha
           </div>
         )}
 
-        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && (
-          <div className="pt-4 border-t mt-6">
+        {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && dealData && (
+          <div className="pt-4 border-t mt-6 space-y-3">
+            <DealSummary dealData={dealData} />
             <Button
               variant="outline"
               size="sm"
