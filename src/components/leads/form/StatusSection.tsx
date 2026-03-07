@@ -287,7 +287,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
 
         {DEAL_TRIGGER_STATUSES.includes(lead.status || '') && hasDeal === true && dealData && (
           <div className="pt-4 border-t mt-6 space-y-3">
-            <DealSummary dealData={dealData} />
+            <DealSummary dealData={dealData} pipelineType={lead.pipelineType} />
             <Button
               variant="outline"
               size="sm"
