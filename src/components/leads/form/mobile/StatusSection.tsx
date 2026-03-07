@@ -79,7 +79,8 @@ const StatusSection: React.FC<StatusSectionProps> = ({
   const [hasDeal, setHasDeal] = useState<boolean | null>(null);
   const [dealData, setDealData] = useState<DealInitialData | undefined>(undefined);
 
-  const DEAL_TRIGGER_STATUSES = ['Deposit', 'Signed', 'Gagné'];
+  const isRental = lead.pipelineType === 'rental';
+  const DEAL_TRIGGER_STATUSES = isRental ? ['Offre', 'Deposit', 'Signed', 'Gagné'] : ['Deposit', 'Signed', 'Gagné'];
 
   useEffect(() => {
     const checkDeal = async () => {
@@ -104,7 +105,7 @@ const StatusSection: React.FC<StatusSectionProps> = ({
     handleInputChange('status', value as LeadStatus);
     if (DEAL_TRIGGER_STATUSES.includes(value)) {
       if (hasDeal) {
-        const DEAL_STATUSES: Record<string, string> = { 'Deposit': 'deposit', 'Signed': 'signed', 'Gagné': 'won' };
+        const DEAL_STATUSES: Record<string, string> = { 'Offre': 'offer', 'Deposit': 'deposit', 'Signed': 'signed', 'Gagné': 'won' };
         await supabase.from('deals').update({ status: DEAL_STATUSES[value] || 'deposit' }).eq('lead_id', lead.id);
       }
       setDealStatus(value);
