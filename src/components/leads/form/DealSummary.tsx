@@ -15,6 +15,7 @@ interface DealSummaryProps {
 const DealSummary: React.FC<DealSummaryProps> = ({ dealData, pipelineType }) => {
   const symbol = CURRENCY_SYMBOLS[dealData.currency || 'EUR'] || '€';
   const price = dealData.sale_price || 0;
+  const pct = dealData.commission_percentage || 0;
   const isRental = pipelineType === 'rental';
   const months = isRental && pct === 100 ? 1 : isRental ? 2 : 0;
   const commission = isRental ? price * (months || 2) : price * pct / 100;
