@@ -183,7 +183,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                         value={column.status} 
                         className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
                       >
-                        {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                        {getStatusTranslations(activeTab)[column.status]} ({leadCountByStatus[column.status]})
                       </TabsTrigger>
                     )
                   )}
