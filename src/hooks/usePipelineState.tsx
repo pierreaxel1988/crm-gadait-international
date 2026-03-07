@@ -201,13 +201,14 @@ export function usePipelineState() {
         pipelineType: "owners" as PipelineType
       }));
     }
+    const isRental = activeTab === 'rental';
     return [
       { title: 'Nouveaux', status: 'New' as LeadStatus },
       { title: 'Contactés', status: 'Contacted' as LeadStatus },
       { title: 'Qualifiés', status: 'Qualified' as LeadStatus },
       { title: 'Propositions', status: 'Proposal' as LeadStatus },
       { title: 'Visites en cours', status: 'Visit' as LeadStatus },
-      { title: 'Offre en cours', status: 'Offre' as LeadStatus },
+      { title: isRental ? 'Contrat de location en cours' : 'Offre en cours', status: 'Offre' as LeadStatus },
       { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
       { title: 'Signature finale', status: 'Signed' as LeadStatus },
       { title: 'Conclus', status: 'Gagné' as LeadStatus },
