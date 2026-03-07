@@ -90,7 +90,7 @@ const KanbanColumn = ({ title, status, className, items, onDrop, pipelineType }:
     'Offer': pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours',
     'Offre': pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours',
     'Deposit': 'Dépôt reçu',
-    'Signed': 'Signature finale',
+    'Signed': pipelineType === 'rental' ? 'Dépôt reçu' : 'Signature finale',
     'Gagné': 'Conclus',
     'Perdu': 'Perdu'
   }[status] || title;
