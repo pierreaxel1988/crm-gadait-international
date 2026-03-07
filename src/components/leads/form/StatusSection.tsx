@@ -37,7 +37,7 @@ const getStatusLabel = (status: LeadStatus, pipelineType: PipelineType): string 
     'Qualified': isOwners ? 'Visite effectuée' : 'Qualifiés',
     'Proposal': isOwners ? 'Mandat en négociation' : 'Propositions',
     'Visit': isOwners ? 'Bien en commercialisation' : 'Visites en cours',
-    'Offre': isOwners ? 'Offre reçue' : 'Offre en cours',
+    'Offre': isOwners ? 'Offre reçue' : (pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours'),
     'Deposit': isOwners ? 'Compromis signé' : 'Dépôt reçu',
     'Signed': isOwners ? 'Mandat signé' : 'Signature finale',
     'Gagné': isOwners ? 'Vente finalisée' : 'Conclus',

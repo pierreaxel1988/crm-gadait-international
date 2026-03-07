@@ -71,7 +71,7 @@ const StatusFilter: React.FC<StatusFilterProps> = ({
       'Qualified': pipelineType === 'owners' ? 'Visite effectuée' : 'Qualifiés',
       'Proposal': pipelineType === 'owners' ? 'Mandat en négociation' : 'Propositions',
       'Visit': pipelineType === 'owners' ? 'Bien en commercialisation' : 'Visites en cours',
-      'Offre': pipelineType === 'owners' ? 'Offre reçue' : 'Offre en cours',
+      'Offre': pipelineType === 'owners' ? 'Offre reçue' : (pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours'),
       'Deposit': pipelineType === 'owners' ? 'Compromis signé' : 'Dépôt reçu',
       'Signed': pipelineType === 'owners' ? 'Mandat signé' : 'Signature finale',
       'Gagné': pipelineType === 'owners' ? 'Vente finalisée' : 'Conclus',
