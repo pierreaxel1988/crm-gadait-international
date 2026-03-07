@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Trophy } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -69,6 +70,7 @@ const DealDialog: React.FC<DealDialogProps> = ({
   const [commissionAmount, setCommissionAmount] = useState('0.00');
   const [currency, setCurrency] = useState('EUR');
   const [notes, setNotes] = useState('');
+  const [rentalMonths, setRentalMonths] = useState<'2' | '1'>('2');
   const [isSaving, setIsSaving] = useState(false);
   const isEditing = !!initialData;
   const isRental = pipelineType === 'rental';
@@ -76,25 +78,30 @@ const DealDialog: React.FC<DealDialogProps> = ({
 
   useEffect(() => {
     if (isRental) {
-      // Rental: commission = 2 × monthly rent (1 month tenant + 1 month landlord)
       const monthlyRent = parseFloat(salePrice) || 0;
-      setCommissionAmount((monthlyRent * 2).toFixed(2));
+      const months = parseInt(rentalMonths);
+      setCommissionAmount((monthlyRent * months).toFixed(2));
     } else {
       const price = parseFloat(salePrice) || 0;
       const pct = parseFloat(commissionPercentage) || 0;
       setCommissionAmount((price * pct / 100).toFixed(2));
     }
-  }, [salePrice, commissionPercentage, isRental]);
+  }, [salePrice, commissionPercentage, isRental, rentalMonths]);
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setSalePrice(initialData?.sale_price?.toString() || '');
-      setCommissionPercentage(initialData?.commission_percentage?.toString() || '');
       setCurrency(initialData?.currency || 'EUR');
       setNotes(initialData?.notes || '');
+      if (isRental && initialData?.commission_percentage) {
+        // commission_percentage stores months (100 = 1 month, 200 = 2 months)
+        setRentalMonths(initialData.commission_percentage === 100 ? '1' : '2');
+      } else {
+        setCommissionPercentage(initialData?.commission_percentage?.toString() || '');
+        setRentalMonths('2');
+      }
     }
-  }, [open, initialData]);
+  }, [open, initialData, isRental]);
 
   const handleSave = async () => {
     const price = parseFloat(salePrice);
@@ -114,7 +121,8 @@ const DealDialog: React.FC<DealDialogProps> = ({
 
     setIsSaving(true);
     try {
-      const pct = isRental ? 200 : parseFloat(commissionPercentage); // 200% = 2 months for display
+      const months = parseInt(rentalMonths);
+      const pct = isRental ? months * 100 : parseFloat(commissionPercentage);
       const dealData = {
         lead_id: leadId,
         lead_name: leadName,
@@ -222,8 +230,26 @@ const DealDialog: React.FC<DealDialogProps> = ({
           )}
 
           {isRental && (
-            <div className="p-3 bg-muted/50 rounded-md border text-xs text-muted-foreground">
-              Commission = 1 mois locataire + 1 mois preneur = <strong>2 mois de loyer</strong>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Type de mandat</Label>
+              <RadioGroup
+                value={rentalMonths}
+                onValueChange={(v) => setRentalMonths(v as '1' | '2')}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="2" id="rental-solo" />
+                  <Label htmlFor="rental-solo" className="text-sm cursor-pointer">
+                    Agence seule (2 mois)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="1" id="rental-coagence" />
+                  <Label htmlFor="rental-coagence" className="text-sm cursor-pointer">
+                    Co-agence (1 mois)
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           )}
 

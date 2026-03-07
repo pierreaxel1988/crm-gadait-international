@@ -15,8 +15,10 @@ interface DealSummaryProps {
 const DealSummary: React.FC<DealSummaryProps> = ({ dealData, pipelineType }) => {
   const symbol = CURRENCY_SYMBOLS[dealData.currency || 'EUR'] || '€';
   const price = dealData.sale_price || 0;
+  const pct = dealData.commission_percentage || 0;
   const isRental = pipelineType === 'rental';
-  const commission = isRental ? price * 2 : price * (dealData.commission_percentage || 0) / 100;
+  const months = isRental && pct === 100 ? 1 : isRental ? 2 : 0;
+  const commission = isRental ? price * (months || 2) : price * pct / 100;
 
   return (
     <div className="p-3 bg-muted/50 rounded-md border text-sm space-y-1">
@@ -26,7 +28,7 @@ const DealSummary: React.FC<DealSummaryProps> = ({ dealData, pipelineType }) => 
       </div>
       <div className="flex justify-between">
         <span className="text-muted-foreground">
-          {isRental ? 'Commission (2 mois)' : `Commission (${dealData.commission_percentage || 0}%)`}
+          {isRental ? `Commission (${months || 2} mois${months === 1 ? ' — co-agence' : ''})` : `Commission (${pct}%)`}
         </span>
         <span className="font-medium">{commission.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {symbol}</span>
       </div>
