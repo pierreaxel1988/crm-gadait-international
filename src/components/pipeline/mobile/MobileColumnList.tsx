@@ -12,19 +12,19 @@ import { applyFiltersToColumns } from '@/utils/kanbanFilterUtils';
 import { sortLeadsByPriority } from './utils/leadSortUtils';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 
-const statusTranslations: Record<LeadStatus, string> = {
+const getStatusTranslations = (pipelineType: string): Record<LeadStatus, string> => ({
   'New': 'Nouveaux',
   'Contacted': 'Contactés',
   'Qualified': 'Qualifiés',
   'Proposal': 'Propositions',
   'Visit': 'Visites en cours',
-  'Offre': 'Offre en cours',
+  'Offre': pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours',
   'Deposit': 'Dépôt reçu',
   'Signed': 'Signature finale',
   'Perdu': 'Perdu',
   'Gagné': 'Conclus',
   'Deleted': 'Supprimé'
-};
+});
 
 const statusOrder = ['New', 'Contacted', 'Qualified', 'Proposal', 'Visit', 'Offre', 'Deposit', 'Signed', 'Perdu', 'Gagné', 'Deleted'];
 
@@ -183,7 +183,7 @@ const MobileColumnList = ({ columns, expandedColumn = null, toggleColumnExpand =
                         value={column.status} 
                         className="rounded-full px-4 whitespace-nowrap data-[state=active]:bg-white data-[state=active]:shadow-sm"
                       >
-                        {statusTranslations[column.status]} ({leadCountByStatus[column.status]})
+                        {getStatusTranslations(activeTab)[column.status]} ({leadCountByStatus[column.status]})
                       </TabsTrigger>
                     )
                   )}
