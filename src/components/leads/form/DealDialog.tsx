@@ -71,13 +71,20 @@ const DealDialog: React.FC<DealDialogProps> = ({
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const isEditing = !!initialData;
+  const isRental = pipelineType === 'rental';
   const currencySymbol = CURRENCY_OPTIONS.find(c => c.value === currency)?.symbol || '€';
 
   useEffect(() => {
-    const price = parseFloat(salePrice) || 0;
-    const pct = parseFloat(commissionPercentage) || 0;
-    setCommissionAmount((price * pct / 100).toFixed(2));
-  }, [salePrice, commissionPercentage]);
+    if (isRental) {
+      // Rental: commission = 2 × monthly rent (1 month tenant + 1 month landlord)
+      const monthlyRent = parseFloat(salePrice) || 0;
+      setCommissionAmount((monthlyRent * 2).toFixed(2));
+    } else {
+      const price = parseFloat(salePrice) || 0;
+      const pct = parseFloat(commissionPercentage) || 0;
+      setCommissionAmount((price * pct / 100).toFixed(2));
+    }
+  }, [salePrice, commissionPercentage, isRental]);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -91,19 +98,23 @@ const DealDialog: React.FC<DealDialogProps> = ({
 
   const handleSave = async () => {
     const price = parseFloat(salePrice);
-    const pct = parseFloat(commissionPercentage);
 
     if (!price || price <= 0) {
-      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez saisir un prix de vente valide.' });
+      toast({ variant: 'destructive', title: 'Erreur', description: isRental ? 'Veuillez saisir un loyer mensuel valide.' : 'Veuillez saisir un prix de vente valide.' });
       return;
     }
-    if (!pct || pct <= 0 || pct > 100) {
-      toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez saisir un % de commission valide (0-100).' });
-      return;
+
+    if (!isRental) {
+      const pct = parseFloat(commissionPercentage);
+      if (!pct || pct <= 0 || pct > 100) {
+        toast({ variant: 'destructive', title: 'Erreur', description: 'Veuillez saisir un % de commission valide (0-100).' });
+        return;
+      }
     }
 
     setIsSaving(true);
     try {
+      const pct = isRental ? 200 : parseFloat(commissionPercentage); // 200% = 2 months for display
       const dealData = {
         lead_id: leadId,
         lead_name: leadName,
@@ -119,7 +130,6 @@ const DealDialog: React.FC<DealDialogProps> = ({
         deal_date: new Date().toISOString().split('T')[0],
       };
 
-      // Check if deal already exists for this lead
       const { data: existing } = await supabase
         .from('deals')
         .select('id')
@@ -181,31 +191,41 @@ const DealDialog: React.FC<DealDialogProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deal-sale-price" className="text-sm font-medium">Prix de vente ({currencySymbol})</Label>
+            <Label htmlFor="deal-sale-price" className="text-sm font-medium">
+              {isRental ? `Loyer mensuel (${currencySymbol})` : `Prix de vente (${currencySymbol})`}
+            </Label>
             <Input
               id="deal-sale-price"
               type="number"
               min="0"
-              step="1000"
-              placeholder="Ex: 1 500 000"
+              step={isRental ? '100' : '1000'}
+              placeholder={isRental ? 'Ex: 2 500' : 'Ex: 1 500 000'}
               value={salePrice}
               onChange={(e) => setSalePrice(e.target.value)}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="deal-commission-pct" className="text-sm font-medium">Commission (%)</Label>
-            <Input
-              id="deal-commission-pct"
-              type="number"
-              min="0"
-              max="100"
-              step="0.1"
-              placeholder="Ex: 5"
-              value={commissionPercentage}
-              onChange={(e) => setCommissionPercentage(e.target.value)}
-            />
-          </div>
+          {!isRental && (
+            <div className="space-y-2">
+              <Label htmlFor="deal-commission-pct" className="text-sm font-medium">Commission (%)</Label>
+              <Input
+                id="deal-commission-pct"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                placeholder="Ex: 5"
+                value={commissionPercentage}
+                onChange={(e) => setCommissionPercentage(e.target.value)}
+              />
+            </div>
+          )}
+
+          {isRental && (
+            <div className="p-3 bg-muted/50 rounded-md border text-xs text-muted-foreground">
+              Commission = 1 mois locataire + 1 mois preneur = <strong>2 mois de loyer</strong>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className="text-sm font-medium">Commission calculée ({currencySymbol})</Label>
