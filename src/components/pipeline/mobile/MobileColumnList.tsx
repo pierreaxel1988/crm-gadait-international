@@ -20,7 +20,7 @@ const getStatusTranslations = (pipelineType: string): Record<LeadStatus, string>
   'Visit': 'Visites en cours',
   'Offre': pipelineType === 'rental' ? 'Contrat de location en cours' : 'Offre en cours',
   'Deposit': 'Dépôt reçu',
-  'Signed': 'Signature finale',
+  'Signed': pipelineType === 'rental' ? 'Dépôt reçu' : 'Signature finale',
   'Perdu': 'Perdu',
   'Gagné': 'Conclus',
   'Deleted': 'Supprimé'

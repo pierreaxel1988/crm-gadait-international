@@ -210,7 +210,7 @@ export function usePipelineState() {
       { title: 'Visites en cours', status: 'Visit' as LeadStatus },
       { title: isRental ? 'Contrat de location en cours' : 'Offre en cours', status: 'Offre' as LeadStatus },
       { title: 'Dépôt reçu', status: 'Deposit' as LeadStatus },
-      { title: 'Signature finale', status: 'Signed' as LeadStatus },
+      { title: isRental ? 'Dépôt reçu' : 'Signature finale', status: 'Signed' as LeadStatus },
       { title: 'Conclus', status: 'Gagné' as LeadStatus },
       { title: 'Perdu', status: 'Perdu' as LeadStatus }
     ].map(col => ({
