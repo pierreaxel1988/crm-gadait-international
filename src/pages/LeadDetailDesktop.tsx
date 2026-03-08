@@ -30,8 +30,17 @@ const LeadDetailDesktop = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('info');
-  const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+  const { lead, isLoading: loading } = useLeadDetail(id!);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const fromHotPipeline = searchParams.get('from') === 'hot-pipeline';
+
+  const handleBack = () => {
+    if (fromHotPipeline) {
+      navigate('/hot-pipeline');
+    } else {
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
@@ -56,11 +65,11 @@ const LeadDetailDesktop = () => {
         <div className="p-6">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="mb-6 text-loro-terracotta"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour
+            {fromHotPipeline ? 'Retour au Pipeline Chaud' : 'Retour'}
           </Button>
           <div className="flex flex-col items-center justify-center min-h-[50vh]">
             <p className="text-red-500 font-medium">
@@ -88,11 +97,11 @@ const LeadDetailDesktop = () => {
       <div className="px-[100px] py-6 max-w-7xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="mb-6 text-loro-terracotta rounded-md"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
+          {fromHotPipeline ? 'Retour au Pipeline Chaud' : 'Retour'}
         </Button>
         <LeadHeader 
           lead={lead} 

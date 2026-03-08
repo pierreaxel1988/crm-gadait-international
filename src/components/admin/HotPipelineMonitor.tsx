@@ -379,7 +379,7 @@ const HotPipelineMonitor: React.FC<HotPipelineMonitorProps> = ({ agentId }) => {
                           <TableCell>
                             <button
                               className="text-primary underline hover:no-underline font-medium text-left"
-                              onClick={() => navigate(`/leads/${lead.id}`)}
+                              onClick={() => navigate(`/leads/${lead.id}?from=hot-pipeline`)}
                             >
                               {lead.name || 'Sans nom'}
                             </button>

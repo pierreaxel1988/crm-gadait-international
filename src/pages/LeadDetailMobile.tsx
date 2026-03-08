@@ -83,8 +83,13 @@ const LeadDetailMobile = () => {
       setLead(updatedLead);
     }
   });
+  const fromHotPipeline = new URLSearchParams(location.search).get('from') === 'hot-pipeline';
   const handleBackClick = () => {
-    navigate('/pipeline');
+    if (fromHotPipeline) {
+      navigate('/hot-pipeline');
+    } else {
+      navigate('/pipeline');
+    }
   };
   const handleMarkComplete = (action: ActionHistory) => {
     if (action && action.id) {
