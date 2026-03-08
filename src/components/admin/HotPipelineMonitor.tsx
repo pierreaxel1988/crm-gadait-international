@@ -250,18 +250,22 @@ const HotPipelineMonitor: React.FC<HotPipelineMonitorProps> = ({ agentId }) => {
       {/* Agent filter + Export */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-wrap">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <Select value={agentFilter} onValueChange={setAgentFilter}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Filtrer par agent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les agents</SelectItem>
-              {teamMembers.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!agentId && (
+            <>
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <Select value={agentFilter} onValueChange={setAgentFilter}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Filtrer par agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les agents</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrer par stade" />
