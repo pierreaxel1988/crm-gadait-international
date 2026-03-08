@@ -41,6 +41,7 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
 const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
 const Resources = lazy(() => import('./pages/Resources'));
+const AgentRevenue = lazy(() => import('./pages/AgentRevenue'));
 
 const AppContent = () => {
   const { user } = useAuth();
