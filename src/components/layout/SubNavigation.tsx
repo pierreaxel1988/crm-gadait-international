@@ -30,6 +30,10 @@ const SubNavigation = () => {
     path: '/revenue',
     icon: TrendingUp
   }, {
+    name: 'Pipeline Chaud',
+    path: '/hot-pipeline',
+    icon: Flame
+  }, {
     name: 'Resources',
     path: '/resources',
     icon: FolderOpen

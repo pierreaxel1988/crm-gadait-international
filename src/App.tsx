@@ -122,6 +122,11 @@ const AppContent = () => {
                 <AgentRevenue />
               </ProtectedRoute>
             } />
+            <Route path="/hot-pipeline" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <AgentHotPipeline />
+              </ProtectedRoute>
+            } />
             <Route path="/resources" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Resources />

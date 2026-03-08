@@ -125,12 +125,16 @@ const HotPipelineMonitor: React.FC<HotPipelineMonitorProps> = ({ agentId }) => {
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['hot-pipeline-leads'],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from('leads')
         .select('id, name, status, assigned_to, action_history, email, phone, phone_country_code, budget')
         .eq('pipeline_type', 'purchase')
         .in('status', ['Visit', 'Offre', 'Deposit'])
         .is('deleted_at', null);
+      if (agentId) {
+        query = query.eq('assigned_to', agentId);
+      }
+      const { data } = await query;
       return (data || []) as LeadRow[];
     },
   });
