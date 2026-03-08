@@ -130,7 +130,7 @@ const AgentRevenue = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><DollarSign className="h-4 w-4" /> CA Total</div>
-            <p className="text-2xl font-bold">{fmt(totalCA)}</p>
+            <p className="text-2xl font-normal">{fmt(totalCA)}</p>
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><TrendingUp className="h-4 w-4" /> Total Commissions</div>
