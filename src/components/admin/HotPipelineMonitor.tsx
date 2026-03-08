@@ -105,7 +105,11 @@ function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boo
   return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType, nextActionDate: nextDate, nextActionType: nextType };
 }
 
-const HotPipelineMonitor: React.FC = () => {
+interface HotPipelineMonitorProps {
+  agentId?: string;
+}
+
+const HotPipelineMonitor: React.FC<HotPipelineMonitorProps> = ({ agentId }) => {
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const navigate = useNavigate();
