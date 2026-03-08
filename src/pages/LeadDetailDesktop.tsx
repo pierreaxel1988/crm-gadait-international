@@ -30,8 +30,17 @@ const LeadDetailDesktop = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('info');
-  const { lead, isLoading: loading } = useLeadDetail(id!); // Fix here to avoid using error property
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Add local error state
+  const { lead, isLoading: loading } = useLeadDetail(id!);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const fromHotPipeline = searchParams.get('from') === 'hot-pipeline';
+
+  const handleBack = () => {
+    if (fromHotPipeline) {
+      navigate('/hot-pipeline');
+    } else {
+      navigate(-1);
+    }
+  };
 
   useEffect(() => {
     // Déterminer l'onglet actif depuis les paramètres d'URL ou utiliser "info" par défaut
