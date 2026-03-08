@@ -97,11 +97,11 @@ const LeadDetailDesktop = () => {
       <div className="px-[100px] py-6 max-w-7xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="mb-6 text-loro-terracotta rounded-md"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Retour
+          {fromHotPipeline ? 'Retour au Pipeline Chaud' : 'Retour'}
         </Button>
         <LeadHeader 
           lead={lead} 
