@@ -120,7 +120,7 @@ const AgentRevenue = () => {
       <SubNavigation />
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Mon Chiffre d'Affaire</h1>
+          <h1 className="text-2xl font-normal text-foreground">Mon Chiffre d'Affaire</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {userName ? `Deals de ${userName}` : 'Vos deals personnels'}
           </p>
@@ -130,19 +130,19 @@ const AgentRevenue = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><DollarSign className="h-4 w-4" /> CA Total</div>
-            <p className="text-2xl font-bold">{fmt(totalCA)}</p>
+            <p className="text-2xl font-normal">{fmt(totalCA)}</p>
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><TrendingUp className="h-4 w-4" /> Total Commissions</div>
-            <p className="text-2xl font-bold">{fmt(totalCommission)}</p>
+            <p className="text-2xl font-normal">{fmt(totalCommission)}</p>
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><Percent className="h-4 w-4" /> Commission Moy.</div>
-            <p className="text-2xl font-bold">{avgCommPct.toFixed(1)}%</p>
+            <p className="text-2xl font-normal">{avgCommPct.toFixed(1)}%</p>
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><Hash className="h-4 w-4" /> Nombre de deals</div>
-            <p className="text-2xl font-bold">{filteredDeals.length}</p>
+            <p className="text-2xl font-normal">{filteredDeals.length}</p>
           </div>
         </div>
 
@@ -191,11 +191,11 @@ const AgentRevenue = () => {
             <TableBody>
               {filteredDeals.map(deal => (
                 <TableRow key={deal.id}>
-                  <TableCell className="font-medium text-sm">{deal.lead_name}</TableCell>
+                  <TableCell className="font-normal text-sm">{deal.lead_name}</TableCell>
                   <TableCell className="text-xs text-muted-foreground capitalize">{deal.pipeline_type || '—'}</TableCell>
-                  <TableCell className="text-right text-sm font-medium">{fmt(deal.sale_price)}</TableCell>
+                  <TableCell className="text-right text-sm font-normal">{fmt(deal.sale_price)}</TableCell>
                   <TableCell className="text-right text-xs">{deal.commission_percentage}%</TableCell>
-                  <TableCell className="text-right text-sm font-semibold text-emerald-700">{fmt(deal.commission_amount)}</TableCell>
+                  <TableCell className="text-right text-sm font-normal text-emerald-700">{fmt(deal.commission_amount)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{deal.lead_source || '—'}</TableCell>
                   <TableCell className="text-xs">{format(new Date(deal.deal_date), 'dd MMM yyyy', { locale: fr })}</TableCell>
                   <TableCell>
@@ -208,10 +208,10 @@ const AgentRevenue = () => {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={2} className="font-bold">Total ({filteredDeals.length} deals)</TableCell>
-                <TableCell className="text-right font-bold">{fmt(totalCA)}</TableCell>
+              <TableCell colSpan={2} className="font-normal">Total ({filteredDeals.length} deals)</TableCell>
+                <TableCell className="text-right font-normal">{fmt(totalCA)}</TableCell>
                 <TableCell className="text-right text-xs">{avgCommPct.toFixed(1)}%</TableCell>
-                <TableCell className="text-right font-bold text-emerald-700">{fmt(totalCommission)}</TableCell>
+                <TableCell className="text-right font-normal text-emerald-700">{fmt(totalCommission)}</TableCell>
                 <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableFooter>
