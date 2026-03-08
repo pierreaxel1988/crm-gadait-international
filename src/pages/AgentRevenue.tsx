@@ -208,10 +208,10 @@ const AgentRevenue = () => {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={2} className="font-bold">Total ({filteredDeals.length} deals)</TableCell>
-                <TableCell className="text-right font-bold">{fmt(totalCA)}</TableCell>
+              <TableCell colSpan={2} className="font-normal">Total ({filteredDeals.length} deals)</TableCell>
+                <TableCell className="text-right font-normal">{fmt(totalCA)}</TableCell>
                 <TableCell className="text-right text-xs">{avgCommPct.toFixed(1)}%</TableCell>
-                <TableCell className="text-right font-bold text-emerald-700">{fmt(totalCommission)}</TableCell>
+                <TableCell className="text-right font-normal text-emerald-700">{fmt(totalCommission)}</TableCell>
                 <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableFooter>
