@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, Calendar, ListTodo, File, ClipboardList, FolderOpen, TrendingUp } from 'lucide-react';
+import { MessageSquare, Calendar, ListTodo, File, ClipboardList, FolderOpen, TrendingUp, Flame } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
