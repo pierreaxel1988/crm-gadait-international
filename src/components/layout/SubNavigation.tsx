@@ -26,17 +26,17 @@ const SubNavigation = () => {
     path: '/properties',
     icon: File
   }, {
-    name: "Chiffre d'affaire",
-    path: '/revenue',
-    icon: TrendingUp
+    name: 'Resources',
+    path: '/resources',
+    icon: FolderOpen
   }, {
     name: 'Pipeline Chaud',
     path: '/hot-pipeline',
     icon: Flame
   }, {
-    name: 'Resources',
-    path: '/resources',
-    icon: FolderOpen
+    name: "Chiffre d'affaire",
+    path: '/revenue',
+    icon: TrendingUp
   }];
 
   // Mobile navigation with horizontal scrolling - icons only
