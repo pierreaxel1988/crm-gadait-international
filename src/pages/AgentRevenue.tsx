@@ -191,7 +191,7 @@ const AgentRevenue = () => {
             <TableBody>
               {filteredDeals.map(deal => (
                 <TableRow key={deal.id}>
-                  <TableCell className="font-medium text-sm">{deal.lead_name}</TableCell>
+                  <TableCell className="font-normal text-sm">{deal.lead_name}</TableCell>
                   <TableCell className="text-xs text-muted-foreground capitalize">{deal.pipeline_type || '—'}</TableCell>
                   <TableCell className="text-right text-sm font-medium">{fmt(deal.sale_price)}</TableCell>
                   <TableCell className="text-right text-xs">{deal.commission_percentage}%</TableCell>
