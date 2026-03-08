@@ -1,40 +1,34 @@
 
+## Plan : Ajouter l'onglet "Chiffre d'affaire" pour chaque agent
 
-# Option A : Dialog de saisie de deal au changement de statut
+### Objectif
+Ajouter un nouvel onglet **"Chiffre d'affaire"** dans la navigation principale (SubNavigation), positionné entre "Propriétés" et "Resources". Cet onglet affichera la même interface que le `RevenueTracker` de l'Admin, mais filtré automatiquement sur les deals de l'agent connecté.
 
-## Principe
-Quand un commercial change le statut d'un lead vers **Deposit**, **Signed** ou **Gagné**, un dialog s'ouvre automatiquement pour saisir le prix de vente et le % de commission. Un deal est alors créé/mis à jour dans la table `deals`.
+### Approche technique
 
-## Composants impactés
+#### 1. Créer une nouvelle page `AgentRevenue.tsx`
+- Basée sur `RevenueTracker.tsx` mais simplifiée pour l'agent
+- Récupère l'ID de l'agent connecté via `useAuth()` et la table `team_members`
+- Filtre automatiquement les deals par `agent_id` de l'utilisateur
+- Masque le filtre "Agent" (inutile puisque déjà filtré)
+- Conserve les fonctionnalités : stats résumées, tableau des deals, export CSV
 
-### 1. Nouveau composant `DealDialog`
-Créer `src/components/leads/form/DealDialog.tsx` :
-- Dialog avec champs : Prix de vente, % Commission, Commission calculée (lecture seule), Notes
-- Calcul auto : `commission_amount = sale_price * commission_percentage / 100`
-- À la validation : upsert dans la table `deals` (si un deal existe déjà pour ce lead, on le met à jour)
-- Bouton "Passer" pour permettre de fermer sans saisir (le statut change quand même)
-- Props : `leadId`, `leadName`, `leadSource`, `pipelineType`, `assignedTo`, `status`, `open`, `onClose`
+#### 2. Modifier `SubNavigation.tsx`
+- Ajouter l'entrée `{ name: 'Chiffre d'affaire', path: '/revenue', icon: TrendingUp }` 
+- Positionner avant "Resources"
 
-### 2. Modification des 3 StatusSection
-Intercepter le changement de statut dans les 3 fichiers :
-- `src/components/leads/form/StatusSection.tsx` (desktop)
-- `src/components/leads/form/mobile/StatusSection.tsx` (mobile)
-- `src/components/leads/form/mobile/components/OwnerStatusSection.tsx` (owners mobile)
+#### 3. Modifier `App.tsx`
+- Ajouter la route `/revenue` protégée avec `commercialAllowed={true}`
+- Lazy load du composant `AgentRevenue`
 
-Logique ajoutée :
-- Quand `onValueChange` du Select de statut reçoit `'Deposit'`, `'Signed'` ou `'Gagné'` → ouvrir le `DealDialog`
-- Le statut est appliqué immédiatement, le dialog est un complément
-- Importer et rendre `<DealDialog />` dans chaque composant
+### Fichiers à modifier/créer
+| Fichier | Action |
+|---------|--------|
+| `src/pages/AgentRevenue.tsx` | Créer — interface CA filtrée pour l'agent |
+| `src/components/layout/SubNavigation.tsx` | Modifier — ajouter l'onglet |
+| `src/App.tsx` | Modifier — ajouter la route |
 
-### 3. Aucune migration SQL nécessaire
-La table `deals` existe déjà avec tous les champs requis.
-
-## Flux utilisateur
-1. Commercial ouvre la fiche lead
-2. Change le statut vers "Dépôt reçu" / "Signature finale" / "Conclus"
-3. Le statut est sauvegardé normalement
-4. Un dialog apparaît : "Félicitations ! Renseignez les détails du deal"
-5. Le commercial saisit prix + % commission → commission calculée automatiquement
-6. Clic "Enregistrer" → upsert dans `deals`
-7. Ou clic "Passer" → le dialog se ferme, le deal pourra être saisi plus tard dans l'admin
-
+### Comportement attendu
+- **Agent** : Voit uniquement SES deals avec ses stats personnelles
+- **Admin** : Accède également à cette page (voit ses propres deals s'il en a, sinon vue vide)
+- Les fonctionnalités d'ajout/modification de deal restent disponibles (pour des corrections)
