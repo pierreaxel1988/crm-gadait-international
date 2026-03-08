@@ -105,7 +105,11 @@ function analyzeActionHistory(actionHistory: any, now: Date): { hasNoAction: boo
   return { hasNoAction: false, lastActionDate: latestDate, lastActionType: latestActionType, nextActionDate: nextDate, nextActionType: nextType };
 }
 
-const HotPipelineMonitor: React.FC = () => {
+interface HotPipelineMonitorProps {
+  agentId?: string;
+}
+
+const HotPipelineMonitor: React.FC<HotPipelineMonitorProps> = ({ agentId }) => {
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const navigate = useNavigate();
@@ -121,12 +125,16 @@ const HotPipelineMonitor: React.FC = () => {
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['hot-pipeline-leads'],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from('leads')
         .select('id, name, status, assigned_to, action_history, email, phone, phone_country_code, budget')
         .eq('pipeline_type', 'purchase')
         .in('status', ['Visit', 'Offre', 'Deposit'])
         .is('deleted_at', null);
+      if (agentId) {
+        query = query.eq('assigned_to', agentId);
+      }
+      const { data } = await query;
       return (data || []) as LeadRow[];
     },
   });
@@ -242,18 +250,22 @@ const HotPipelineMonitor: React.FC = () => {
       {/* Agent filter + Export */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-wrap">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <Select value={agentFilter} onValueChange={setAgentFilter}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Filtrer par agent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tous les agents</SelectItem>
-              {teamMembers.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {!agentId && (
+            <>
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <Select value={agentFilter} onValueChange={setAgentFilter}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Filtrer par agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les agents</SelectItem>
+                  {teamMembers.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Filtrer par stade" />

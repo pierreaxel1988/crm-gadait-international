@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from "@/components/ui/navigation-menu";
-import { MessageSquare, Calendar, ListTodo, File, ClipboardList, FolderOpen, TrendingUp } from 'lucide-react';
+import { MessageSquare, Calendar, ListTodo, File, ClipboardList, FolderOpen, TrendingUp, Flame } from 'lucide-react';
 import { useBreakpoint } from '@/hooks/use-mobile';
 
 const SubNavigation = () => {
@@ -29,6 +29,10 @@ const SubNavigation = () => {
     name: "Chiffre d'affaire",
     path: '/revenue',
     icon: TrendingUp
+  }, {
+    name: 'Pipeline Chaud',
+    path: '/hot-pipeline',
+    icon: Flame
   }, {
     name: 'Resources',
     path: '/resources',

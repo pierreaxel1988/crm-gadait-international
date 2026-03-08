@@ -1,33 +1,40 @@
 
 
-## Plan : Ajouter l'onglet "Pipeline Chaud" pour chaque agent
+# Option A : Dialog de saisie de deal au changement de statut
 
-### Objectif
-Ajouter un nouvel onglet **"Pipeline Chaud"** dans la SubNavigation, accessible à tous les agents. Il affichera la meme interface que le `HotPipelineMonitor` admin mais filtrée automatiquement sur les leads assignés a l'agent connecté (sans le filtre agent).
+## Principe
+Quand un commercial change le statut d'un lead vers **Deposit**, **Signed** ou **Gagné**, un dialog s'ouvre automatiquement pour saisir le prix de vente et le % de commission. Un deal est alors créé/mis à jour dans la table `deals`.
 
-### Approche technique
+## Composants impactés
 
-#### 1. Créer `src/pages/AgentHotPipeline.tsx`
-- Page wrapper avec Navbar + SubNavigation
-- Récupère le `team_member.id` de l'agent connecté via `useAuth()` + requete `team_members`
-- Réutilise directement le composant `HotPipelineMonitor` existant en lui passant une nouvelle prop `agentId`
+### 1. Nouveau composant `DealDialog`
+Créer `src/components/leads/form/DealDialog.tsx` :
+- Dialog avec champs : Prix de vente, % Commission, Commission calculée (lecture seule), Notes
+- Calcul auto : `commission_amount = sale_price * commission_percentage / 100`
+- À la validation : upsert dans la table `deals` (si un deal existe déjà pour ce lead, on le met à jour)
+- Bouton "Passer" pour permettre de fermer sans saisir (le statut change quand même)
+- Props : `leadId`, `leadName`, `leadSource`, `pipelineType`, `assignedTo`, `status`, `open`, `onClose`
 
-#### 2. Modifier `src/components/admin/HotPipelineMonitor.tsx`
-- Ajouter une prop optionnelle `agentId?: string`
-- Si `agentId` est fourni : filtrer la requete Supabase avec `.eq('assigned_to', agentId)` et masquer le filtre agent
+### 2. Modification des 3 StatusSection
+Intercepter le changement de statut dans les 3 fichiers :
+- `src/components/leads/form/StatusSection.tsx` (desktop)
+- `src/components/leads/form/mobile/StatusSection.tsx` (mobile)
+- `src/components/leads/form/mobile/components/OwnerStatusSection.tsx` (owners mobile)
 
-#### 3. Modifier `SubNavigation.tsx`
-- Ajouter `{ name: 'Pipeline Chaud', path: '/hot-pipeline', icon: Flame }` entre "Chiffre d'affaire" et "Resources"
+Logique ajoutée :
+- Quand `onValueChange` du Select de statut reçoit `'Deposit'`, `'Signed'` ou `'Gagné'` → ouvrir le `DealDialog`
+- Le statut est appliqué immédiatement, le dialog est un complément
+- Importer et rendre `<DealDialog />` dans chaque composant
 
-#### 4. Modifier `App.tsx`
-- Lazy load `AgentHotPipeline`
-- Route `/hot-pipeline` protégée avec `commercialAllowed={true}`
+### 3. Aucune migration SQL nécessaire
+La table `deals` existe déjà avec tous les champs requis.
 
-### Fichiers a modifier/créer
-| Fichier | Action |
-|---------|--------|
-| `src/pages/AgentHotPipeline.tsx` | Créer |
-| `src/components/admin/HotPipelineMonitor.tsx` | Modifier — ajouter prop `agentId` |
-| `src/components/layout/SubNavigation.tsx` | Modifier — ajouter onglet |
-| `src/App.tsx` | Modifier — ajouter route |
+## Flux utilisateur
+1. Commercial ouvre la fiche lead
+2. Change le statut vers "Dépôt reçu" / "Signature finale" / "Conclus"
+3. Le statut est sauvegardé normalement
+4. Un dialog apparaît : "Félicitations ! Renseignez les détails du deal"
+5. Le commercial saisit prix + % commission → commission calculée automatiquement
+6. Clic "Enregistrer" → upsert dans `deals`
+7. Ou clic "Passer" → le dialog se ferme, le deal pourra être saisi plus tard dans l'admin
 
