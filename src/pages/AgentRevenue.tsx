@@ -195,7 +195,7 @@ const AgentRevenue = () => {
                   <TableCell className="text-xs text-muted-foreground capitalize">{deal.pipeline_type || '—'}</TableCell>
                   <TableCell className="text-right text-sm font-normal">{fmt(deal.sale_price)}</TableCell>
                   <TableCell className="text-right text-xs">{deal.commission_percentage}%</TableCell>
-                  <TableCell className="text-right text-sm font-semibold text-emerald-700">{fmt(deal.commission_amount)}</TableCell>
+                  <TableCell className="text-right text-sm font-normal text-emerald-700">{fmt(deal.commission_amount)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{deal.lead_source || '—'}</TableCell>
                   <TableCell className="text-xs">{format(new Date(deal.deal_date), 'dd MMM yyyy', { locale: fr })}</TableCell>
                   <TableCell>
