@@ -193,7 +193,7 @@ const AgentRevenue = () => {
                 <TableRow key={deal.id}>
                   <TableCell className="font-normal text-sm">{deal.lead_name}</TableCell>
                   <TableCell className="text-xs text-muted-foreground capitalize">{deal.pipeline_type || '—'}</TableCell>
-                  <TableCell className="text-right text-sm font-medium">{fmt(deal.sale_price)}</TableCell>
+                  <TableCell className="text-right text-sm font-normal">{fmt(deal.sale_price)}</TableCell>
                   <TableCell className="text-right text-xs">{deal.commission_percentage}%</TableCell>
                   <TableCell className="text-right text-sm font-semibold text-emerald-700">{fmt(deal.commission_amount)}</TableCell>
                   <TableCell className="text-xs text-muted-foreground">{deal.lead_source || '—'}</TableCell>
