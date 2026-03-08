@@ -26,6 +26,10 @@ const SubNavigation = () => {
     path: '/properties',
     icon: File
   }, {
+    name: "Chiffre d'affaire",
+    path: '/revenue',
+    icon: TrendingUp
+  }, {
     name: 'Resources',
     path: '/resources',
     icon: FolderOpen

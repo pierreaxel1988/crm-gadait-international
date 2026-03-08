@@ -116,6 +116,11 @@ const AppContent = () => {
                 <LeadsAnalytics />
               </ProtectedRoute>
             } />
+            <Route path="/revenue" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <AgentRevenue />
+              </ProtectedRoute>
+            } />
             <Route path="/resources" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Resources />
