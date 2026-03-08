@@ -120,7 +120,7 @@ const AgentRevenue = () => {
       <SubNavigation />
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Mon Chiffre d'Affaire</h1>
+          <h1 className="text-2xl font-normal text-foreground">Mon Chiffre d'Affaire</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {userName ? `Deals de ${userName}` : 'Vos deals personnels'}
           </p>
