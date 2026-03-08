@@ -65,7 +65,7 @@ const UserMenu = () => {
       <DropdownMenuContent align="end" className="w-56">
         {isAdmin && <DropdownMenuItem onClick={() => navigate('/admin?tab=hot-pipeline')}>
             <Flame className="mr-2 h-4 w-4 text-orange-500" />
-            <span>🔥 Pipeline Chaud</span>
+            <span>Pipeline Chaud</span>
           </DropdownMenuItem>}
 
         <DropdownMenuItem onClick={handleAnalyticsClick}>
