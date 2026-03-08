@@ -138,7 +138,7 @@ const AgentRevenue = () => {
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><Percent className="h-4 w-4" /> Commission Moy.</div>
-            <p className="text-2xl font-bold">{avgCommPct.toFixed(1)}%</p>
+            <p className="text-2xl font-normal">{avgCommPct.toFixed(1)}%</p>
           </div>
           <div className="bg-background border rounded-lg p-4 space-y-1">
             <div className="flex items-center gap-2 text-xs text-muted-foreground"><Hash className="h-4 w-4" /> Nombre de deals</div>
