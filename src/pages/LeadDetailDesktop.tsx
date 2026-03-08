@@ -65,11 +65,11 @@ const LeadDetailDesktop = () => {
         <div className="p-6">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="mb-6 text-loro-terracotta"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour
+            {fromHotPipeline ? 'Retour au Pipeline Chaud' : 'Retour'}
           </Button>
           <div className="flex flex-col items-center justify-center min-h-[50vh]">
             <p className="text-red-500 font-medium">
