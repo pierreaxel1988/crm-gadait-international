@@ -43,6 +43,7 @@ const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
 const Resources = lazy(() => import('./pages/Resources'));
 const AgentRevenue = lazy(() => import('./pages/AgentRevenue'));
 const AgentHotPipeline = lazy(() => import('./pages/AgentHotPipeline'));
+const MyDay = lazy(() => import('./pages/MyDay'));
 
 const AppContent = () => {
   const { user } = useAuth();
