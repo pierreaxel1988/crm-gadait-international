@@ -8,6 +8,7 @@ import ImmersiveHeaderOverlay from './ImmersiveHeaderOverlay';
 import Logo from './navbar/Logo';
 import SearchBar from './navbar/SearchBar';
 import NotificationsDropdown from './navbar/NotificationsDropdown';
+import ActionsBadge from './navbar/ActionsBadge';
 import UserMenu from './navbar/UserMenu';
 
 interface NavbarProps {
