@@ -60,7 +60,9 @@ const MyDay = () => {
       // Fetch leads
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, created_at') as any;     .not('status', 'in', '("Gagné","Perdu")');
+        .select('id, name, action_history, tags, status, created_at') as any;
+      
+      query = query.not('status', 'in', '("Gagné","Perdu")');
 
       if (teamMemberId) {
         query = query.eq('assigned_to', teamMemberId);
