@@ -20,7 +20,8 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
-  assignedTo?: string; // This is the agent's name
+  assignedTo?: string;
+  tags?: string[];
   onClick: (id: string) => void;
 }
 
