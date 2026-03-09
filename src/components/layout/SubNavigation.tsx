@@ -14,6 +14,10 @@ const SubNavigation = () => {
     path: '/pipeline',
     icon: ListTodo
   }, {
+    name: 'Ma Journée',
+    path: '/my-day',
+    icon: Sun
+  }, {
     name: 'Actions',
     path: '/actions',
     icon: ClipboardList

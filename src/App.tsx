@@ -128,6 +128,11 @@ const AppContent = () => {
                 <AgentHotPipeline />
               </ProtectedRoute>
             } />
+            <Route path="/my-day" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <MyDay />
+              </ProtectedRoute>
+            } />
             <Route path="/resources" element={
               <ProtectedRoute commercialAllowed={true}>
                 <Resources />

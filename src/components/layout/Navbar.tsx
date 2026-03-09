@@ -38,6 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             <div className="flex items-center space-x-2 md:space-x-4 text-white">
               <SearchBar />
+              <ActionsBadge />
               <NotificationsDropdown />
               <UserMenu />
             </div>
