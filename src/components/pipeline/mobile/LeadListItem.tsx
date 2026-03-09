@@ -6,6 +6,7 @@ import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormat
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
 import LeadTagsList from './components/LeadTagsList';
+import PriorityBadge, { getLeadPriorityScore } from '@/components/common/PriorityBadge';
 
 interface LeadListItemProps {
   id: string;
