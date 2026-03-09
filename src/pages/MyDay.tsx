@@ -125,7 +125,7 @@ const MyDay = () => {
         }
 
         // Inactive leads (no update in 5+ days)
-        const lastUpdate = leadDate(lead.created_at);
+        const lastUpdate = new Date(lead.created_at);
         if (lastUpdate < fiveDaysAgo) {
           inactive.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Dernière activité: ${format(lastUpdate, 'dd/MM', { locale: fr })}` });
         }
