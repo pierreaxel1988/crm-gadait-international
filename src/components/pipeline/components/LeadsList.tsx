@@ -67,6 +67,7 @@ const LeadsList: React.FC<LeadsListProps> = ({
             assignedTo={lead.assignedTo && teamMembers ? 
               teamMembers.find(member => member.id === lead.assignedTo)?.name : 
               undefined}
+            tags={lead.tags as string[] || []}
             onClick={onLeadClick}
           />
         ))}

@@ -43,6 +43,7 @@ const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
 const Resources = lazy(() => import('./pages/Resources'));
 const AgentRevenue = lazy(() => import('./pages/AgentRevenue'));
 const AgentHotPipeline = lazy(() => import('./pages/AgentHotPipeline'));
+const MyDay = lazy(() => import('./pages/MyDay'));
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -125,6 +126,11 @@ const AppContent = () => {
             <Route path="/hot-pipeline" element={
               <ProtectedRoute commercialAllowed={true}>
                 <AgentHotPipeline />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-day" element={
+              <ProtectedRoute commercialAllowed={true}>
+                <MyDay />
               </ProtectedRoute>
             } />
             <Route path="/resources" element={

@@ -7,6 +7,7 @@ import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
 import { isPast, isToday } from 'date-fns';
 import { PipelineType } from '@/types/lead';
+import PriorityBadge, { getLeadPriorityScore } from '@/components/common/PriorityBadge';
 
 // Import sub-components
 import ContactInfo from './card/ContactInfo';
@@ -177,14 +178,17 @@ const KanbanCard = ({ item, className, draggable = false, pipelineType }: Kanban
       onDragEnd={draggable ? handleDragEnd : undefined}
     >
       <CardContent className="p-4">
-        {/* En-tête avec nom et tags */}
+        {/* En-tête avec nom, priorité et tags */}
         <div className="flex justify-between items-start mb-3">
-          <h3 className={cn(
-            "font-medium text-sm",
-            isDeleted ? "text-gray-500" : "text-gray-900"
-          )}>
-            {item.name}
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <PriorityBadge score={getLeadPriorityScore({ status: item.status, tags: item.tags as string[], nextFollowUpDate: item.nextFollowUpDate })} />
+            <h3 className={cn(
+              "font-medium text-sm",
+              isDeleted ? "text-muted-foreground" : "text-foreground"
+            )}>
+              {item.name}
+            </h3>
+          </div>
           <TagList tags={item.tags} />
         </div>
         

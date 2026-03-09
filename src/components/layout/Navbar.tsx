@@ -8,6 +8,7 @@ import ImmersiveHeaderOverlay from './ImmersiveHeaderOverlay';
 import Logo from './navbar/Logo';
 import SearchBar from './navbar/SearchBar';
 import NotificationsDropdown from './navbar/NotificationsDropdown';
+import ActionsBadge from './navbar/ActionsBadge';
 import UserMenu from './navbar/UserMenu';
 
 interface NavbarProps {
@@ -37,6 +38,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             <div className="flex items-center space-x-2 md:space-x-4 text-white">
               <SearchBar />
+              <ActionsBadge />
               <NotificationsDropdown />
               <UserMenu />
             </div>

@@ -6,6 +6,7 @@ import { formatDate, formatName, getActionStatusStyle } from './utils/leadFormat
 import LeadAvatar from './components/LeadAvatar';
 import LeadContactActions from './components/LeadContactActions';
 import LeadTagsList from './components/LeadTagsList';
+import PriorityBadge, { getLeadPriorityScore } from '@/components/common/PriorityBadge';
 
 interface LeadListItemProps {
   id: string;
@@ -19,7 +20,8 @@ interface LeadListItemProps {
   nextFollowUpDate?: string;
   phone?: string;
   email?: string;
-  assignedTo?: string; // This is the agent's name
+  assignedTo?: string;
+  tags?: string[];
   onClick: (id: string) => void;
 }
 
@@ -36,6 +38,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   phone,
   email,
   assignedTo,
+  tags,
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
@@ -72,7 +75,10 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
+            <h3 className="font-futuraLight text-base text-foreground flex items-center gap-1.5">
+              <PriorityBadge score={getLeadPriorityScore({ status: columnStatus, tags, nextFollowUpDate })} />
+              {formatName(name)}
+            </h3>
             <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
               {formatDate(createdAt)}
             </div>
