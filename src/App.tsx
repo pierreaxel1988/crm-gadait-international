@@ -36,7 +36,7 @@ const MobileLeadImport = lazy(() => import('./pages/MobileLeadImport'));
 const ActionsPage = lazy(() => import('./pages/Actions'));
 const Calendar = lazy(() => import('./pages/Calendar'));
 const Admin = lazy(() => import('./pages/Admin'));
-const ProtectedRoute = lazy(() => import('./components/layout/ProtectedRoute'));
+import ProtectedRoute from './components/layout/ProtectedRoute';
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ChatGadaitPage = lazy(() => import('./pages/ChatGadaitPage'));
 const LeadsAnalytics = lazy(() => import('./pages/LeadsAnalytics'));
