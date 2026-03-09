@@ -75,7 +75,10 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-futuraLight text-base text-zinc-700">{formatName(name)}</h3>
+            <h3 className="font-futuraLight text-base text-foreground flex items-center gap-1.5">
+              <PriorityBadge score={getLeadPriorityScore({ status: columnStatus, tags, nextFollowUpDate })} />
+              {formatName(name)}
+            </h3>
             <div className="text-xs text-zinc-500 whitespace-nowrap font-futuraLight">
               {formatDate(createdAt)}
             </div>
