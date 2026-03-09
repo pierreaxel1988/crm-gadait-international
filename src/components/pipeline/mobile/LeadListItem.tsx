@@ -38,6 +38,7 @@ const LeadListItem: React.FC<LeadListItemProps> = ({
   phone,
   email,
   assignedTo,
+  tags,
   onClick
 }) => {
   const actionStyle = getActionStatusStyle(nextFollowUpDate);
