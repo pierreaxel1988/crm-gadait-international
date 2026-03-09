@@ -1,5 +1,6 @@
 
 import React, { Suspense, lazy } from 'react';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 import {
   BrowserRouter as Router,
   Route,
