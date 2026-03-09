@@ -7,6 +7,7 @@ import { LeadTag } from '@/components/common/TagBadge';
 import { Card, CardContent } from "@/components/ui/card";
 import { isPast, isToday } from 'date-fns';
 import { PipelineType } from '@/types/lead';
+import PriorityBadge, { getLeadPriorityScore } from '@/components/common/PriorityBadge';
 
 // Import sub-components
 import ContactInfo from './card/ContactInfo';
