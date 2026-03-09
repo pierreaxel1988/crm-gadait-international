@@ -60,7 +60,7 @@ const MyDay = () => {
       // Fetch leads
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, updated_at, created_at')
+        .select('id, name, action_history, tags, status, created_at') as any;
         .not('status', 'in', '("Gagné","Perdu")');
 
       if (teamMemberId) {
