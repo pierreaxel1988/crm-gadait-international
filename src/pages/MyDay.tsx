@@ -5,12 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isPast, isToday, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 interface ActionItem {
   id: string;
@@ -28,7 +30,7 @@ interface AlertLead {
 }
 
 const MyDay = () => {
-  const { user, isCommercial, userName } = useAuth();
+  const { user, isCommercial, isAdmin, userName } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
@@ -37,11 +39,20 @@ const MyDay = () => {
   const [untaggedLeads, setUntaggedLeads] = useState<AlertLead[]>([]);
   const [inactiveLeads, setInactiveLeads] = useState<AlertLead[]>([]);
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+
+  const allMembers = useMemo(() => 
+    [...GUARANTEED_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name)), 
+  []);
+
+  const selectedAgentName = selectedAgentId 
+    ? allMembers.find(m => m.id === selectedAgentId)?.name || null 
+    : null;
 
   useEffect(() => {
     if (!user) return;
     fetchData();
-  }, [user]);
+  }, [user, selectedAgentId]);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -64,7 +75,10 @@ const MyDay = () => {
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
 
-      if (teamMemberId) {
+      // Admin with agent filter selected
+      if (isAdmin && selectedAgentId) {
+        query = query.eq('assigned_to', selectedAgentId);
+      } else if (teamMemberId) {
         query = query.eq('assigned_to', teamMemberId);
       }
 
@@ -165,12 +179,42 @@ const MyDay = () => {
       <div className={`${isMobile ? 'p-3' : 'p-6'} bg-background min-h-screen max-w-screen-xl mx-auto`}>
         <div className="mb-6">
           <h1 className="text-2xl font-futura text-foreground">
-            {greeting}, {userName || 'Agent'} 👋
+            {greeting}, {selectedAgentName || userName || 'Agent'} 👋
           </h1>
           <p className="text-muted-foreground text-sm mt-1">
             {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
           </p>
         </div>
+
+        {/* Agent filter for admins */}
+        {isAdmin && (
+          <div className="mb-6">
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+              <User className="h-4 w-4" /> Filtrer par agent
+            </h4>
+            <div className="flex flex-wrap gap-1">
+              <Button
+                variant={selectedAgentId === null ? "default" : "outline"}
+                size="sm"
+                className="text-xs px-2 py-1 h-auto"
+                onClick={() => setSelectedAgentId(null)}
+              >
+                Tous
+              </Button>
+              {allMembers.map(member => (
+                <Button
+                  key={member.id}
+                  variant={selectedAgentId === member.id ? "default" : "outline"}
+                  size="sm"
+                  className="text-xs px-2 py-1 h-auto"
+                  onClick={() => setSelectedAgentId(member.id)}
+                >
+                  {member.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Stats summary */}
         <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} gap-3 mb-6`}>

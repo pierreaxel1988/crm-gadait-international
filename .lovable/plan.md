@@ -1,14 +1,40 @@
 
+# Optimisations CRM — Implémentation
 
-## Filtre par agent sur la page Ma Journée (admin only)
+## ✅ Implémenté
 
-### Changements dans `src/pages/MyDay.tsx`
+### Badge de priorité lead (Quick win #2)
+- Composant `PriorityBadge` avec scoring (🔴🟠🟡🟢)
+- Visible sur les KanbanCard (desktop) et LeadListItem (mobile)
+- Score basé sur : stade + tags + urgence action
 
-1. **Importer** `GUARANTEED_TEAM_MEMBERS` depuis `teamMemberService` et `isAdmin` depuis `useAuth`
-2. **Ajouter un state** `selectedAgentId: string | null` (default `null` = tous)
-3. **Afficher un sélecteur d'agent** (boutons comme dans `AgentFilter.tsx`) entre le greeting et les stats, visible uniquement si `isAdmin`
-4. **Modifier `fetchData`** : quand `isAdmin` et `selectedAgentId` est défini, filtrer par `assigned_to = selectedAgentId`. Refetch quand `selectedAgentId` change
-5. **Adapter le greeting** : si un agent est sélectionné, afficher son nom au lieu de "Agent"
+### Compteur d'actions navbar (Quick win #9)
+- Composant `ActionsBadge` dans la navbar
+- Affiche le nombre d'actions en retard + aujourd'hui
+- Badge rouge si actions en retard, terracotta sinon
+- Rafraîchissement toutes les 5 minutes
 
-Pattern existant : reprend le style de `AgentFilter.tsx` (boutons inline avec "Tous" + liste des membres triés).
+### Dashboard Ma Journée (#4)
+- Page `/my-day` accessible via SubNavigation
+- Actions en retard (rouge) et du jour (bleu)
+- Leads sans action programmée
+- Leads inactifs (+5 jours)
+- Leads sans tag
+- Greeting personnalisé par heure du jour
 
+## 🔲 À implémenter
+
+### PRIORITE 1
+1. Alerte automatique "Lead dormant" (Edge Function cron)
+3. Temps de réponse moyen par agent (KPI visible)
+
+### PRIORITE 2
+5. Interface leads "No response" en séquence de relance
+6. Badge leads sans action programmée (dans rapport quotidien)
+
+### PRIORITE 3
+7. Taux de conversion par source
+8. Objectifs agent et progression
+
+### PRIORITE 4
+10. Export automatique hebdo KPI management
