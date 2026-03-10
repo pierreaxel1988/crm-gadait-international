@@ -75,7 +75,10 @@ const MyDay = () => {
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
 
-      if (teamMemberId) {
+      // Admin with agent filter selected
+      if (isAdmin && selectedAgentId) {
+        query = query.eq('assigned_to', selectedAgentId);
+      } else if (teamMemberId) {
         query = query.eq('assigned_to', teamMemberId);
       }
 
