@@ -30,7 +30,7 @@ interface AlertLead {
 }
 
 const MyDay = () => {
-  const { user, isCommercial, userName } = useAuth();
+  const { user, isCommercial, isAdmin, userName } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [isLoading, setIsLoading] = useState(true);
@@ -39,11 +39,20 @@ const MyDay = () => {
   const [untaggedLeads, setUntaggedLeads] = useState<AlertLead[]>([]);
   const [inactiveLeads, setInactiveLeads] = useState<AlertLead[]>([]);
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+
+  const allMembers = useMemo(() => 
+    [...GUARANTEED_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name)), 
+  []);
+
+  const selectedAgentName = selectedAgentId 
+    ? allMembers.find(m => m.id === selectedAgentId)?.name || null 
+    : null;
 
   useEffect(() => {
     if (!user) return;
     fetchData();
-  }, [user]);
+  }, [user, selectedAgentId]);
 
   const fetchData = async () => {
     setIsLoading(true);
