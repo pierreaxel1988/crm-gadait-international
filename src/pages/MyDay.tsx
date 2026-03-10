@@ -5,12 +5,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isPast, isToday, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 interface ActionItem {
   id: string;
