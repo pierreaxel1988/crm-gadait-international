@@ -54,3 +54,6 @@ verify_jwt = false
 
 [functions.weekly-activity-report]
 verify_jwt = false
+
+[functions.check-dormant-leads]
+verify_jwt = false
