@@ -309,7 +309,7 @@ const MyDay = () => {
           <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} />
           <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} />
           <StatCard icon={<CalendarDays className="h-4 w-4 text-indigo-600" />} label="Cette semaine" count={upcomingActions.length} />
-          <StatCard icon={<Mail className="h-4 w-4 text-rose-600" />} label="Sans email" count={noEmailLeads.length} />
+          
           {isAdmin && <StatCard icon={<Trophy className="h-4 w-4 text-green-600" />} label="Gagnés (30j)" count={monthlyWins} />}
         </div>
 
