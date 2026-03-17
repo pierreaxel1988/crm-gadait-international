@@ -249,7 +249,7 @@ const MyDay = () => {
       setNewLeads(newL);
       setUnassignedLeads(unassigned);
       setVipLeads(vip);
-      setNoEmailLeads(noEmail.slice(0, 10));
+      
       setPipelineCounts(pipelines);
     } catch (error) {
       console.error('Error fetching my day data:', error);
