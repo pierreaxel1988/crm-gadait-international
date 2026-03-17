@@ -65,7 +65,7 @@ const MyDay = () => {
 
       const { error } = await supabase
         .from('leads')
-        .update({ action_history: updated, email_envoye: false })
+        .update({ action_history: updated })
         .eq('id', action.leadId);
 
       if (error) throw error;
