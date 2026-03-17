@@ -360,7 +360,7 @@ const MyDay = () => {
           {/* Overdue actions */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <AlertTriangle className="h-4 w-4 text-destructive" />
                 Actions en retard ({overdueActions.length})
               </CardTitle>
