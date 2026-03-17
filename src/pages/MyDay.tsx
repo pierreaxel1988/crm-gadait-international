@@ -150,7 +150,7 @@ const MyDay = () => {
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
-      const twoDaysAgo = subDays(now, 2);
+      
       const tomorrow = startOfDay(addDays(now, 1));
       const sevenDaysLater = startOfDay(addDays(now, 8));
 
