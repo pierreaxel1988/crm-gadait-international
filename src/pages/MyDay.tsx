@@ -98,6 +98,11 @@ const MyDay = () => {
       fiveDaysAgo.setDate(now.getDate() - 5);
 
       leads.forEach(lead => {
+        // New leads
+        if (lead.status === 'New') {
+          newL.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}` });
+        }
+
         // Check actions
         const actions = Array.isArray(lead.action_history) ? lead.action_history : [];
         const incompleteActions = actions.filter((a: any) => !a.completedDate && a.scheduledDate);
