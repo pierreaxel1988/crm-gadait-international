@@ -167,9 +167,10 @@ const MyDay = () => {
         // VIP / Hot leads
         const tags: string[] = Array.isArray(lead.tags) ? lead.tags : [];
         const isVipOrHot = tags.some(t => ['Vip', 'Hot'].includes(t));
-        const highBudget = lead.budget && lead.budget >= 1000000;
+        const budgetNum = typeof lead.budget === 'number' && !isNaN(lead.budget) ? lead.budget : 0;
+        const highBudget = budgetNum >= 1000000;
         if (isVipOrHot || highBudget) {
-          const budgetStr = lead.budget ? `${(lead.budget / 1000000).toFixed(1)}M€` : '';
+          const budgetStr = budgetNum > 0 ? `${(budgetNum / 1000000).toFixed(1)}M€` : '';
           const tagStr = tags.filter(t => ['Vip', 'Hot'].includes(t)).join(', ');
           vip.push({
             id: lead.id,
