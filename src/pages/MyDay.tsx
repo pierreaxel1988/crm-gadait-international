@@ -39,6 +39,7 @@ const MyDay = () => {
   const [untaggedLeads, setUntaggedLeads] = useState<AlertLead[]>([]);
   const [inactiveLeads, setInactiveLeads] = useState<AlertLead[]>([]);
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
+  const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
 
   const allMembers = useMemo(() => 
