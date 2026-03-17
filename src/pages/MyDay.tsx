@@ -448,7 +448,7 @@ const MyDay = () => {
           {/* Inactive leads */}
           <Card className="border-amber-200 dark:border-amber-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Tag className="h-4 w-4 text-amber-600" />
                 Inactifs +5 jours ({inactiveLeads.length})
               </CardTitle>
