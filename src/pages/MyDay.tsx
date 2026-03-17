@@ -3,11 +3,12 @@ import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { isPast, isToday, format, addDays, isBefore, isAfter, startOfDay } from 'date-fns';
+import { isPast, isToday, format, addDays, isBefore, isAfter, startOfDay, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase, Crown, Mail, Trophy, Home, ShoppingCart, Key } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
@@ -30,7 +31,11 @@ const MyDay = () => {
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
   const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [unassignedLeads, setUnassignedLeads] = useState<AlertLead[]>([]);
+  const [vipLeads, setVipLeads] = useState<AlertLead[]>([]);
+  const [noEmailLeads, setNoEmailLeads] = useState<AlertLead[]>([]);
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
+  const [monthlyWins, setMonthlyWins] = useState(0);
+  const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
@@ -65,7 +70,6 @@ const MyDay = () => {
 
       if (error) throw error;
 
-      // Optimistic removal
       setOverdueActions(prev => prev.filter(a => a.id !== action.id));
       setTodayActions(prev => prev.filter(a => a.id !== action.id));
       setUpcomingActions(prev => prev.filter(a => a.id !== action.id));
@@ -99,7 +103,7 @@ const MyDay = () => {
 
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, created_at, assigned_to') as any;
+        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type, email_envoye') as any;
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
       query = query.is('deleted_at', null);
@@ -110,7 +114,25 @@ const MyDay = () => {
         query = query.eq('assigned_to', teamMemberId);
       }
 
-      const { data: leads } = await query;
+      // Parallel: fetch wins for admin
+      const winsPromise = isAdmin ? (async () => {
+        const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
+        let wQuery = supabase
+          .from('leads')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'Gagné')
+          .is('deleted_at', null)
+          .gte('updated_at', thirtyDaysAgo) as any;
+        if (selectedAgentId) wQuery = wQuery.eq('assigned_to', selectedAgentId);
+        return wQuery;
+      })() : Promise.resolve(null);
+
+      const [{ data: leads }, winsResult] = await Promise.all([query, winsPromise]);
+      
+      if (winsResult) {
+        setMonthlyWins(winsResult.count || 0);
+      }
+
       if (!leads) return;
 
       const overdue: ActionItem[] = [];
@@ -121,16 +143,50 @@ const MyDay = () => {
       const noAction: AlertLead[] = [];
       const newL: AlertLead[] = [];
       const unassigned: AlertLead[] = [];
+      const vip: AlertLead[] = [];
+      const noEmail: AlertLead[] = [];
+      const pipelines = { purchase: 0, rental: 0, owner: 0, other: 0 };
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
+      const twoDaysAgo = subDays(now, 2);
       const tomorrow = startOfDay(addDays(now, 1));
       const sevenDaysLater = startOfDay(addDays(now, 8));
 
       setTotalActiveLeads(leads.length);
 
       leads.forEach((lead: any) => {
+        // Pipeline counts
+        const pt = (lead.pipeline_type || '').toLowerCase();
+        if (pt.includes('purchase') || pt.includes('achat')) pipelines.purchase++;
+        else if (pt.includes('rental') || pt.includes('location')) pipelines.rental++;
+        else if (pt.includes('owner') || pt.includes('propriétaire') || pt.includes('proprietaire')) pipelines.owner++;
+        else pipelines.other++;
+
+        // VIP / Hot leads
+        const tags: string[] = Array.isArray(lead.tags) ? lead.tags : [];
+        const isVipOrHot = tags.some(t => ['Vip', 'Hot'].includes(t));
+        const highBudget = lead.budget && lead.budget >= 1000000;
+        if (isVipOrHot || highBudget) {
+          const budgetStr = lead.budget ? `${(lead.budget / 1000000).toFixed(1)}M€` : '';
+          const tagStr = tags.filter(t => ['Vip', 'Hot'].includes(t)).join(', ');
+          vip.push({
+            id: lead.id,
+            name: lead.name || 'Sans nom',
+            reason: [tagStr, budgetStr].filter(Boolean).join(' · ')
+          });
+        }
+
+        // No email sent (created > 2 days ago)
+        if (!lead.email_envoye && new Date(lead.created_at) < twoDaysAgo) {
+          noEmail.push({
+            id: lead.id,
+            name: lead.name || 'Sans nom',
+            reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}`
+          });
+        }
+
         // New leads
         if (lead.status === 'New') {
           newL.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}` });
@@ -150,34 +206,21 @@ const MyDay = () => {
           const d = new Date(action.scheduledDate);
           if (isPast(d) && !isToday(d)) {
             overdue.push({
-              id: action.id,
-              leadId: lead.id,
-              leadName: lead.name || 'Sans nom',
-              actionType: action.actionType || 'Action',
-              scheduledDate: action.scheduledDate,
-              status: 'overdue'
+              id: action.id, leadId: lead.id, leadName: lead.name || 'Sans nom',
+              actionType: action.actionType || 'Action', scheduledDate: action.scheduledDate, status: 'overdue'
             });
           } else if (isToday(d)) {
             today.push({
-              id: action.id,
-              leadId: lead.id,
-              leadName: lead.name || 'Sans nom',
-              actionType: action.actionType || 'Action',
-              scheduledDate: action.scheduledDate,
-              status: 'today'
+              id: action.id, leadId: lead.id, leadName: lead.name || 'Sans nom',
+              actionType: action.actionType || 'Action', scheduledDate: action.scheduledDate, status: 'today'
             });
             hasFutureAction = true;
           } else {
             hasFutureAction = true;
-            // Upcoming 7 days
             if (isAfter(d, tomorrow) && isBefore(d, sevenDaysLater)) {
               upcoming.push({
-                id: action.id,
-                leadId: lead.id,
-                leadName: lead.name || 'Sans nom',
-                actionType: action.actionType || 'Action',
-                scheduledDate: action.scheduledDate,
-                status: 'upcoming',
+                id: action.id, leadId: lead.id, leadName: lead.name || 'Sans nom',
+                actionType: action.actionType || 'Action', scheduledDate: action.scheduledDate, status: 'upcoming',
                 dayLabel: format(d, 'EEEE dd', { locale: fr })
               });
             }
@@ -188,21 +231,14 @@ const MyDay = () => {
           noAction.push({ id: lead.id, name: lead.name || 'Sans nom', reason: 'Aucune action programmée' });
         }
 
-        if (!lead.tags || lead.tags.length === 0) {
+        if (!tags.length) {
           untagged.push({ id: lead.id, name: lead.name || 'Sans nom', reason: 'Aucun tag' });
         }
 
-        // Fix: use latest action date instead of created_at
         let lastActivity = new Date(lead.created_at);
         actions.forEach((a: any) => {
-          if (a.completedDate) {
-            const d = new Date(a.completedDate);
-            if (d > lastActivity) lastActivity = d;
-          }
-          if (a.createdAt) {
-            const d = new Date(a.createdAt);
-            if (d > lastActivity) lastActivity = d;
-          }
+          if (a.completedDate) { const d = new Date(a.completedDate); if (d > lastActivity) lastActivity = d; }
+          if (a.createdAt) { const d = new Date(a.createdAt); if (d > lastActivity) lastActivity = d; }
         });
 
         if (lastActivity < fiveDaysAgo) {
@@ -210,7 +246,6 @@ const MyDay = () => {
         }
       });
 
-      // Sort upcoming by date
       upcoming.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
 
       setOverdueActions(overdue);
@@ -221,6 +256,9 @@ const MyDay = () => {
       setNoActionLeads(noAction.slice(0, 10));
       setNewLeads(newL);
       setUnassignedLeads(unassigned);
+      setVipLeads(vip);
+      setNoEmailLeads(noEmail.slice(0, 10));
+      setPipelineCounts(pipelines);
     } catch (error) {
       console.error('Error fetching my day data:', error);
     } finally {
@@ -263,41 +301,52 @@ const MyDay = () => {
               <User className="h-4 w-4" /> Filtrer par agent
             </h4>
             <div className="flex flex-wrap gap-1">
-              <Button
-                variant={selectedAgentId === null ? "default" : "outline"}
-                size="sm"
-                className="text-xs px-2 py-1 h-auto"
-                onClick={() => setSelectedAgentId(null)}
-              >
-                Tous
-              </Button>
+              <Button variant={selectedAgentId === null ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(null)}>Tous</Button>
               {allMembers.map(member => (
-                <Button
-                  key={member.id}
-                  variant={selectedAgentId === member.id ? "default" : "outline"}
-                  size="sm"
-                  className="text-xs px-2 py-1 h-auto"
-                  onClick={() => setSelectedAgentId(member.id)}
-                >
-                  {member.name}
-                </Button>
+                <Button key={member.id} variant={selectedAgentId === member.id ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(member.id)}>{member.name}</Button>
               ))}
             </div>
           </div>
         )}
 
         {/* Stats summary */}
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4 lg:grid-cols-7'} gap-3 mb-6`}>
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4 lg:grid-cols-8'} gap-3 mb-3`}>
           <StatCard icon={<Briefcase className="h-4 w-4 text-primary" />} label="Portfolio" count={totalActiveLeads} />
+          <StatCard icon={<Crown className="h-4 w-4 text-amber-500" />} label="VIP / Hot" count={vipLeads.length} />
           <StatCard icon={<Bell className="h-4 w-4 text-destructive" />} label="Nouveaux" count={newLeads.length} />
           <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} />
           <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} />
           <StatCard icon={<CalendarDays className="h-4 w-4 text-indigo-600" />} label="Cette semaine" count={upcomingActions.length} />
-          <StatCard icon={<Tag className="h-4 w-4 text-amber-600" />} label="Sans tag" count={untaggedLeads.length} />
-          <StatCard icon={<UserX className="h-4 w-4 text-orange-600" />} label="Sans action" count={noActionLeads.length} />
+          <StatCard icon={<Mail className="h-4 w-4 text-rose-600" />} label="Sans email" count={noEmailLeads.length} />
+          {isAdmin && <StatCard icon={<Trophy className="h-4 w-4 text-green-600" />} label="Gagnés (30j)" count={monthlyWins} />}
+        </div>
+
+        {/* Pipeline distribution */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Badge variant="outline" className="text-xs gap-1"><ShoppingCart className="h-3 w-3" /> Achat: {pipelineCounts.purchase}</Badge>
+          <Badge variant="outline" className="text-xs gap-1"><Key className="h-3 w-3" /> Location: {pipelineCounts.rental}</Badge>
+          <Badge variant="outline" className="text-xs gap-1"><Home className="h-3 w-3" /> Propriétaires: {pipelineCounts.owner}</Badge>
+          {pipelineCounts.other > 0 && <Badge variant="outline" className="text-xs gap-1">Autre: {pipelineCounts.other}</Badge>}
         </div>
 
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'} gap-4`}>
+          {/* VIP / Hot leads */}
+          {vipLeads.length > 0 && (
+            <Card className="border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/10">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Crown className="h-4 w-4 text-amber-500" />
+                  Leads prioritaires ({vipLeads.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {vipLeads.slice(0, 8).map(l => (
+                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
           {/* New leads */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
@@ -308,14 +357,10 @@ const MyDay = () => {
             </CardHeader>
             <CardContent className="space-y-1">
               {newLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead
-                </p>
-              ) : (
-                newLeads.slice(0, 8).map(l => (
-                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
-                ))
-              )}
+                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead</p>
+              ) : newLeads.slice(0, 8).map(l => (
+                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
+              ))}
             </CardContent>
           </Card>
 
@@ -329,14 +374,10 @@ const MyDay = () => {
             </CardHeader>
             <CardContent className="space-y-1">
               {overdueActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Tout est à jour !
-                </p>
-              ) : (
-                overdueActions.slice(0, 8).map(a => (
-                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-                ))
-              )}
+                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tout est à jour !</p>
+              ) : overdueActions.slice(0, 8).map(a => (
+                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              ))}
             </CardContent>
           </Card>
 
@@ -351,11 +392,9 @@ const MyDay = () => {
             <CardContent className="space-y-1">
               {todayActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Rien de prévu aujourd'hui</p>
-              ) : (
-                todayActions.slice(0, 8).map(a => (
-                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-                ))
-              )}
+              ) : todayActions.slice(0, 8).map(a => (
+                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              ))}
             </CardContent>
           </Card>
 
@@ -370,11 +409,26 @@ const MyDay = () => {
             <CardContent className="space-y-1">
               {upcomingActions.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Aucune action prévue cette semaine</p>
-              ) : (
-                upcomingActions.slice(0, 10).map(a => (
-                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-                ))
-              )}
+              ) : upcomingActions.slice(0, 10).map(a => (
+                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* No email sent */}
+          <Card className="border-rose-200 dark:border-rose-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Mail className="h-4 w-4 text-rose-600" />
+                Sans email envoyé ({noEmailLeads.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              {noEmailLeads.length === 0 ? (
+                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont été contactés</p>
+              ) : noEmailLeads.map(l => (
+                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              ))}
             </CardContent>
           </Card>
 
@@ -389,14 +443,10 @@ const MyDay = () => {
               </CardHeader>
               <CardContent className="space-y-1">
                 {unassignedLeads.length === 0 ? (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads sont assignés
-                  </p>
-                ) : (
-                  unassignedLeads.slice(0, 8).map(l => (
-                    <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-                  ))
-                )}
+                  <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads sont assignés</p>
+                ) : unassignedLeads.slice(0, 8).map(l => (
+                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+                ))}
               </CardContent>
             </Card>
           )}
@@ -411,14 +461,10 @@ const MyDay = () => {
             </CardHeader>
             <CardContent className="space-y-1">
               {noActionLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont des actions
-                </p>
-              ) : (
-                noActionLeads.map(l => (
-                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-                ))
-              )}
+                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont des actions</p>
+              ) : noActionLeads.map(l => (
+                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              ))}
             </CardContent>
           </Card>
 
@@ -433,11 +479,9 @@ const MyDay = () => {
             <CardContent className="space-y-1">
               {inactiveLeads.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Tous les leads sont actifs</p>
-              ) : (
-                inactiveLeads.map(l => (
-                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-                ))
-              )}
+              ) : inactiveLeads.map(l => (
+                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              ))}
             </CardContent>
           </Card>
         </div>
