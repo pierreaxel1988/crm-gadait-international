@@ -1,40 +1,18 @@
 
-# Optimisations CRM — Implémentation
 
-## ✅ Implémenté
+## Correction : exclure les leads supprimés dans Ma Journée
 
-### Badge de priorité lead (Quick win #2)
-- Composant `PriorityBadge` avec scoring (🔴🟠🟡🟢)
-- Visible sur les KanbanCard (desktop) et LeadListItem (mobile)
-- Score basé sur : stade + tags + urgence action
+### Problème
+La requête Supabase dans `src/pages/MyDay.tsx` (`fetchData`) ne filtre pas `deleted_at IS NULL`, contrairement au pipeline. Résultat : les leads soft-deleted sont comptabilisés dans toutes les sections (nouveaux, en retard, sans tag, etc.).
 
-### Compteur d'actions navbar (Quick win #9)
-- Composant `ActionsBadge` dans la navbar
-- Affiche le nombre d'actions en retard + aujourd'hui
-- Badge rouge si actions en retard, terracotta sinon
-- Rafraîchissement toutes les 5 minutes
+### Changement unique dans `src/pages/MyDay.tsx`
 
-### Dashboard Ma Journée (#4)
-- Page `/my-day` accessible via SubNavigation
-- Actions en retard (rouge) et du jour (bleu)
-- Leads sans action programmée
-- Leads inactifs (+5 jours)
-- Leads sans tag
-- Greeting personnalisé par heure du jour
+Ajouter `.is('deleted_at', null)` à la requête Supabase existante (ligne ~77, juste après le filtre sur le status) :
 
-## 🔲 À implémenter
+```typescript
+query = query.not('status', 'in', '("Gagné","Perdu")');
+query = query.is('deleted_at', null);  // ← ajouter cette ligne
+```
 
-### PRIORITE 1
-1. Alerte automatique "Lead dormant" (Edge Function cron)
-3. Temps de réponse moyen par agent (KPI visible)
+Cela corrigera les compteurs de **toutes** les sections (nouveaux leads, actions en retard, sans tag, inactifs, sans action) d'un coup puisqu'elles utilisent toutes le même dataset `leads`.
 
-### PRIORITE 2
-5. Interface leads "No response" en séquence de relance
-6. Badge leads sans action programmée (dans rapport quotidien)
-
-### PRIORITE 3
-7. Taux de conversion par source
-8. Objectifs agent et progression
-
-### PRIORITE 4
-10. Export automatique hebdo KPI management
