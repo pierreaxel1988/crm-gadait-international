@@ -343,7 +343,7 @@ const MyDay = () => {
           {/* New leads */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Bell className="h-4 w-4 text-destructive" />
                 Nouveaux leads ({newLeads.length})
               </CardTitle>
@@ -360,7 +360,7 @@ const MyDay = () => {
           {/* Overdue actions */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <AlertTriangle className="h-4 w-4 text-destructive" />
                 Actions en retard ({overdueActions.length})
               </CardTitle>
@@ -377,7 +377,7 @@ const MyDay = () => {
           {/* Today's actions */}
           <Card className="border-blue-200 dark:border-blue-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Clock className="h-4 w-4 text-blue-600" />
                 Actions du jour ({todayActions.length})
               </CardTitle>
@@ -394,7 +394,7 @@ const MyDay = () => {
           {/* Upcoming 7 days */}
           <Card className="border-indigo-200 dark:border-indigo-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <CalendarDays className="h-4 w-4 text-indigo-600" />
                 Cette semaine ({upcomingActions.length})
               </CardTitle>
@@ -413,7 +413,7 @@ const MyDay = () => {
           {isAdmin &&
           <Card className="border-purple-200 dark:border-purple-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-base flex items-center gap-2 font-medium">
                   <Users className="h-4 w-4 text-purple-600" />
                   Leads non assignés ({unassignedLeads.length})
                 </CardTitle>
@@ -431,7 +431,7 @@ const MyDay = () => {
           {/* Leads without scheduled action */}
           <Card className="border-orange-200 dark:border-orange-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <UserX className="h-4 w-4 text-orange-600" />
                 Sans action programmée ({noActionLeads.length})
               </CardTitle>
@@ -448,7 +448,7 @@ const MyDay = () => {
           {/* Inactive leads */}
           <Card className="border-amber-200 dark:border-amber-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Tag className="h-4 w-4 text-amber-600" />
                 Inactifs +5 jours ({inactiveLeads.length})
               </CardTitle>
