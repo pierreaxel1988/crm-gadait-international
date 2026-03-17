@@ -157,6 +157,7 @@ const MyDay = () => {
       setUntaggedLeads(untagged);
       setInactiveLeads(inactive.slice(0, 10));
       setNoActionLeads(noAction.slice(0, 10));
+      setNewLeads(newL);
     } catch (error) {
       console.error('Error fetching my day data:', error);
     } finally {
