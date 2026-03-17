@@ -144,7 +144,7 @@ const MyDay = () => {
       const newL: AlertLead[] = [];
       const unassigned: AlertLead[] = [];
       const vip: AlertLead[] = [];
-      const noEmail: AlertLead[] = [];
+      
       const pipelines = { purchase: 0, rental: 0, owner: 0, other: 0 };
 
       const now = new Date();
