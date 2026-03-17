@@ -413,7 +413,7 @@ const MyDay = () => {
           {isAdmin &&
           <Card className="border-purple-200 dark:border-purple-800">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-base flex items-center gap-2 font-medium">
                   <Users className="h-4 w-4 text-purple-600" />
                   Leads non assignés ({unassignedLeads.length})
                 </CardTitle>
