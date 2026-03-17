@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isPast, isToday, format, addDays, isBefore, isAfter, startOfDay, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase, Crown, Mail, Trophy, Home, ShoppingCart, Key } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase, Crown, Trophy, Home, ShoppingCart, Key } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,7 @@ const MyDay = () => {
   const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [unassignedLeads, setUnassignedLeads] = useState<AlertLead[]>([]);
   const [vipLeads, setVipLeads] = useState<AlertLead[]>([]);
-  const [noEmailLeads, setNoEmailLeads] = useState<AlertLead[]>([]);
+  
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
@@ -65,7 +65,7 @@ const MyDay = () => {
 
       const { error } = await supabase
         .from('leads')
-        .update({ action_history: updated, email_envoye: false })
+        .update({ action_history: updated })
         .eq('id', action.leadId);
 
       if (error) throw error;
@@ -103,7 +103,7 @@ const MyDay = () => {
 
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type, email_envoye') as any;
+        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type') as any;
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
       query = query.is('deleted_at', null);
@@ -144,13 +144,13 @@ const MyDay = () => {
       const newL: AlertLead[] = [];
       const unassigned: AlertLead[] = [];
       const vip: AlertLead[] = [];
-      const noEmail: AlertLead[] = [];
+      
       const pipelines = { purchase: 0, rental: 0, owner: 0, other: 0 };
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
-      const twoDaysAgo = subDays(now, 2);
+      
       const tomorrow = startOfDay(addDays(now, 1));
       const sevenDaysLater = startOfDay(addDays(now, 8));
 
@@ -178,14 +178,6 @@ const MyDay = () => {
           });
         }
 
-        // No email sent (created > 2 days ago)
-        if (!lead.email_envoye && new Date(lead.created_at) < twoDaysAgo) {
-          noEmail.push({
-            id: lead.id,
-            name: lead.name || 'Sans nom',
-            reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}`
-          });
-        }
 
         // New leads
         if (lead.status === 'New') {
@@ -257,7 +249,7 @@ const MyDay = () => {
       setNewLeads(newL);
       setUnassignedLeads(unassigned);
       setVipLeads(vip);
-      setNoEmailLeads(noEmail.slice(0, 10));
+      
       setPipelineCounts(pipelines);
     } catch (error) {
       console.error('Error fetching my day data:', error);
@@ -317,7 +309,7 @@ const MyDay = () => {
           <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} />
           <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} />
           <StatCard icon={<CalendarDays className="h-4 w-4 text-indigo-600" />} label="Cette semaine" count={upcomingActions.length} />
-          <StatCard icon={<Mail className="h-4 w-4 text-rose-600" />} label="Sans email" count={noEmailLeads.length} />
+          
           {isAdmin && <StatCard icon={<Trophy className="h-4 w-4 text-green-600" />} label="Gagnés (30j)" count={monthlyWins} />}
         </div>
 
@@ -415,22 +407,6 @@ const MyDay = () => {
             </CardContent>
           </Card>
 
-          {/* No email sent */}
-          <Card className="border-rose-200 dark:border-rose-800">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Mail className="h-4 w-4 text-rose-600" />
-                Sans email envoyé ({noEmailLeads.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {noEmailLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont été contactés</p>
-              ) : noEmailLeads.map(l => (
-                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-              ))}
-            </CardContent>
-          </Card>
 
           {/* Unassigned leads (admin only) */}
           {isAdmin && (
