@@ -178,14 +178,6 @@ const MyDay = () => {
           });
         }
 
-        // No email sent (created > 2 days ago)
-        if (!lead.email_envoye && new Date(lead.created_at) < twoDaysAgo) {
-          noEmail.push({
-            id: lead.id,
-            name: lead.name || 'Sans nom',
-            reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}`
-          });
-        }
 
         // New leads
         if (lead.status === 'New') {
