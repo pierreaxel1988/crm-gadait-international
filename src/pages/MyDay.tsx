@@ -91,6 +91,7 @@ const MyDay = () => {
       const untagged: AlertLead[] = [];
       const inactive: AlertLead[] = [];
       const noAction: AlertLead[] = [];
+      const newL: AlertLead[] = [];
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
