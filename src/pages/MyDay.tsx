@@ -309,7 +309,7 @@ const MyDay = () => {
             </h4>
             <div className="flex flex-wrap gap-1">
               <Button variant={selectedAgentId === null ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(null)}>Tous</Button>
-              {allMembers.map((member) =>
+              {allMembers.filter((member) => agentsWithLeads.has(member.id)).map((member) =>
             <Button key={member.id} variant={selectedAgentId === member.id ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(member.id)}>{member.name}</Button>
             )}
             </div>
