@@ -1,33 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { isPast, isToday, format } from 'date-fns';
+import { isPast, isToday, format, addDays, isBefore, isAfter, startOfDay } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight, User, Bell } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
-
-interface ActionItem {
-  id: string;
-  leadId: string;
-  leadName: string;
-  actionType: string;
-  scheduledDate: string;
-  status: 'overdue' | 'today' | 'upcoming';
-}
-
-interface AlertLead {
-  id: string;
-  name: string;
-  reason: string;
-}
+import { toast } from '@/hooks/use-toast';
+import StatCard from '@/components/myday/StatCard';
+import ActionRow, { ActionItem } from '@/components/myday/ActionRow';
+import LeadRow, { AlertLead } from '@/components/myday/LeadRow';
 
 const MyDay = () => {
   const { user, isCommercial, isAdmin, userName } = useAuth();
@@ -36,11 +24,15 @@ const MyDay = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [overdueActions, setOverdueActions] = useState<ActionItem[]>([]);
   const [todayActions, setTodayActions] = useState<ActionItem[]>([]);
+  const [upcomingActions, setUpcomingActions] = useState<ActionItem[]>([]);
   const [untaggedLeads, setUntaggedLeads] = useState<AlertLead[]>([]);
   const [inactiveLeads, setInactiveLeads] = useState<AlertLead[]>([]);
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
   const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
+  const [unassignedLeads, setUnassignedLeads] = useState<AlertLead[]>([]);
+  const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
   const allMembers = useMemo(() => 
     [...GUARANTEED_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name)), 
@@ -50,6 +42,43 @@ const MyDay = () => {
     ? allMembers.find(m => m.id === selectedAgentId)?.name || null 
     : null;
 
+  const handleCompleteAction = useCallback(async (action: ActionItem) => {
+    setCompletingActionId(action.id);
+    try {
+      const { data: lead, error: leadError } = await supabase
+        .from('leads')
+        .select('action_history')
+        .eq('id', action.leadId)
+        .single();
+
+      if (leadError || !lead) throw leadError;
+
+      const history = Array.isArray(lead.action_history) ? lead.action_history : [];
+      const updated = history.map((a: any) => 
+        a.id === action.id ? { ...a, completedDate: new Date().toISOString() } : a
+      );
+
+      const { error } = await supabase
+        .from('leads')
+        .update({ action_history: updated, email_envoye: false })
+        .eq('id', action.leadId);
+
+      if (error) throw error;
+
+      // Optimistic removal
+      setOverdueActions(prev => prev.filter(a => a.id !== action.id));
+      setTodayActions(prev => prev.filter(a => a.id !== action.id));
+      setUpcomingActions(prev => prev.filter(a => a.id !== action.id));
+
+      toast({ title: "Action complétée ✓", description: `${action.actionType} pour ${action.leadName}` });
+    } catch (err) {
+      console.error('Error completing action:', err);
+      toast({ variant: "destructive", title: "Erreur", description: "Impossible de compléter l'action." });
+    } finally {
+      setCompletingActionId(null);
+    }
+  }, []);
+
   useEffect(() => {
     if (!user) return;
     fetchData();
@@ -58,7 +87,6 @@ const MyDay = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // Get current team member ID
       let teamMemberId: string | null = null;
       if (isCommercial) {
         const { data: tm } = await supabase
@@ -69,15 +97,13 @@ const MyDay = () => {
         teamMemberId = tm?.id || null;
       }
 
-      // Fetch leads
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, created_at') as any;
+        .select('id, name, action_history, tags, status, created_at, assigned_to') as any;
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
       query = query.is('deleted_at', null);
 
-      // Admin with agent filter selected
       if (isAdmin && selectedAgentId) {
         query = query.eq('assigned_to', selectedAgentId);
       } else if (teamMemberId) {
@@ -89,22 +115,32 @@ const MyDay = () => {
 
       const overdue: ActionItem[] = [];
       const today: ActionItem[] = [];
+      const upcoming: ActionItem[] = [];
       const untagged: AlertLead[] = [];
       const inactive: AlertLead[] = [];
       const noAction: AlertLead[] = [];
       const newL: AlertLead[] = [];
+      const unassigned: AlertLead[] = [];
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
+      const tomorrow = startOfDay(addDays(now, 1));
+      const sevenDaysLater = startOfDay(addDays(now, 8));
 
-      leads.forEach(lead => {
+      setTotalActiveLeads(leads.length);
+
+      leads.forEach((lead: any) => {
         // New leads
         if (lead.status === 'New') {
           newL.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}` });
         }
 
-        // Check actions
+        // Unassigned leads (admin)
+        if (!lead.assigned_to) {
+          unassigned.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}` });
+        }
+
         const actions = Array.isArray(lead.action_history) ? lead.action_history : [];
         const incompleteActions = actions.filter((a: any) => !a.completedDate && a.scheduledDate);
         
@@ -133,32 +169,58 @@ const MyDay = () => {
             hasFutureAction = true;
           } else {
             hasFutureAction = true;
+            // Upcoming 7 days
+            if (isAfter(d, tomorrow) && isBefore(d, sevenDaysLater)) {
+              upcoming.push({
+                id: action.id,
+                leadId: lead.id,
+                leadName: lead.name || 'Sans nom',
+                actionType: action.actionType || 'Action',
+                scheduledDate: action.scheduledDate,
+                status: 'upcoming',
+                dayLabel: format(d, 'EEEE dd', { locale: fr })
+              });
+            }
           }
         });
 
-        // No future action scheduled
         if (!hasFutureAction && incompleteActions.length === 0) {
           noAction.push({ id: lead.id, name: lead.name || 'Sans nom', reason: 'Aucune action programmée' });
         }
 
-        // Untagged leads
         if (!lead.tags || lead.tags.length === 0) {
           untagged.push({ id: lead.id, name: lead.name || 'Sans nom', reason: 'Aucun tag' });
         }
 
-        // Inactive leads (no update in 5+ days)
-        const lastUpdate = new Date(lead.created_at);
-        if (lastUpdate < fiveDaysAgo) {
-          inactive.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Dernière activité: ${format(lastUpdate, 'dd/MM', { locale: fr })}` });
+        // Fix: use latest action date instead of created_at
+        let lastActivity = new Date(lead.created_at);
+        actions.forEach((a: any) => {
+          if (a.completedDate) {
+            const d = new Date(a.completedDate);
+            if (d > lastActivity) lastActivity = d;
+          }
+          if (a.createdAt) {
+            const d = new Date(a.createdAt);
+            if (d > lastActivity) lastActivity = d;
+          }
+        });
+
+        if (lastActivity < fiveDaysAgo) {
+          inactive.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Dernière activité: ${format(lastActivity, 'dd/MM', { locale: fr })}` });
         }
       });
 
+      // Sort upcoming by date
+      upcoming.sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
+
       setOverdueActions(overdue);
       setTodayActions(today);
+      setUpcomingActions(upcoming);
       setUntaggedLeads(untagged);
       setInactiveLeads(inactive.slice(0, 10));
       setNoActionLeads(noAction.slice(0, 10));
       setNewLeads(newL);
+      setUnassignedLeads(unassigned);
     } catch (error) {
       console.error('Error fetching my day data:', error);
     } finally {
@@ -195,7 +257,6 @@ const MyDay = () => {
           </p>
         </div>
 
-        {/* Agent filter for admins */}
         {isAdmin && (
           <div className="mb-6">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -226,21 +287,23 @@ const MyDay = () => {
         )}
 
         {/* Stats summary */}
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-5'} gap-3 mb-6`}>
-          <StatCard icon={<Bell className="h-4 w-4 text-destructive" />} label="Nouveaux" count={newLeads.length} variant="red" />
-          <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} variant="destructive" />
-          <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} variant="blue" />
-          <StatCard icon={<Tag className="h-4 w-4 text-amber-600" />} label="Sans tag" count={untaggedLeads.length} variant="amber" />
-          <StatCard icon={<UserX className="h-4 w-4 text-orange-600" />} label="Sans action" count={noActionLeads.length} variant="orange" />
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4 lg:grid-cols-7'} gap-3 mb-6`}>
+          <StatCard icon={<Briefcase className="h-4 w-4 text-primary" />} label="Portfolio" count={totalActiveLeads} />
+          <StatCard icon={<Bell className="h-4 w-4 text-destructive" />} label="Nouveaux" count={newLeads.length} />
+          <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} />
+          <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} />
+          <StatCard icon={<CalendarDays className="h-4 w-4 text-indigo-600" />} label="Cette semaine" count={upcomingActions.length} />
+          <StatCard icon={<Tag className="h-4 w-4 text-amber-600" />} label="Sans tag" count={untaggedLeads.length} />
+          <StatCard icon={<UserX className="h-4 w-4 text-orange-600" />} label="Sans action" count={noActionLeads.length} />
         </div>
 
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'} gap-4`}>
           {/* New leads */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Bell className="h-4 w-4 text-destructive" />
-                Nouveaux leads à contacter ({newLeads.length})
+                Nouveaux leads ({newLeads.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
@@ -255,6 +318,7 @@ const MyDay = () => {
               )}
             </CardContent>
           </Card>
+
           {/* Overdue actions */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
@@ -270,14 +334,14 @@ const MyDay = () => {
                 </p>
               ) : (
                 overdueActions.slice(0, 8).map(a => (
-                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} />
+                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
                 ))
               )}
             </CardContent>
           </Card>
 
           {/* Today's actions */}
-          <Card className="border-blue-200">
+          <Card className="border-blue-200 dark:border-blue-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-600" />
@@ -289,18 +353,60 @@ const MyDay = () => {
                 <p className="text-sm text-muted-foreground">Rien de prévu aujourd'hui</p>
               ) : (
                 todayActions.slice(0, 8).map(a => (
-                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} />
+                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
                 ))
               )}
             </CardContent>
           </Card>
 
+          {/* Upcoming 7 days */}
+          <Card className="border-indigo-200 dark:border-indigo-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-indigo-600" />
+                Cette semaine ({upcomingActions.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              {upcomingActions.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucune action prévue cette semaine</p>
+              ) : (
+                upcomingActions.slice(0, 10).map(a => (
+                  <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Unassigned leads (admin only) */}
+          {isAdmin && (
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Users className="h-4 w-4 text-purple-600" />
+                  Leads non assignés ({unassignedLeads.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {unassignedLeads.length === 0 ? (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads sont assignés
+                  </p>
+                ) : (
+                  unassignedLeads.slice(0, 8).map(l => (
+                    <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Leads without scheduled action */}
-          <Card className="border-orange-200">
+          <Card className="border-orange-200 dark:border-orange-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <UserX className="h-4 w-4 text-orange-600" />
-                Leads sans action programmée ({noActionLeads.length})
+                Sans action programmée ({noActionLeads.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
@@ -317,11 +423,11 @@ const MyDay = () => {
           </Card>
 
           {/* Inactive leads */}
-          <Card className="border-amber-200">
+          <Card className="border-amber-200 dark:border-amber-800">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Tag className="h-4 w-4 text-amber-600" />
-                Leads inactifs +5 jours ({inactiveLeads.length})
+                Inactifs +5 jours ({inactiveLeads.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
@@ -339,43 +445,5 @@ const MyDay = () => {
     </>
   );
 };
-
-const StatCard = ({ icon, label, count, variant }: { icon: React.ReactNode; label: string; count: number; variant: string }) => (
-  <Card className="p-3">
-    <div className="flex items-center gap-2">
-      {icon}
-      <div>
-        <p className="text-2xl font-semibold text-foreground">{count}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </div>
-    </div>
-  </Card>
-);
-
-const ActionRow = ({ action, onClick }: { action: ActionItem; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-muted/50 transition-colors text-left"
-  >
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-foreground truncate">{action.leadName}</p>
-      <p className="text-xs text-muted-foreground">{action.actionType}</p>
-    </div>
-    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 ml-2" />
-  </button>
-);
-
-const LeadRow = ({ lead, onClick }: { lead: AlertLead; onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className="w-full flex items-center justify-between px-2 py-1.5 rounded hover:bg-muted/50 transition-colors text-left"
-  >
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-foreground truncate">{lead.name}</p>
-      <p className="text-xs text-muted-foreground">{lead.reason}</p>
-    </div>
-    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0 ml-2" />
-  </button>
-);
 
 export default MyDay;
