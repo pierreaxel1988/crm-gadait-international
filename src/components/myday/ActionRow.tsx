@@ -24,7 +24,7 @@ const ActionRow = ({ action, onClick, onComplete, completing }: ActionRowProps) 
       <p className="text-sm font-medium text-foreground truncate">{action.leadName}</p>
       <p className="text-xs text-muted-foreground">
         {action.actionType}
-        {action.dayLabel && <span className="ml-1 text-muted-foreground/70">· {action.dayLabel}</span>}
+        {action.dayLabel && <span className="ml-1">· {action.dayLabel}</span>}
       </p>
     </button>
     <div className="flex items-center gap-1 flex-shrink-0 ml-2">
