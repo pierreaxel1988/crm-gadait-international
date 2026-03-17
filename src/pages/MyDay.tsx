@@ -32,7 +32,7 @@ const MyDay = () => {
   const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [unassignedLeads, setUnassignedLeads] = useState<AlertLead[]>([]);
   const [vipLeads, setVipLeads] = useState<AlertLead[]>([]);
-  const [noEmailLeads, setNoEmailLeads] = useState<AlertLead[]>([]);
+  
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
