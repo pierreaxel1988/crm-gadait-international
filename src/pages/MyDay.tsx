@@ -407,22 +407,6 @@ const MyDay = () => {
             </CardContent>
           </Card>
 
-          {/* No email sent */}
-          <Card className="border-rose-200 dark:border-rose-800">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Mail className="h-4 w-4 text-rose-600" />
-                Sans email envoyé ({noEmailLeads.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-1">
-              {noEmailLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont été contactés</p>
-              ) : noEmailLeads.map(l => (
-                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-              ))}
-            </CardContent>
-          </Card>
 
           {/* Unassigned leads (admin only) */}
           {isAdmin && (
