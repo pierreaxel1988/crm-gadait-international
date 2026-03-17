@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isPast, isToday, format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight, User } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, ArrowRight, User, Bell } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,7 @@ const MyDay = () => {
   const [untaggedLeads, setUntaggedLeads] = useState<AlertLead[]>([]);
   const [inactiveLeads, setInactiveLeads] = useState<AlertLead[]>([]);
   const [noActionLeads, setNoActionLeads] = useState<AlertLead[]>([]);
+  const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
 
   const allMembers = useMemo(() => 
@@ -90,12 +91,18 @@ const MyDay = () => {
       const untagged: AlertLead[] = [];
       const inactive: AlertLead[] = [];
       const noAction: AlertLead[] = [];
+      const newL: AlertLead[] = [];
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
 
       leads.forEach(lead => {
+        // New leads
+        if (lead.status === 'New') {
+          newL.push({ id: lead.id, name: lead.name || 'Sans nom', reason: `Créé le ${format(new Date(lead.created_at), 'dd/MM', { locale: fr })}` });
+        }
+
         // Check actions
         const actions = Array.isArray(lead.action_history) ? lead.action_history : [];
         const incompleteActions = actions.filter((a: any) => !a.completedDate && a.scheduledDate);
@@ -150,6 +157,7 @@ const MyDay = () => {
       setUntaggedLeads(untagged);
       setInactiveLeads(inactive.slice(0, 10));
       setNoActionLeads(noAction.slice(0, 10));
+      setNewLeads(newL);
     } catch (error) {
       console.error('Error fetching my day data:', error);
     } finally {
@@ -217,7 +225,8 @@ const MyDay = () => {
         )}
 
         {/* Stats summary */}
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} gap-3 mb-6`}>
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-5'} gap-3 mb-6`}>
+          <StatCard icon={<Bell className="h-4 w-4 text-destructive" />} label="Nouveaux" count={newLeads.length} variant="red" />
           <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} variant="destructive" />
           <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} variant="blue" />
           <StatCard icon={<Tag className="h-4 w-4 text-amber-600" />} label="Sans tag" count={untaggedLeads.length} variant="amber" />
@@ -225,6 +234,26 @@ const MyDay = () => {
         </div>
 
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+          {/* New leads */}
+          <Card className="border-destructive/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Bell className="h-4 w-4 text-destructive" />
+                Nouveaux leads à contacter ({newLeads.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              {newLeads.length === 0 ? (
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead
+                </p>
+              ) : (
+                newLeads.slice(0, 8).map(l => (
+                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
+                ))
+              )}
+            </CardContent>
+          </Card>
           {/* Overdue actions */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">

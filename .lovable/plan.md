@@ -1,20 +1,40 @@
 
+# Optimisations CRM — Implémentation
 
-## Ajouter une section "Nouveaux leads à contacter" dans Ma Journée
+## ✅ Implémenté
 
-### Objectif
-Afficher en haut du dashboard une carte dédiée aux leads avec le statut "New" assignés à l'agent (ou filtrés par agent pour les admins), avec un CTA pour aller directement sur la fiche du lead.
+### Badge de priorité lead (Quick win #2)
+- Composant `PriorityBadge` avec scoring (🔴🟠🟡🟢)
+- Visible sur les KanbanCard (desktop) et LeadListItem (mobile)
+- Score basé sur : stade + tags + urgence action
 
-### Changements dans `src/pages/MyDay.tsx`
+### Compteur d'actions navbar (Quick win #9)
+- Composant `ActionsBadge` dans la navbar
+- Affiche le nombre d'actions en retard + aujourd'hui
+- Badge rouge si actions en retard, terracotta sinon
+- Rafraîchissement toutes les 5 minutes
 
-1. **Nouveau state** : `newLeads: AlertLead[]`
-2. **Dans `fetchData`** : ajouter un filtre `status = 'New'` sur les leads récupérés pour peupler cette liste (ou filtrer côté client les leads déjà fetchés qui ont `status === 'New'`)
-3. **Nouvelle StatCard** : icône Bell, label "Nouveaux", count des new leads, variante "red"
-4. **Nouvelle Card** en première position dans la grille : "Nouveaux leads à contacter" avec icône Bell rouge, listant les leads New avec bouton pour naviguer vers `/leads/{id}?tab=actions`
-5. **Grille stats** : passer de 4 à 5 colonnes desktop (ou garder 4 et ajouter la 5e en dessous sur mobile)
+### Dashboard Ma Journée (#4)
+- Page `/my-day` accessible via SubNavigation
+- Actions en retard (rouge) et du jour (bleu)
+- Leads sans action programmée
+- Leads inactifs (+5 jours)
+- Leads sans tag
+- Greeting personnalisé par heure du jour
 
-### Détail technique
-- Le filtre existant exclut déjà "Gagné"/"Perdu", donc les leads "New" sont déjà dans le dataset `leads`. Il suffit de filtrer `leads.filter(l => l.status === 'New')` dans la boucle `forEach` existante pour peupler `newLeads`.
-- La carte affichera le nom du lead et la date de création formatée.
-- Sur mobile : grille stats reste 2 colonnes, grille cards reste 1 colonne.
+## 🔲 À implémenter
 
+### PRIORITE 1
+1. Alerte automatique "Lead dormant" (Edge Function cron)
+3. Temps de réponse moyen par agent (KPI visible)
+
+### PRIORITE 2
+5. Interface leads "No response" en séquence de relance
+6. Badge leads sans action programmée (dans rapport quotidien)
+
+### PRIORITE 3
+7. Taux de conversion par source
+8. Objectifs agent et progression
+
+### PRIORITE 4
+10. Export automatique hebdo KPI management
