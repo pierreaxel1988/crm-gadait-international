@@ -115,7 +115,7 @@ const MyDay = () => {
         query = query.eq('assigned_to', teamMemberId);
       }
 
-      // Parallel: fetch wins for admin
+      // Parallel: fetch wins for admin + agents with leads
       const winsPromise = isAdmin ? (async () => {
         const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
         let wQuery = supabase.
@@ -128,7 +128,14 @@ const MyDay = () => {
         return wQuery;
       })() : Promise.resolve(null);
 
-      const [{ data: leads }, winsResult] = await Promise.all([query, winsPromise]);
+      const agentsPromise = isAdmin ? supabase.
+        from('leads').
+        select('assigned_to').
+        not('status', 'in', '("Gagné","Perdu")').
+        is('deleted_at', null).
+        not('assigned_to', 'is', null) : Promise.resolve(null);
+
+      const [{ data: leads }, winsResult, agentsResult] = await Promise.all([query, winsPromise, agentsPromise]);
 
       if (winsResult) {
         setMonthlyWins(winsResult.count || 0);
