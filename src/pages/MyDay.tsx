@@ -137,6 +137,10 @@ const MyDay = () => {
 
       const [{ data: leads }, winsResult, agentsResult] = await Promise.all([query, winsPromise, agentsPromise]);
 
+      if (winsResult) {
+        setMonthlyWins(winsResult.count || 0);
+      }
+
       if (agentsResult && agentsResult.data) {
         const ids = new Set<string>();
         agentsResult.data.forEach((r: any) => { if (r.assigned_to) ids.add(r.assigned_to); });
