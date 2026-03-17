@@ -37,6 +37,7 @@ const MyDay = () => {
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [agentsWithLeads, setAgentsWithLeads] = useState<Set<string>>(new Set());
   const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
   const allMembers = useMemo(() =>
@@ -114,7 +115,7 @@ const MyDay = () => {
         query = query.eq('assigned_to', teamMemberId);
       }
 
-      // Parallel: fetch wins for admin
+      // Parallel: fetch wins for admin + agents with leads
       const winsPromise = isAdmin ? (async () => {
         const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
         let wQuery = supabase.
@@ -127,10 +128,23 @@ const MyDay = () => {
         return wQuery;
       })() : Promise.resolve(null);
 
-      const [{ data: leads }, winsResult] = await Promise.all([query, winsPromise]);
+      const agentsPromise = isAdmin ? supabase.
+        from('leads').
+        select('assigned_to').
+        not('status', 'in', '("Gagné","Perdu")').
+        is('deleted_at', null).
+        not('assigned_to', 'is', null) : Promise.resolve(null);
+
+      const [{ data: leads }, winsResult, agentsResult] = await Promise.all([query, winsPromise, agentsPromise]);
 
       if (winsResult) {
         setMonthlyWins(winsResult.count || 0);
+      }
+
+      if (agentsResult && agentsResult.data) {
+        const ids = new Set<string>();
+        agentsResult.data.forEach((r: any) => { if (r.assigned_to) ids.add(r.assigned_to); });
+        setAgentsWithLeads(ids);
       }
 
       if (!leads) return;
@@ -295,7 +309,7 @@ const MyDay = () => {
             </h4>
             <div className="flex flex-wrap gap-1">
               <Button variant={selectedAgentId === null ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(null)}>Tous</Button>
-              {allMembers.map((member) =>
+              {allMembers.filter((member) => agentsWithLeads.has(member.id)).map((member) =>
             <Button key={member.id} variant={selectedAgentId === member.id ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(member.id)}>{member.name}</Button>
             )}
             </div>
