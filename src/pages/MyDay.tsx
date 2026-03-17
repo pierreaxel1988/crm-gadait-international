@@ -431,7 +431,7 @@ const MyDay = () => {
           {/* Leads without scheduled action */}
           <Card className="border-orange-200 dark:border-orange-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <UserX className="h-4 w-4 text-orange-600" />
                 Sans action programmée ({noActionLeads.length})
               </CardTitle>
