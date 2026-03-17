@@ -32,47 +32,47 @@ const MyDay = () => {
   const [newLeads, setNewLeads] = useState<AlertLead[]>([]);
   const [unassignedLeads, setUnassignedLeads] = useState<AlertLead[]>([]);
   const [vipLeads, setVipLeads] = useState<AlertLead[]>([]);
-  
+
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
-  const allMembers = useMemo(() => 
-    [...GUARANTEED_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name)), 
+  const allMembers = useMemo(() =>
+  [...GUARANTEED_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name)),
   []);
 
-  const selectedAgentName = selectedAgentId 
-    ? allMembers.find(m => m.id === selectedAgentId)?.name || null 
-    : null;
+  const selectedAgentName = selectedAgentId ?
+  allMembers.find((m) => m.id === selectedAgentId)?.name || null :
+  null;
 
   const handleCompleteAction = useCallback(async (action: ActionItem) => {
     setCompletingActionId(action.id);
     try {
-      const { data: lead, error: leadError } = await supabase
-        .from('leads')
-        .select('action_history')
-        .eq('id', action.leadId)
-        .single();
+      const { data: lead, error: leadError } = await supabase.
+      from('leads').
+      select('action_history').
+      eq('id', action.leadId).
+      single();
 
       if (leadError || !lead) throw leadError;
 
       const history = Array.isArray(lead.action_history) ? lead.action_history : [];
-      const updated = history.map((a: any) => 
-        a.id === action.id ? { ...a, completedDate: new Date().toISOString() } : a
+      const updated = history.map((a: any) =>
+      a.id === action.id ? { ...a, completedDate: new Date().toISOString() } : a
       );
 
-      const { error } = await supabase
-        .from('leads')
-        .update({ action_history: updated })
-        .eq('id', action.leadId);
+      const { error } = await supabase.
+      from('leads').
+      update({ action_history: updated }).
+      eq('id', action.leadId);
 
       if (error) throw error;
 
-      setOverdueActions(prev => prev.filter(a => a.id !== action.id));
-      setTodayActions(prev => prev.filter(a => a.id !== action.id));
-      setUpcomingActions(prev => prev.filter(a => a.id !== action.id));
+      setOverdueActions((prev) => prev.filter((a) => a.id !== action.id));
+      setTodayActions((prev) => prev.filter((a) => a.id !== action.id));
+      setUpcomingActions((prev) => prev.filter((a) => a.id !== action.id));
 
       toast({ title: "Action complétée ✓", description: `${action.actionType} pour ${action.leadName}` });
     } catch (err) {
@@ -93,18 +93,18 @@ const MyDay = () => {
     try {
       let teamMemberId: string | null = null;
       if (isCommercial) {
-        const { data: tm } = await supabase
-          .from('team_members')
-          .select('id')
-          .eq('email', user!.email)
-          .single();
+        const { data: tm } = await supabase.
+        from('team_members').
+        select('id').
+        eq('email', user!.email).
+        single();
         teamMemberId = tm?.id || null;
       }
 
-      let query = supabase
-        .from('leads')
-        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type') as any;
-      
+      let query = supabase.
+      from('leads').
+      select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type') as any;
+
       query = query.not('status', 'in', '("Gagné","Perdu")');
       query = query.is('deleted_at', null);
 
@@ -117,18 +117,18 @@ const MyDay = () => {
       // Parallel: fetch wins for admin
       const winsPromise = isAdmin ? (async () => {
         const thirtyDaysAgo = subDays(new Date(), 30).toISOString();
-        let wQuery = supabase
-          .from('leads')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'Gagné')
-          .is('deleted_at', null)
-          .gte('updated_at', thirtyDaysAgo) as any;
+        let wQuery = supabase.
+        from('leads').
+        select('id', { count: 'exact', head: true }).
+        eq('status', 'Gagné').
+        is('deleted_at', null).
+        gte('updated_at', thirtyDaysAgo) as any;
         if (selectedAgentId) wQuery = wQuery.eq('assigned_to', selectedAgentId);
         return wQuery;
       })() : Promise.resolve(null);
 
       const [{ data: leads }, winsResult] = await Promise.all([query, winsPromise]);
-      
+
       if (winsResult) {
         setMonthlyWins(winsResult.count || 0);
       }
@@ -144,13 +144,13 @@ const MyDay = () => {
       const newL: AlertLead[] = [];
       const unassigned: AlertLead[] = [];
       const vip: AlertLead[] = [];
-      
+
       const pipelines = { purchase: 0, rental: 0, owner: 0, other: 0 };
 
       const now = new Date();
       const fiveDaysAgo = new Date(now);
       fiveDaysAgo.setDate(now.getDate() - 5);
-      
+
       const tomorrow = startOfDay(addDays(now, 1));
       const sevenDaysLater = startOfDay(addDays(now, 8));
 
@@ -159,19 +159,19 @@ const MyDay = () => {
       leads.forEach((lead: any) => {
         // Pipeline counts
         const pt = (lead.pipeline_type || '').toLowerCase();
-        if (pt.includes('purchase') || pt.includes('achat')) pipelines.purchase++;
-        else if (pt.includes('rental') || pt.includes('location')) pipelines.rental++;
-        else if (pt.includes('owner') || pt.includes('propriétaire') || pt.includes('proprietaire')) pipelines.owner++;
-        else pipelines.other++;
+        if (pt.includes('purchase') || pt.includes('achat')) pipelines.purchase++;else
+        if (pt.includes('rental') || pt.includes('location')) pipelines.rental++;else
+        if (pt.includes('owner') || pt.includes('propriétaire') || pt.includes('proprietaire')) pipelines.owner++;else
+        pipelines.other++;
 
         // VIP / Hot leads
         const tags: string[] = Array.isArray(lead.tags) ? lead.tags : [];
-        const isVipOrHot = tags.some(t => ['Vip', 'Hot'].includes(t));
+        const isVipOrHot = tags.some((t) => ['Vip', 'Hot'].includes(t));
         const budgetNum = typeof lead.budget === 'number' && !isNaN(lead.budget) ? lead.budget : 0;
         const highBudget = budgetNum >= 1000000;
         if (isVipOrHot || highBudget) {
           const budgetStr = budgetNum > 0 ? `${(budgetNum / 1000000).toFixed(1)}M€` : '';
-          const tagStr = tags.filter(t => ['Vip', 'Hot'].includes(t)).join(', ');
+          const tagStr = tags.filter((t) => ['Vip', 'Hot'].includes(t)).join(', ');
           vip.push({
             id: lead.id,
             name: lead.name || 'Sans nom',
@@ -192,9 +192,9 @@ const MyDay = () => {
 
         const actions = Array.isArray(lead.action_history) ? lead.action_history : [];
         const incompleteActions = actions.filter((a: any) => !a.completedDate && a.scheduledDate);
-        
+
         let hasFutureAction = false;
-        
+
         incompleteActions.forEach((action: any) => {
           const d = new Date(action.scheduledDate);
           if (isPast(d) && !isToday(d)) {
@@ -230,8 +230,8 @@ const MyDay = () => {
 
         let lastActivity = new Date(lead.created_at);
         actions.forEach((a: any) => {
-          if (a.completedDate) { const d = new Date(a.completedDate); if (d > lastActivity) lastActivity = d; }
-          if (a.createdAt) { const d = new Date(a.createdAt); if (d > lastActivity) lastActivity = d; }
+          if (a.completedDate) {const d = new Date(a.completedDate);if (d > lastActivity) lastActivity = d;}
+          if (a.createdAt) {const d = new Date(a.createdAt);if (d > lastActivity) lastActivity = d;}
         });
 
         if (lastActivity < fiveDaysAgo) {
@@ -250,7 +250,7 @@ const MyDay = () => {
       setNewLeads(newL);
       setUnassignedLeads(unassigned);
       setVipLeads(vip);
-      
+
       setPipelineCounts(pipelines);
     } catch (error) {
       console.error('Error fetching my day data:', error);
@@ -271,8 +271,8 @@ const MyDay = () => {
       <Navbar />
       <SubNavigation />
       <LoadingScreen fullscreen={false} />
-    </>
-  );
+    </>);
+
 
   return (
     <>
@@ -288,19 +288,19 @@ const MyDay = () => {
           </p>
         </div>
 
-        {isAdmin && (
-          <div className="mb-6">
+        {isAdmin &&
+        <div className="mb-6">
             <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
               <User className="h-4 w-4" /> Filtrer par agent
             </h4>
             <div className="flex flex-wrap gap-1">
               <Button variant={selectedAgentId === null ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(null)}>Tous</Button>
-              {allMembers.map(member => (
-                <Button key={member.id} variant={selectedAgentId === member.id ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(member.id)}>{member.name}</Button>
-              ))}
+              {allMembers.map((member) =>
+            <Button key={member.id} variant={selectedAgentId === member.id ? "default" : "outline"} size="sm" className="text-xs px-2 py-1 h-auto" onClick={() => setSelectedAgentId(member.id)}>{member.name}</Button>
+            )}
             </div>
           </div>
-        )}
+        }
 
         {/* Stats summary */}
         <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4 lg:grid-cols-8'} gap-3 mb-3`}>
@@ -324,21 +324,21 @@ const MyDay = () => {
 
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'} gap-4`}>
           {/* VIP / Hot leads */}
-          {vipLeads.length > 0 && (
-            <Card className="border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/10">
+          {vipLeads.length > 0 &&
+          <Card className="border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/10">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-base flex items-center gap-2 font-medium">
                   <Crown className="h-4 w-4 text-amber-500" />
                   Leads prioritaires ({vipLeads.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                {vipLeads.slice(0, 8).map(l => (
-                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-                ))}
+                {vipLeads.slice(0, 8).map((l) =>
+              <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              )}
               </CardContent>
             </Card>
-          )}
+          }
 
           {/* New leads */}
           <Card className="border-destructive/20">
@@ -349,11 +349,11 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {newLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead</p>
-              ) : newLeads.slice(0, 8).map(l => (
-                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
-              ))}
+              {newLeads.length === 0 ?
+              <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead</p> :
+              newLeads.slice(0, 8).map((l) =>
+              <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
+              )}
             </CardContent>
           </Card>
 
@@ -366,11 +366,11 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {overdueActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tout est à jour !</p>
-              ) : overdueActions.slice(0, 8).map(a => (
-                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-              ))}
+              {overdueActions.length === 0 ?
+              <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tout est à jour !</p> :
+              overdueActions.slice(0, 8).map((a) =>
+              <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              )}
             </CardContent>
           </Card>
 
@@ -383,11 +383,11 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {todayActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Rien de prévu aujourd'hui</p>
-              ) : todayActions.slice(0, 8).map(a => (
-                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-              ))}
+              {todayActions.length === 0 ?
+              <p className="text-sm text-muted-foreground">Rien de prévu aujourd'hui</p> :
+              todayActions.slice(0, 8).map((a) =>
+              <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              )}
             </CardContent>
           </Card>
 
@@ -400,18 +400,18 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {upcomingActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Aucune action prévue cette semaine</p>
-              ) : upcomingActions.slice(0, 10).map(a => (
-                <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
-              ))}
+              {upcomingActions.length === 0 ?
+              <p className="text-sm text-muted-foreground">Aucune action prévue cette semaine</p> :
+              upcomingActions.slice(0, 10).map((a) =>
+              <ActionRow key={a.id} action={a} onClick={() => navigate(`/leads/${a.leadId}`)} onComplete={handleCompleteAction} completing={completingActionId === a.id} />
+              )}
             </CardContent>
           </Card>
 
 
           {/* Unassigned leads (admin only) */}
-          {isAdmin && (
-            <Card className="border-purple-200 dark:border-purple-800">
+          {isAdmin &&
+          <Card className="border-purple-200 dark:border-purple-800">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Users className="h-4 w-4 text-purple-600" />
@@ -419,14 +419,14 @@ const MyDay = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                {unassignedLeads.length === 0 ? (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads sont assignés</p>
-                ) : unassignedLeads.slice(0, 8).map(l => (
-                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-                ))}
+                {unassignedLeads.length === 0 ?
+              <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads sont assignés</p> :
+              unassignedLeads.slice(0, 8).map((l) =>
+              <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              )}
               </CardContent>
             </Card>
-          )}
+          }
 
           {/* Leads without scheduled action */}
           <Card className="border-orange-200 dark:border-orange-800">
@@ -437,11 +437,11 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {noActionLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont des actions</p>
-              ) : noActionLeads.map(l => (
-                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-              ))}
+              {noActionLeads.length === 0 ?
+              <p className="text-sm text-muted-foreground flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-green-500" /> Tous les leads ont des actions</p> :
+              noActionLeads.map((l) =>
+              <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              )}
             </CardContent>
           </Card>
 
@@ -454,17 +454,17 @@ const MyDay = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
-              {inactiveLeads.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Tous les leads sont actifs</p>
-              ) : inactiveLeads.map(l => (
-                <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
-              ))}
+              {inactiveLeads.length === 0 ?
+              <p className="text-sm text-muted-foreground">Tous les leads sont actifs</p> :
+              inactiveLeads.map((l) =>
+              <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}`)} />
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
-    </>
-  );
+    </>);
+
 };
 
 export default MyDay;
