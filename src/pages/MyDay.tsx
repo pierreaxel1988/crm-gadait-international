@@ -234,6 +234,26 @@ const MyDay = () => {
         </div>
 
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+          {/* New leads */}
+          <Card className="border-destructive/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Bell className="h-4 w-4 text-destructive" />
+                Nouveaux leads à contacter ({newLeads.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              {newLeads.length === 0 ? (
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" /> Aucun nouveau lead
+                </p>
+              ) : (
+                newLeads.slice(0, 8).map(l => (
+                  <LeadRow key={l.id} lead={l} onClick={() => navigate(`/leads/${l.id}?tab=actions`)} />
+                ))
+              )}
+            </CardContent>
+          </Card>
           {/* Overdue actions */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
