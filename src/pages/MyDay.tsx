@@ -103,7 +103,7 @@ const MyDay = () => {
 
       let query = supabase
         .from('leads')
-        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type, email_envoye') as any;
+        .select('id, name, action_history, tags, status, created_at, assigned_to, budget, pipeline_type') as any;
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
       query = query.is('deleted_at', null);
