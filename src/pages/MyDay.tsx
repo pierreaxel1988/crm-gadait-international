@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { isPast, isToday, format, addDays, isBefore, isAfter, startOfDay, subDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase, Crown, Mail, Trophy, Home, ShoppingCart, Key } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle2, Tag, UserX, User, Bell, CalendarDays, Users, Briefcase, Crown, Trophy, Home, ShoppingCart, Key } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
