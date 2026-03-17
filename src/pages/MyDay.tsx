@@ -225,7 +225,8 @@ const MyDay = () => {
         )}
 
         {/* Stats summary */}
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-4'} gap-3 mb-6`}>
+        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-5'} gap-3 mb-6`}>
+          <StatCard icon={<Bell className="h-4 w-4 text-destructive" />} label="Nouveaux" count={newLeads.length} variant="red" />
           <StatCard icon={<AlertTriangle className="h-4 w-4 text-destructive" />} label="En retard" count={overdueActions.length} variant="destructive" />
           <StatCard icon={<Clock className="h-4 w-4 text-blue-600" />} label="Aujourd'hui" count={todayActions.length} variant="blue" />
           <StatCard icon={<Tag className="h-4 w-4 text-amber-600" />} label="Sans tag" count={untaggedLeads.length} variant="amber" />
