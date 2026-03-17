@@ -75,6 +75,7 @@ const MyDay = () => {
         .select('id, name, action_history, tags, status, created_at') as any;
       
       query = query.not('status', 'in', '("Gagné","Perdu")');
+      query = query.is('deleted_at', null);
 
       // Admin with agent filter selected
       if (isAdmin && selectedAgentId) {
