@@ -316,10 +316,10 @@ const MyDay = () => {
 
         {/* Pipeline distribution */}
         <div className="flex flex-wrap gap-2 mb-6">
-          <Badge variant="outline" className="text-xs gap-1"><ShoppingCart className="h-3 w-3" /> Achat: {pipelineCounts.purchase}</Badge>
-          <Badge variant="outline" className="text-xs gap-1"><Key className="h-3 w-3" /> Location: {pipelineCounts.rental}</Badge>
-          <Badge variant="outline" className="text-xs gap-1"><Home className="h-3 w-3" /> Propriétaires: {pipelineCounts.owner}</Badge>
-          {pipelineCounts.other > 0 && <Badge variant="outline" className="text-xs gap-1">Autre: {pipelineCounts.other}</Badge>}
+          <Badge variant="outline" className="text-xs font-medium gap-1"><ShoppingCart className="h-3 w-3" /> Achat: {pipelineCounts.purchase}</Badge>
+          <Badge variant="outline" className="text-xs font-medium gap-1"><Key className="h-3 w-3" /> Location: {pipelineCounts.rental}</Badge>
+          <Badge variant="outline" className="text-xs font-medium gap-1"><Home className="h-3 w-3" /> Propriétaires: {pipelineCounts.owner}</Badge>
+          {pipelineCounts.other > 0 && <Badge variant="outline" className="text-xs font-medium gap-1">Autre: {pipelineCounts.other}</Badge>}
         </div>
 
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'} gap-4`}>
