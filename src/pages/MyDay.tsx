@@ -343,7 +343,7 @@ const MyDay = () => {
           {/* New leads */}
           <Card className="border-destructive/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Bell className="h-4 w-4 text-destructive" />
                 Nouveaux leads ({newLeads.length})
               </CardTitle>
