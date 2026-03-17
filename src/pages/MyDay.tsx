@@ -377,7 +377,7 @@ const MyDay = () => {
           {/* Today's actions */}
           <Card className="border-blue-200 dark:border-blue-800">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
+              <CardTitle className="text-base flex items-center gap-2 font-medium">
                 <Clock className="h-4 w-4 text-blue-600" />
                 Actions du jour ({todayActions.length})
               </CardTitle>
