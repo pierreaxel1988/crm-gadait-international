@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 interface Deal {
   id: string;
@@ -42,14 +43,20 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const AgentRevenue = () => {
-  const { user, userName } = useAuth();
+  const { user, userName, isAdmin } = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [agentTeamMemberId, setAgentTeamMemberId] = useState<string | null>(null);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [selectedAgentName, setSelectedAgentName] = useState<string | null>(null);
 
-  // Filters (no agent filter needed)
+  // Filters
   const [filterSource, setFilterSource] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  const allMembers = GUARANTEED_TEAM_MEMBERS
+    .filter(m => m.role === 'agent' || m.role === 'admin')
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
     if (!user?.email) return;
@@ -67,11 +74,14 @@ const AgentRevenue = () => {
       if (member) {
         setAgentTeamMemberId(member.id);
         
-        // Fetch only this agent's deals
+        // Determine which agent's deals to show
+        const targetAgentId = (isAdmin && selectedAgentId) ? selectedAgentId : member.id;
+        
+        // Fetch deals for the target agent
         const { data: dealsData } = await supabase
           .from('deals')
           .select('*')
-          .eq('agent_id', member.id)
+          .eq('agent_id', targetAgentId)
           .order('deal_date', { ascending: false });
 
         if (dealsData) setDeals(dealsData as Deal[]);
@@ -81,7 +91,7 @@ const AgentRevenue = () => {
     };
 
     fetchAgentAndDeals();
-  }, [user?.email]);
+  }, [user?.email, isAdmin, selectedAgentId]);
 
   const filteredDeals = useMemo(() => {
     return deals.filter(d => {
@@ -120,11 +130,40 @@ const AgentRevenue = () => {
       <SubNavigation />
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-normal text-foreground">Mon Chiffre d'Affaire</h1>
+          <h1 className="text-2xl font-normal text-foreground">
+            {isAdmin && selectedAgentId ? 'Chiffre d\'Affaire' : 'Mon Chiffre d\'Affaire'}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {userName ? `Deals de ${userName}` : 'Vos deals personnels'}
+            {isAdmin && selectedAgentId 
+              ? `Deals de ${selectedAgentName || 'Agent'}` 
+              : userName ? `Deals de ${userName}` : 'Vos deals personnels'}
           </p>
         </div>
+
+        {/* Agent filter for admins */}
+        {isAdmin && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={!selectedAgentId ? 'default' : 'outline'}
+              size="sm"
+              className="text-xs"
+              onClick={() => { setSelectedAgentId(null); setSelectedAgentName(null); }}
+            >
+              Mes deals
+            </Button>
+            {allMembers.map(m => (
+              <Button
+                key={m.id}
+                variant={selectedAgentId === m.id ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs"
+                onClick={() => { setSelectedAgentId(m.id); setSelectedAgentName(m.name); }}
+              >
+                {m.name.split(' ')[0]}
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
