@@ -130,11 +130,40 @@ const AgentRevenue = () => {
       <SubNavigation />
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-normal text-foreground">Mon Chiffre d'Affaire</h1>
+          <h1 className="text-2xl font-normal text-foreground">
+            {isAdmin && selectedAgentId ? 'Chiffre d\'Affaire' : 'Mon Chiffre d\'Affaire'}
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {userName ? `Deals de ${userName}` : 'Vos deals personnels'}
+            {isAdmin && selectedAgentId 
+              ? `Deals de ${selectedAgentName || 'Agent'}` 
+              : userName ? `Deals de ${userName}` : 'Vos deals personnels'}
           </p>
         </div>
+
+        {/* Agent filter for admins */}
+        {isAdmin && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant={!selectedAgentId ? 'default' : 'outline'}
+              size="sm"
+              className="text-xs"
+              onClick={() => { setSelectedAgentId(null); setSelectedAgentName(null); }}
+            >
+              Mes deals
+            </Button>
+            {allMembers.map(m => (
+              <Button
+                key={m.id}
+                variant={selectedAgentId === m.id ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs"
+                onClick={() => { setSelectedAgentId(m.id); setSelectedAgentName(m.name); }}
+              >
+                {m.name.split(' ')[0]}
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
