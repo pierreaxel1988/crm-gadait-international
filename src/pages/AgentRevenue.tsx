@@ -47,9 +47,13 @@ const AgentRevenue = () => {
   const { user, userName, isAdmin } = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [agentTeamMemberId, setAgentTeamMemberId] = useState<string | null>(null);
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
-  const [selectedAgentName, setSelectedAgentName] = useState<string | null>(null);
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
+
+  const selectedAgentName = useMemo(() => {
+    if (!selectedAgent) return null;
+    const member = GUARANTEED_TEAM_MEMBERS.find(m => m.id === selectedAgent);
+    return member ? member.name : null;
+  }, [selectedAgent]);
 
   // Filters
   const [filterSource, setFilterSource] = useState<string>('all');
