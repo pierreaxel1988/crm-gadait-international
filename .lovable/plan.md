@@ -1,20 +1,23 @@
 
 
-## Synchroniser le filtre agent global sur la page Chiffre d'Affaire
+## Synchroniser le filtre agent global sur MyDay
 
 ### Constat
 
-- **Actions** : utilise déjà `useSelectedAgent` — le filtre pipeline se propage automatiquement.
-- **Calendrier** : utilise déjà `useSelectedAgent` — le filtre pipeline se propage automatiquement.
-- **Chiffre d'Affaire** (`AgentRevenue.tsx`) : utilise son propre state local (`selectedAgentId`), déconnecté du hook global. C'est le seul onglet qui ne réagit pas au filtre agent sélectionné dans Pipeline.
+Le hook `useSelectedAgent` synchronise déjà le filtre agent via `localStorage` + événements custom entre :
+- ✅ Pipeline
+- ✅ Actions  
+- ✅ Calendrier  
+- ✅ Chiffre d'Affaire  
+- ❌ **Ma Journée** — utilise un state local `selectedAgentId` / `setSelectedAgentId`, déconnecté du hook global
 
-### Changement unique : `src/pages/AgentRevenue.tsx`
+### Changement unique : `src/pages/MyDay.tsx`
 
-1. Importer `useSelectedAgent` et l'utiliser à la place du state local `selectedAgentId` / `selectedAgentName`.
-2. Remplacer `selectedAgentId` par `selectedAgent` du hook global.
-3. Calculer `selectedAgentName` à partir de `GUARANTEED_TEAM_MEMBERS` au lieu d'un state séparé.
-4. Mettre à jour les boutons du filtre agent admin pour appeler `handleAgentChange` du hook global au lieu de `setSelectedAgentId`.
-5. Le `useEffect` de fetch utilise `selectedAgent` au lieu de `selectedAgentId`.
+1. Importer `useSelectedAgent` depuis `@/hooks/useSelectedAgent`
+2. Remplacer le state local `selectedAgentId` / `setSelectedAgentId` par `selectedAgent` / `handleAgentChange` du hook
+3. Dériver `selectedAgentName` depuis `selectedAgent` au lieu de `selectedAgentId`
+4. Mettre à jour toutes les références : `fetchData`, boutons filtre admin, greeting
+5. Supprimer le `useState<string | null>(null)` devenu inutile
 
-Résultat : sélectionner un agent dans Pipeline pré-filtre immédiatement Actions, Calendrier et Chiffre d'Affaire.
+Résultat : sélectionner un agent dans n'importe quel onglet (Pipeline, Actions, etc.) pré-filtre automatiquement Ma Journée, et inversement.
 
