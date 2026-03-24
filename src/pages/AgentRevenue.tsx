@@ -131,10 +131,10 @@ const AgentRevenue = () => {
       <div className="max-w-screen-xl mx-auto px-4 py-6 space-y-6">
         <div>
           <h1 className="text-2xl font-normal text-foreground">
-            {isAdmin && selectedAgentId ? 'Chiffre d\'Affaire' : 'Mon Chiffre d\'Affaire'}
+            {isAdmin && selectedAgent ? 'Chiffre d\'Affaire' : 'Mon Chiffre d\'Affaire'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isAdmin && selectedAgentId 
+            {isAdmin && selectedAgent 
               ? `Deals de ${selectedAgentName || 'Agent'}` 
               : userName ? `Deals de ${userName}` : 'Vos deals personnels'}
           </p>
@@ -144,20 +144,20 @@ const AgentRevenue = () => {
         {isAdmin && (
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={!selectedAgentId ? 'default' : 'outline'}
+              variant={!selectedAgent ? 'default' : 'outline'}
               size="sm"
               className="text-xs"
-              onClick={() => { setSelectedAgentId(null); setSelectedAgentName(null); }}
+              onClick={() => handleAgentChange(null)}
             >
               Mes deals
             </Button>
             {allMembers.map(m => (
               <Button
                 key={m.id}
-                variant={selectedAgentId === m.id ? 'default' : 'outline'}
+                variant={selectedAgent === m.id ? 'default' : 'outline'}
                 size="sm"
                 className="text-xs"
-                onClick={() => { setSelectedAgentId(m.id); setSelectedAgentName(m.name); }}
+                onClick={() => handleAgentChange(m.id)}
               >
                 {m.name.split(' ')[0]}
               </Button>
