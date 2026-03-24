@@ -1,40 +1,20 @@
 
-# Optimisations CRM — Implémentation
 
-## ✅ Implémenté
+## Synchroniser le filtre agent global sur la page Chiffre d'Affaire
 
-### Badge de priorité lead (Quick win #2)
-- Composant `PriorityBadge` avec scoring (🔴🟠🟡🟢)
-- Visible sur les KanbanCard (desktop) et LeadListItem (mobile)
-- Score basé sur : stade + tags + urgence action
+### Constat
 
-### Compteur d'actions navbar (Quick win #9)
-- Composant `ActionsBadge` dans la navbar
-- Affiche le nombre d'actions en retard + aujourd'hui
-- Badge rouge si actions en retard, terracotta sinon
-- Rafraîchissement toutes les 5 minutes
+- **Actions** : utilise déjà `useSelectedAgent` — le filtre pipeline se propage automatiquement.
+- **Calendrier** : utilise déjà `useSelectedAgent` — le filtre pipeline se propage automatiquement.
+- **Chiffre d'Affaire** (`AgentRevenue.tsx`) : utilise son propre state local (`selectedAgentId`), déconnecté du hook global. C'est le seul onglet qui ne réagit pas au filtre agent sélectionné dans Pipeline.
 
-### Dashboard Ma Journée (#4)
-- Page `/my-day` accessible via SubNavigation
-- Actions en retard (rouge) et du jour (bleu)
-- Leads sans action programmée
-- Leads inactifs (+5 jours)
-- Leads sans tag
-- Greeting personnalisé par heure du jour
+### Changement unique : `src/pages/AgentRevenue.tsx`
 
-## 🔲 À implémenter
+1. Importer `useSelectedAgent` et l'utiliser à la place du state local `selectedAgentId` / `selectedAgentName`.
+2. Remplacer `selectedAgentId` par `selectedAgent` du hook global.
+3. Calculer `selectedAgentName` à partir de `GUARANTEED_TEAM_MEMBERS` au lieu d'un state séparé.
+4. Mettre à jour les boutons du filtre agent admin pour appeler `handleAgentChange` du hook global au lieu de `setSelectedAgentId`.
+5. Le `useEffect` de fetch utilise `selectedAgent` au lieu de `selectedAgentId`.
 
-### PRIORITE 1
-1. Alerte automatique "Lead dormant" (Edge Function cron)
-3. Temps de réponse moyen par agent (KPI visible)
+Résultat : sélectionner un agent dans Pipeline pré-filtre immédiatement Actions, Calendrier et Chiffre d'Affaire.
 
-### PRIORITE 2
-5. Interface leads "No response" en séquence de relance
-6. Badge leads sans action programmée (dans rapport quotidien)
-
-### PRIORITE 3
-7. Taux de conversion par source
-8. Objectifs agent et progression
-
-### PRIORITE 4
-10. Export automatique hebdo KPI management
