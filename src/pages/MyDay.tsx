@@ -14,6 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 import { toast } from '@/hooks/use-toast';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import StatCard from '@/components/myday/StatCard';
 import ActionRow, { ActionItem } from '@/components/myday/ActionRow';
 import LeadRow, { AlertLead } from '@/components/myday/LeadRow';
