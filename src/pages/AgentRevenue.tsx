@@ -69,7 +69,6 @@ const AgentRevenue = () => {
     const fetchAgentAndDeals = async () => {
       setLoading(true);
       
-      // Get team_member id for logged-in user
       const { data: member } = await supabase
         .from('team_members')
         .select('id')
@@ -77,12 +76,8 @@ const AgentRevenue = () => {
         .single();
 
       if (member) {
-        setAgentTeamMemberId(member.id);
+        const targetAgentId = (isAdmin && selectedAgent) ? selectedAgent : member.id;
         
-        // Determine which agent's deals to show
-        const targetAgentId = (isAdmin && selectedAgentId) ? selectedAgentId : member.id;
-        
-        // Fetch deals for the target agent
         const { data: dealsData } = await supabase
           .from('deals')
           .select('*')
@@ -96,7 +91,7 @@ const AgentRevenue = () => {
     };
 
     fetchAgentAndDeals();
-  }, [user?.email, isAdmin, selectedAgentId]);
+  }, [user?.email, isAdmin, selectedAgent]);
 
   const filteredDeals = useMemo(() => {
     return deals.filter(d => {
