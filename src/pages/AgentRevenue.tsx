@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 
 interface Deal {
   id: string;
