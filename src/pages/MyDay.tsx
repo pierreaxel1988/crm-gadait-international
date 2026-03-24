@@ -36,7 +36,7 @@ const MyDay = () => {
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const { selectedAgent: selectedAgentId, handleAgentChange: setSelectedAgentId } = useSelectedAgent();
   const [agentsWithLeads, setAgentsWithLeads] = useState<Set<string>>(new Set());
   const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
