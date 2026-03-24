@@ -14,6 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import LoadingScreen from '@/components/layout/LoadingScreen';
 import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 import { toast } from '@/hooks/use-toast';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import StatCard from '@/components/myday/StatCard';
 import ActionRow, { ActionItem } from '@/components/myday/ActionRow';
 import LeadRow, { AlertLead } from '@/components/myday/LeadRow';
@@ -36,7 +37,7 @@ const MyDay = () => {
   const [totalActiveLeads, setTotalActiveLeads] = useState(0);
   const [monthlyWins, setMonthlyWins] = useState(0);
   const [pipelineCounts, setPipelineCounts] = useState({ purchase: 0, rental: 0, owner: 0, other: 0 });
-  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const { selectedAgent: selectedAgentId, handleAgentChange: setSelectedAgentId } = useSelectedAgent();
   const [agentsWithLeads, setAgentsWithLeads] = useState<Set<string>>(new Set());
   const [completingActionId, setCompletingActionId] = useState<string | null>(null);
 
