@@ -293,6 +293,7 @@ serve(async (req) => {
             body: JSON.stringify({
               from: fromEmail,
               to: [agentMember.email],
+              cc: ['pierre@gadait-international.com'],
               subject: `🚨 ${alerts.length} lead(s) dormant(s) nécessitent votre attention`,
               html: agentHtml,
             }),
