@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -7,11 +7,13 @@ import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import HotPipelineMonitor from '@/components/admin/HotPipelineMonitor';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Flame } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Flame, X } from 'lucide-react';
+import { GUARANTEED_TEAM_MEMBERS } from '@/services/teamMemberService';
 
 const AgentHotPipeline: React.FC = () => {
   const { user, isAdmin } = useAuth();
-  const { selectedAgent } = useSelectedAgent();
+  const { selectedAgent, handleAgentChange } = useSelectedAgent();
 
   const { data: teamMemberId, isLoading } = useQuery({
     queryKey: ['my-team-member-id', user?.email],
@@ -27,6 +29,12 @@ const AgentHotPipeline: React.FC = () => {
     enabled: !!user?.email,
   });
 
+  const selectedAgentName = useMemo(() => {
+    if (!selectedAgent) return null;
+    const member = GUARANTEED_TEAM_MEMBERS.find(m => m.id === selectedAgent);
+    return member?.name || null;
+  }, [selectedAgent]);
+
   // Admins: use global agent filter (undefined = all agents)
   // Agents: always filter on their own teamMemberId
   const effectiveAgentId = isAdmin
@@ -41,6 +49,14 @@ const AgentHotPipeline: React.FC = () => {
         <div className="flex items-center gap-2 mb-6">
           <Flame className="h-5 w-5 text-orange-500" />
           <h1 className="text-2xl font-normal text-foreground">Pipeline Chaud</h1>
+          {isAdmin && selectedAgentName && (
+            <Badge variant="secondary" className="ml-2 flex items-center gap-1 text-sm">
+              {selectedAgentName}
+              <button onClick={() => handleAgentChange(null)} className="ml-1 hover:text-destructive">
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
         </div>
         {isLoading ? (
           <div className="space-y-4">
