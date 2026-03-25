@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSelectedAgent } from '@/hooks/useSelectedAgent';
 import Navbar from '@/components/layout/Navbar';
 import SubNavigation from '@/components/layout/SubNavigation';
 import HotPipelineMonitor from '@/components/admin/HotPipelineMonitor';
@@ -9,7 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Flame } from 'lucide-react';
 
 const AgentHotPipeline: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { selectedAgent } = useSelectedAgent();
 
   const { data: teamMemberId, isLoading } = useQuery({
     queryKey: ['my-team-member-id', user?.email],
@@ -25,6 +27,12 @@ const AgentHotPipeline: React.FC = () => {
     enabled: !!user?.email,
   });
 
+  // Admins: use global agent filter (undefined = all agents)
+  // Agents: always filter on their own teamMemberId
+  const effectiveAgentId = isAdmin
+    ? (selectedAgent || undefined)
+    : teamMemberId || undefined;
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -39,8 +47,8 @@ const AgentHotPipeline: React.FC = () => {
             <Skeleton className="h-32 w-full" />
             <Skeleton className="h-64 w-full" />
           </div>
-        ) : teamMemberId ? (
-          <HotPipelineMonitor agentId={teamMemberId} />
+        ) : (isAdmin || teamMemberId) ? (
+          <HotPipelineMonitor agentId={effectiveAgentId} />
         ) : (
           <p className="text-muted-foreground">Aucun profil agent trouvé pour votre compte.</p>
         )}
