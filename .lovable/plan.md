@@ -1,23 +1,17 @@
 
 
-## Synchroniser le filtre agent global sur MyDay
+## Synchroniser le filtre agent global sur Pipeline Chaud
 
 ### Constat
 
-Le hook `useSelectedAgent` synchronise déjà le filtre agent via `localStorage` + événements custom entre :
-- ✅ Pipeline
-- ✅ Actions  
-- ✅ Calendrier  
-- ✅ Chiffre d'Affaire  
-- ❌ **Ma Journée** — utilise un state local `selectedAgentId` / `setSelectedAgentId`, déconnecté du hook global
+`AgentHotPipeline.tsx` récupère l'ID agent uniquement via l'email de l'utilisateur connecté et le passe en prop `agentId` à `HotPipelineMonitor`. Il n'utilise pas `useSelectedAgent`, donc la sélection d'agent faite dans Pipeline/Actions/Calendrier ne se propage pas.
 
-### Changement unique : `src/pages/MyDay.tsx`
+### Changement : `src/pages/AgentHotPipeline.tsx`
 
-1. Importer `useSelectedAgent` depuis `@/hooks/useSelectedAgent`
-2. Remplacer le state local `selectedAgentId` / `setSelectedAgentId` par `selectedAgent` / `handleAgentChange` du hook
-3. Dériver `selectedAgentName` depuis `selectedAgent` au lieu de `selectedAgentId`
-4. Mettre à jour toutes les références : `fetchData`, boutons filtre admin, greeting
-5. Supprimer le `useState<string | null>(null)` devenu inutile
+1. Importer `useSelectedAgent` et `useAuth` (pour `isAdmin`)
+2. Pour les **admins** : utiliser `selectedAgent` du hook global comme `agentId` passé à `HotPipelineMonitor` (si un agent est sélectionné), sinon ne pas filtrer (passer `undefined`)
+3. Pour les **agents classiques** : conserver le comportement actuel (filtrer sur leur propre `teamMemberId`)
+4. Ajouter les boutons de sélection d'agent (comme sur les autres onglets) pour les admins, liés à `handleAgentChange`
 
-Résultat : sélectionner un agent dans n'importe quel onglet (Pipeline, Actions, etc.) pré-filtre automatiquement Ma Journée, et inversement.
+Résultat : sélectionner un agent dans Pipeline pré-filtre automatiquement Pipeline Chaud, et inversement.
 
